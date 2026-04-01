@@ -39,28 +39,27 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 #btn-buy{background:rgba(200,184,154,0.12);color:var(--gold)}
 #btn-more{background:var(--gold);color:var(--bg)}
 
-/* ---- Carousel Modal ---- */
-#carousel-modal{position:fixed;inset:0;z-index:100;background:rgba(5,5,5,0.97);display:none;flex-direction:column}
-#carousel-modal.open{display:flex}
-#c-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
-#c-title{font-size:0.9rem;font-weight:600;color:var(--gold)}
-#c-close{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.06)}
+/* ---- 3D Circle Gallery ---- */
+#gallery-modal{position:fixed;inset:0;z-index:100;background:rgba(5,5,5,0.97);display:none;flex-direction:column;overflow:hidden}
+#gallery-modal.open{display:flex}
+#g3d-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;z-index:2}
+#g3d-title{font-size:0.9rem;font-weight:600;color:var(--gold)}
+#g3d-close{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.06)}
 
-/* Swipeable horizontal carousel */
-#c-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;touch-action:pan-y}
-#c-track{display:flex;gap:0;transition:transform 0.35s cubic-bezier(0.25,1,0.5,1);will-change:transform}
-#c-track.dragging{transition:none}
-.c-slide{flex:0 0 80vw;max-width:360px;display:flex;flex-direction:column;align-items:center;padding:0 10px}
-.c-slide-img-wrap{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:14px;margin-bottom:12px;overflow:hidden}
-.c-slide-img-wrap img{max-width:88%;max-height:88%;object-fit:contain}
-.c-slide-name{font-size:0.85rem;font-weight:600;margin-bottom:4px}
-.c-slide-sub{font-size:0.65rem;color:rgba(255,255,255,0.35)}
-.c-slide-buy{margin-top:10px;padding:8px 24px;border-radius:20px;border:1px solid rgba(200,184,154,0.3);background:none;color:var(--gold);font-size:0.7rem;cursor:pointer;text-decoration:none;display:inline-block}
+#g3d-scene{flex:1;perspective:1000px;overflow:hidden;position:relative;cursor:grab;touch-action:none}
+#g3d-scene:active{cursor:grabbing}
+#g3d-ring{position:absolute;width:100%;height:100%;transform-style:preserve-3d;will-change:transform}
 
-/* Dots */
-#c-dots{display:flex;gap:6px;justify-content:center;padding:16px 0 24px}
-.c-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all 0.3s}
-.c-dot.active{background:var(--gold);width:18px;border-radius:3px}
+.g3d-card{position:absolute;width:200px;height:260px;left:50%;top:50%;margin-left:-100px;margin-top:-130px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity 0.3s,box-shadow 0.3s;backface-visibility:hidden}
+.g3d-card:hover,.g3d-card.front{box-shadow:0 0 30px rgba(200,184,154,0.15)}
+.g3d-card img{width:85%;height:65%;object-fit:contain;margin-bottom:8px}
+.g3d-card .g3d-name{font-size:0.75rem;font-weight:600;text-align:center}
+.g3d-card .g3d-sub{font-size:0.58rem;color:rgba(255,255,255,0.35);margin-top:2px}
+.g3d-card .g3d-buy{margin-top:8px;padding:5px 16px;border-radius:14px;border:1px solid rgba(200,184,154,0.25);background:none;color:var(--gold);font-size:0.6rem;cursor:pointer;text-decoration:none}
+
+#g3d-indicator{position:absolute;bottom:20px;left:0;right:0;text-align:center;z-index:2;pointer-events:none}
+#g3d-indicator span{font-size:0.7rem;color:rgba(255,255,255,0.4)}
+#g3d-hint{position:absolute;bottom:44px;left:0;right:0;text-align:center;z-index:2;font-size:0.6rem;color:rgba(255,255,255,0.2);pointer-events:none}
 
 /* ---- Grid Panel ---- */
 #grid-panel{position:fixed;inset:0;z-index:50;background:rgba(5,5,5,0.97);display:none;flex-direction:column;overflow-y:auto}
@@ -112,15 +111,16 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
   </div>
 </div>
 
-<div id="carousel-modal">
-  <div id="c-header">
-    <span id="c-title">Holder Collection</span>
-    <button id="c-close" onclick="closeCarousel()">×</button>
+<div id="gallery-modal">
+  <div id="g3d-header">
+    <span id="g3d-title">Holder Collection</span>
+    <button id="g3d-close" onclick="closeGallery()">×</button>
   </div>
-  <div id="c-main">
-    <div id="c-track"></div>
+  <div id="g3d-scene">
+    <div id="g3d-ring"></div>
   </div>
-  <div id="c-dots"></div>
+  <div id="g3d-hint">드래그하여 탐색</div>
+  <div id="g3d-indicator"><span></span></div>
 </div>
 
 <div id="grid-panel">
@@ -241,145 +241,173 @@ let demoI=0;
 function demoNext(){showProduct(demoI%products.length);demoI++;}
 
 // ============================================================
-// INTERACTIVE CAROUSEL (drag/swipe, snap, momentum)
+// 3D CIRCLE GALLERY — vertical cylinder, drag to rotate
 // ============================================================
-let cSlideIdx=0;
-let cDragStartX=0, cDragCurrentX=0, cDragging=false, cStartTime=0;
-const SLIDE_W=()=>Math.min(window.innerWidth*0.8,360);
+let gAngle = 0;           // current rotation angle (degrees)
+let gVelocity = 0;        // momentum
+let gDragging = false;
+let gDragStartY = 0;
+let gDragLastY = 0;
+let gDragLastTime = 0;
+let gRafId = null;
+const G_FRICTION = 0.96;
+const G_SENSITIVITY = 0.4;
 
-function openCarousel(startIdx){
-  const modal=document.getElementById('carousel-modal');
-  const track=document.getElementById('c-track');
-  const dots=document.getElementById('c-dots');
+function openCarousel(startIdx) {
+  const modal = document.getElementById('gallery-modal');
+  const ring = document.getElementById('g3d-ring');
 
-  if(startIdx===undefined) startIdx=currentIdx>=0?currentIdx:0;
-  cSlideIdx=startIdx;
+  if (startIdx === undefined) startIdx = currentIdx >= 0 ? currentIdx : 0;
 
-  // Build slides for ALL products
-  track.innerHTML='';
-  dots.innerHTML='';
-  products.forEach((p,i)=>{
-    // Slide
-    const slide=document.createElement('div');
-    slide.className='c-slide';
-    slide.style.minWidth=SLIDE_W()+'px';
+  // Build cards on a vertical cylinder
+  ring.innerHTML = '';
+  const n = products.length;
+  const angleStep = 360 / n;
+  const radius = Math.max(320, n * 22); // adaptive radius
 
-    const imgWrap=document.createElement('div');
-    imgWrap.className='c-slide-img-wrap';
-    const img=document.createElement('img');
-    img.src=p.images[0];
-    img.alt=p.name;
-    img.loading=i<5?'eager':'lazy';
-    imgWrap.appendChild(img);
+  products.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'g3d-card';
+    card.setAttribute('data-idx', i);
 
-    // Mini gallery row if multiple images
-    if(p.images.length>1){
-      imgWrap.style.cursor='pointer';
-      let imgIdx=0;
-      imgWrap.onclick=(e)=>{
+    const img = document.createElement('img');
+    img.src = p.images[0];
+    img.alt = p.name;
+    img.loading = 'lazy';
+
+    // Tap image to cycle angles
+    let imgI = 0;
+    if (p.images.length > 1) {
+      img.addEventListener('click', (e) => {
         e.stopPropagation();
-        imgIdx=(imgIdx+1)%p.images.length;
-        img.src=p.images[imgIdx];
-      };
+        imgI = (imgI + 1) % p.images.length;
+        img.src = p.images[imgI];
+      });
     }
 
-    const name=document.createElement('div');
-    name.className='c-slide-name';
-    name.textContent=p.name;
+    const name = document.createElement('div');
+    name.className = 'g3d-name';
+    name.textContent = p.name;
 
-    const sub=document.createElement('div');
-    sub.className='c-slide-sub';
-    sub.textContent=p.type.toUpperCase()+' · '+p.price;
+    const sub = document.createElement('div');
+    sub.className = 'g3d-sub';
+    sub.textContent = p.type.toUpperCase() + ' · ' + p.price;
 
-    const buy=document.createElement('a');
-    buy.className='c-slide-buy';
-    buy.textContent='구매하기';
-    buy.href=SHOP+p.handle;
-    buy.target='_blank';
-    buy.onclick=(e)=>e.stopPropagation();
+    const buy = document.createElement('a');
+    buy.className = 'g3d-buy';
+    buy.textContent = '구매하기';
+    buy.href = SHOP + p.handle;
+    buy.target = '_blank';
+    buy.addEventListener('click', (e) => e.stopPropagation());
 
-    slide.appendChild(imgWrap);
-    slide.appendChild(name);
-    slide.appendChild(sub);
-    slide.appendChild(buy);
-    track.appendChild(slide);
+    card.appendChild(img);
+    card.appendChild(name);
+    card.appendChild(sub);
+    card.appendChild(buy);
 
-    // Dot
-    const dot=document.createElement('div');
-    dot.className='c-dot'+(i===cSlideIdx?' active':'');
-    dot.onclick=()=>goSlide(i);
-    dots.appendChild(dot);
+    // Card click → select product
+    card.addEventListener('click', () => {
+      closeGallery();
+      showProduct(i);
+    });
+
+    ring.appendChild(card);
   });
 
-  updateTrack(false);
+  // Jump to the selected product
+  gAngle = -startIdx * angleStep;
+  gVelocity = 0;
+  updateRing(n, angleStep, radius);
+
   modal.classList.add('open');
-  bindCarouselTouch();
+  bindGalleryTouch(n, angleStep, radius);
+  startGalleryLoop(n, angleStep, radius);
 }
 
-function goSlide(idx){
-  cSlideIdx=Math.max(0,Math.min(products.length-1,idx));
-  updateTrack(true);
-}
+function updateRing(n, angleStep, radius) {
+  const ring = document.getElementById('g3d-ring');
+  const cards = ring.children;
 
-function updateTrack(animate){
-  const track=document.getElementById('c-track');
-  const sw=SLIDE_W();
-  const offset=-cSlideIdx*sw+(window.innerWidth-sw)/2;
-  if(animate){
-    track.classList.remove('dragging');
-  }else{
-    track.classList.add('dragging');
-    requestAnimationFrame(()=>{track.classList.remove('dragging');
-      track.style.transform='translateX('+offset+'px)';});
-    return;
+  for (let i = 0; i < cards.length; i++) {
+    const cardAngle = gAngle + i * angleStep;
+    const rad = cardAngle * Math.PI / 180;
+    const z = Math.cos(rad) * radius;
+    const y = Math.sin(rad) * radius;
+    const opacity = (z + radius) / (2 * radius); // 0 at back, 1 at front
+    const scale = 0.55 + opacity * 0.45;
+
+    cards[i].style.transform =
+      'translateY(' + y + 'px) translateZ(' + z + 'px) scale(' + scale.toFixed(3) + ')';
+    cards[i].style.opacity = Math.max(0.15, opacity).toFixed(2);
+    cards[i].style.zIndex = Math.round(z + radius);
+    cards[i].classList.toggle('front', opacity > 0.9);
   }
-  track.style.transform='translateX('+offset+'px)';
-  // Update dots
-  document.querySelectorAll('.c-dot').forEach((d,i)=>{
-    d.classList.toggle('active',i===cSlideIdx);
-  });
+
+  // Update indicator — find front card
+  let frontIdx = 0, bestZ = -Infinity;
+  for (let i = 0; i < n; i++) {
+    const rad = (gAngle + i * angleStep) * Math.PI / 180;
+    const z = Math.cos(rad) * radius;
+    if (z > bestZ) { bestZ = z; frontIdx = i; }
+  }
+  const ind = document.querySelector('#g3d-indicator span');
+  if (ind) ind.textContent = products[frontIdx].name + '  (' + (frontIdx + 1) + '/' + n + ')';
 }
 
-function bindCarouselTouch(){
-  const main=document.getElementById('c-main');
-  const track=document.getElementById('c-track');
+function bindGalleryTouch(n, angleStep, radius) {
+  const scene = document.getElementById('g3d-scene');
 
-  const onStart=(x)=>{cDragging=true;cDragStartX=x;cDragCurrentX=x;cStartTime=Date.now();track.classList.add('dragging');};
-  const onMove=(x)=>{
-    if(!cDragging)return;
-    cDragCurrentX=x;
-    const dx=cDragCurrentX-cDragStartX;
-    const sw=SLIDE_W();
-    const base=-cSlideIdx*sw+(window.innerWidth-sw)/2;
-    track.style.transform='translateX('+(base+dx)+'px)';
+  const onStart = (y) => {
+    gDragging = true;
+    gDragStartY = y;
+    gDragLastY = y;
+    gDragLastTime = Date.now();
+    gVelocity = 0;
   };
-  const onEnd=()=>{
-    if(!cDragging)return;
-    cDragging=false;
-    track.classList.remove('dragging');
-    const dx=cDragCurrentX-cDragStartX;
-    const dt=Date.now()-cStartTime;
-    const velocity=dx/Math.max(dt,1);
 
-    // Snap: if fast swipe or dragged > 25%
-    if(Math.abs(velocity)>0.4||Math.abs(dx)>SLIDE_W()*0.25){
-      if(dx<0)goSlide(cSlideIdx+1);
-      else goSlide(cSlideIdx-1);
-    }else{
-      goSlide(cSlideIdx);
+  const onMove = (y) => {
+    if (!gDragging) return;
+    const dy = y - gDragLastY;
+    gAngle += dy * G_SENSITIVITY;
+    const now = Date.now();
+    const dt = now - gDragLastTime;
+    if (dt > 0) gVelocity = dy / dt * 16; // normalize to ~60fps
+    gDragLastY = y;
+    gDragLastTime = now;
+    updateRing(n, angleStep, radius);
+  };
+
+  const onEnd = () => {
+    gDragging = false;
+  };
+
+  scene.ontouchstart = (e) => { e.preventDefault(); onStart(e.touches[0].clientY); };
+  scene.ontouchmove = (e) => { e.preventDefault(); onMove(e.touches[0].clientY); };
+  scene.ontouchend = onEnd;
+  scene.onpointerdown = (e) => { if (e.pointerType === 'mouse') { onStart(e.clientY); scene.setPointerCapture(e.pointerId); } };
+  scene.onpointermove = (e) => { if (e.pointerType === 'mouse') onMove(e.clientY); };
+  scene.onpointerup = (e) => { if (e.pointerType === 'mouse') onEnd(); };
+}
+
+function startGalleryLoop(n, angleStep, radius) {
+  if (gRafId) cancelAnimationFrame(gRafId);
+
+  function loop() {
+    if (!document.getElementById('gallery-modal').classList.contains('open')) return;
+
+    if (!gDragging && Math.abs(gVelocity) > 0.05) {
+      gAngle += gVelocity * G_SENSITIVITY;
+      gVelocity *= G_FRICTION;
+      updateRing(n, angleStep, radius);
     }
-  };
-
-  main.ontouchstart=(e)=>onStart(e.touches[0].clientX);
-  main.ontouchmove=(e)=>{e.preventDefault();onMove(e.touches[0].clientX);};
-  main.ontouchend=onEnd;
-  main.onpointerdown=(e)=>{if(e.pointerType==='mouse'){onStart(e.clientX);main.setPointerCapture(e.pointerId);}};
-  main.onpointermove=(e)=>{if(e.pointerType==='mouse')onMove(e.clientX);};
-  main.onpointerup=(e)=>{if(e.pointerType==='mouse')onEnd();};
+    gRafId = requestAnimationFrame(loop);
+  }
+  loop();
 }
 
-function closeCarousel(){
-  document.getElementById('carousel-modal').classList.remove('open');
+function closeGallery() {
+  document.getElementById('gallery-modal').classList.remove('open');
+  if (gRafId) { cancelAnimationFrame(gRafId); gRafId = null; }
 }
 
 // ============================================================
