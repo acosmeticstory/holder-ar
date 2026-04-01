@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Holder AR — acosmeticstory</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:#0a0a0a;color:#fff;overflow:hidden;height:100dvh;width:100vw;position:relative}
+
+/* Camera */
+#camera-view{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;z-index:0}
+#scan-overlay{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#scan-frame{width:220px;height:72px;border:2px solid rgba(200,184,154,0.5);border-radius:10px;position:relative;animation:breathe 2.5s ease-in-out infinite;pointer-events:auto}
+@keyframes breathe{0%,100%{transform:scale(1);border-color:rgba(200,184,154,0.35)}50%{transform:scale(1.03);border-color:rgba(200,184,154,0.6)}}
+#scan-label{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:rgba(255,255,255,0.5);white-space:nowrap}
+#scan-hint{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:rgba(200,184,154,0.5);white-space:nowrap;display:none}
+
+/* Top bar */
+#top-bar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent)}
+#brand{font-size:0.75rem;letter-spacing:0.08em;color:rgba(255,255,255,0.7)}
+#btn-grid{background:none;border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:0.7rem;padding:6px 12px;border-radius:20px;cursor:pointer}
+
+/* Info Panel (slide up) */
+#info-panel{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(to top,rgba(10,10,10,0.97),rgba(10,10,10,0.85));border-top:1px solid rgba(200,184,154,0.15);transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);padding:20px 16px 32px;max-height:70dvh;overflow-y:auto}
+#info-panel.show{transform:translateY(0)}
+#p-name{font-size:1.1rem;font-weight:600;margin-bottom:2px}
+#p-sub{font-size:0.75rem;color:rgba(255,255,255,0.45);margin-bottom:10px}
+#p-pattern-wrap{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px}
+#p-pattern-img{height:24px;image-rendering:pixelated;border-radius:3px}
+#p-pattern-label{font-size:0.65rem;color:rgba(200,184,154,0.6)}
+#p-image-wrap{width:100%;display:flex;justify-content:center;margin-bottom:16px}
+#p-image{max-width:280px;max-height:220px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,0.03)}
+#p-actions{display:flex;gap:8px;margin-top:12px}
+#p-actions button{flex:1;padding:10px 0;border-radius:8px;font-size:0.8rem;font-weight:500;cursor:pointer;border:none;transition:background 0.2s}
+#btn-more{background:#c8b89a;color:#0a0a0a}
+#btn-more:active{background:#b5a68a}
+#btn-rescan{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
+#btn-rescan:active{background:rgba(255,255,255,0.15)}
+
+/* 3D Carousel Modal */
+#carousel-modal{position:fixed;inset:0;z-index:100;background:rgba(5,5,5,0.96);display:none;flex-direction:column;align-items:center;justify-content:center}
+#carousel-modal.open{display:flex}
+#carousel-close{position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;z-index:101;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.06)}
+#carousel-title{font-size:1rem;font-weight:600;margin-bottom:24px;color:#c8b89a}
+#carousel-scene{width:300px;height:320px;perspective:800px;position:relative}
+#carousel-ring{width:100%;height:100%;position:absolute;transform-style:preserve-3d;animation:spin 18s linear infinite}
+#carousel-ring.paused{animation-play-state:paused}
+@keyframes spin{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
+.carousel-card{position:absolute;width:160px;height:210px;left:50%;top:50%;margin-left:-80px;margin-top:-105px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
+.carousel-card img{max-width:92%;max-height:92%;object-fit:contain}
+#carousel-hint{position:absolute;bottom:50px;font-size:0.7rem;color:rgba(255,255,255,0.3)}
+#carousel-pattern{position:absolute;bottom:80px;height:20px;image-rendering:pixelated;border-radius:3px;border:1px solid rgba(200,184,154,0.2)}
+
+/* Grid Select Panel */
+#grid-panel{position:fixed;inset:0;z-index:50;background:rgba(5,5,5,0.97);display:none;flex-direction:column;overflow-y:auto}
+#grid-panel.open{display:flex}
+#grid-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;background:rgba(5,5,5,0.97);z-index:1}
+#grid-header span{font-size:0.85rem;font-weight:600}
+#grid-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
+#grid-body{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
+.grid-item{text-align:center;cursor:pointer;border-radius:10px;padding:8px;transition:background 0.2s}
+.grid-item:active{background:rgba(200,184,154,0.1)}
+.grid-item img.g-product{width:100%;aspect-ratio:1;object-fit:contain;border-radius:6px;background:rgba(255,255,255,0.03)}
+.grid-item .g-label{font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:5px}
+.grid-item .g-pattern{height:16px;width:100%;margin-top:4px;border-radius:3px;image-rendering:pixelated;object-fit:contain;background:rgba(255,255,255,0.02)}
+
+/* Toast */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(200,184,154,0.9);color:#0a0a0a;padding:8px 18px;border-radius:20px;font-size:0.75rem;font-weight:500;opacity:0;transition:all 0.3s;z-index:200;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Camera -->
+<video id="camera-view" autoplay playsinline muted></video>
+
+<!-- Scan overlay -->
+<div id="scan-overlay">
+  <div id="scan-frame">
+    <div id="scan-hint">탭하여 데모 보기</div>
+    <div id="scan-label">홀더 패턴에 카메라를 비춰주세요</div>
+  </div>
+</div>
+
+<!-- Top bar -->
+<div id="top-bar">
+  <div id="brand">HOLDER AR · acosmeticstory</div>
+  <button id="btn-grid" onclick="toggleGrid()">직접 선택</button>
+</div>
+
+<!-- Info panel -->
+<div id="info-panel">
+  <div id="p-name"></div>
+  <div id="p-sub"></div>
+  <div id="p-pattern-wrap">
+    <img id="p-pattern-img" src="" alt="pattern">
+    <span id="p-pattern-label">인식된 패턴</span>
+  </div>
+  <div id="p-image-wrap"><img id="p-image" src="" alt="product"></div>
+  <div id="p-actions">
+    <button id="btn-rescan" onclick="hideProduct()">다시 스캔</button>
+    <button id="btn-more" onclick="openCarousel()">더 보기</button>
+  </div>
+</div>
+
+<!-- 3D Carousel Modal -->
+<div id="carousel-modal">
+  <button id="carousel-close" onclick="closeCarousel()">×</button>
+  <div id="carousel-title"></div>
+  <div id="carousel-scene">
+    <div id="carousel-ring"></div>
+  </div>
+  <img id="carousel-pattern" src="" alt="pattern">
+  <div id="carousel-hint">터치하여 일시정지</div>
+</div>
+
+<!-- Grid panel -->
+<div id="grid-panel">
+  <div id="grid-header">
+    <span>제품 선택 (30종)</span>
+    <button id="grid-close" onclick="toggleGrid()">×</button>
+  </div>
+  <div id="grid-body"></div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const PRODUCT_COUNT = 30;
+const SCAN_INTERVAL = 800;
+const MATCH_THRESHOLD = 0.82;
+
+// ============================================================
+// PRODUCT DATA
+// ============================================================
+const products = [];
+for (let i = 1; i <= PRODUCT_COUNT; i++) {
+  const num2 = String(i).padStart(2, '0');
+  const num3 = String(i).padStart(3, '0');
+  products.push({
+    id: i,
+    barcode: 'JU-' + num3,
+    name: 'JU Holder No.' + i,
+    sub: 'acosmeticstory \u00b7 ju series',
+    image: 'images/JU_' + num2 + '.png',
+    pattern: 'patterns/JU_' + num3 + '.png',
+    gallery: ['images/JU_' + num2 + '.png']
+  });
+}
+
+// ============================================================
+// PATTERN MATCHING
+// ============================================================
+function getDescriptor(imgData, w, h) {
+  const desc = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) desc[i] = imgData[i * 4] / 255;
+  return desc;
+}
+
+function cosineSim(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-8);
+}
+
+const DESC_W = 40, DESC_H = 12;
+const referenceDescriptors = [];
+
+function buildReferences() {
+  const c = document.createElement('canvas');
+  c.width = DESC_W; c.height = DESC_H;
+  const ctx = c.getContext('2d');
+  let loaded = 0;
+
+  products.forEach((p, idx) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.clearRect(0, 0, DESC_W, DESC_H);
+      ctx.drawImage(img, 0, 0, DESC_W, DESC_H);
+      const data = ctx.getImageData(0, 0, DESC_W, DESC_H).data;
+      referenceDescriptors[idx] = getDescriptor(data, DESC_W, DESC_H);
+      loaded++;
+      if (loaded === PRODUCT_COUNT) {
+        console.log('All ' + PRODUCT_COUNT + ' pattern references loaded');
+        showToast('패턴 ' + PRODUCT_COUNT + '종 로드 완료');
+      }
+    };
+    img.onerror = () => {
+      console.warn('Pattern load failed:', p.pattern);
+      loaded++;
+    };
+    img.src = p.pattern;
+  });
+}
+
+// ============================================================
+// CAMERA
+// ============================================================
+let stream = null;
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    document.getElementById('camera-view').srcObject = stream;
+    document.getElementById('scan-hint').style.display = 'none';
+  } catch (e) {
+    console.warn('Camera unavailable:', e.message);
+    document.getElementById('scan-label').textContent = '카메라 없음 \u2014 직접 선택 또는 탭하여 데모';
+    document.getElementById('scan-hint').style.display = 'block';
+  }
+}
+
+// ============================================================
+// SCANNING
+// ============================================================
+let scanning = true;
+let scanTimer = null;
+const captureCanvas = document.createElement('canvas');
+captureCanvas.width = DESC_W; captureCanvas.height = DESC_H;
+const captureCtx = captureCanvas.getContext('2d');
+
+function scanFrame() {
+  if (!scanning) return;
+  const video = document.getElementById('camera-view');
+  if (!video.srcObject || video.readyState < 2) {
+    scanTimer = setTimeout(scanFrame, 500);
+    return;
+  }
+
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const cropW = vw * 0.55, cropH = vh * 0.18;
+  const sx = (vw - cropW) / 2, sy = (vh - cropH) / 2;
+
+  captureCtx.drawImage(video, sx, sy, cropW, cropH, 0, 0, DESC_W, DESC_H);
+
+  const imgData = captureCtx.getImageData(0, 0, DESC_W, DESC_H);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const g = d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114;
+    const bw = g > 128 ? 255 : 0;
+    d[i] = d[i+1] = d[i+2] = bw;
+  }
+  captureCtx.putImageData(imgData, 0, 0);
+  const captured = getDescriptor(d, DESC_W, DESC_H);
+
+  let bestIdx = -1, bestSim = 0;
+  for (let i = 0; i < referenceDescriptors.length; i++) {
+    if (!referenceDescriptors[i]) continue;
+    const sim = cosineSim(captured, referenceDescriptors[i]);
+    if (sim > bestSim) { bestSim = sim; bestIdx = i; }
+  }
+
+  if (bestSim >= MATCH_THRESHOLD && bestIdx >= 0) {
+    showProduct(bestIdx);
+  }
+
+  scanTimer = setTimeout(scanFrame, SCAN_INTERVAL);
+}
+
+// ============================================================
+// PRODUCT DISPLAY
+// ============================================================
+let currentProduct = -1;
+
+function showProduct(idx) {
+  if (currentProduct === idx) return;
+  currentProduct = idx;
+  scanning = false;
+  if (scanTimer) { clearTimeout(scanTimer); scanTimer = null; }
+  const p = products[idx];
+
+  document.getElementById('p-name').textContent = p.name;
+  document.getElementById('p-sub').textContent = p.sub;
+  document.getElementById('p-image').src = p.image;
+  document.getElementById('p-pattern-img').src = p.pattern;
+  document.getElementById('info-panel').classList.add('show');
+  document.getElementById('scan-overlay').style.display = 'none';
+
+  if (navigator.vibrate) navigator.vibrate(60);
+}
+
+function hideProduct() {
+  currentProduct = -1;
+  scanning = true;
+  document.getElementById('info-panel').classList.remove('show');
+  document.getElementById('scan-overlay').style.display = 'flex';
+  scanFrame();
+}
+
+// ============================================================
+// 3D CAROUSEL
+// ============================================================
+function openCarousel() {
+  const modal = document.getElementById('carousel-modal');
+  const ring = document.getElementById('carousel-ring');
+  const p = products[currentProduct];
+  if (!p) return;
+
+  document.getElementById('carousel-title').textContent = p.name;
+  document.getElementById('carousel-pattern').src = p.pattern;
+
+  // Build 6 cards (MVP: same image repeated; production: multi-angle)
+  ring.innerHTML = '';
+  const count = 6;
+  const angleStep = 360 / count;
+  const radius = 200;
+
+  for (let i = 0; i < count; i++) {
+    const card = document.createElement('div');
+    card.className = 'carousel-card';
+    card.style.transform = 'rotateY(' + (i * angleStep) + 'deg) translateZ(' + radius + 'px)';
+    const img = document.createElement('img');
+    img.src = p.image;
+    img.alt = p.name + ' view ' + (i + 1);
+    card.appendChild(img);
+    ring.appendChild(card);
+  }
+
+  modal.classList.add('open');
+  ring.classList.remove('paused');
+  ring.onpointerdown = () => ring.classList.add('paused');
+  ring.onpointerup = () => ring.classList.remove('paused');
+}
+
+function closeCarousel() {
+  document.getElementById('carousel-modal').classList.remove('open');
+}
+
+// ============================================================
+// GRID SELECT
+// ============================================================
+let gridBuilt = false;
+
+function toggleGrid() {
+  const panel = document.getElementById('grid-panel');
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    return;
+  }
+  if (!gridBuilt) buildGrid();
+  panel.classList.add('open');
+}
+
+function buildGrid() {
+  const body = document.getElementById('grid-body');
+  products.forEach((p, idx) => {
+    const item = document.createElement('div');
+    item.className = 'grid-item';
+    item.onclick = () => { toggleGrid(); showProduct(idx); };
+
+    const img = document.createElement('img');
+    img.className = 'g-product';
+    img.src = p.image;
+    img.alt = p.name;
+    img.loading = 'lazy';
+
+    const label = document.createElement('div');
+    label.className = 'g-label';
+    label.textContent = p.barcode;
+
+    const pattern = document.createElement('img');
+    pattern.className = 'g-pattern';
+    pattern.src = p.pattern;
+    pattern.alt = 'pattern ' + p.barcode;
+
+    item.appendChild(img);
+    item.appendChild(label);
+    item.appendChild(pattern);
+    body.appendChild(item);
+  });
+  gridBuilt = true;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, duration) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration || 2000);
+}
+
+// ============================================================
+// DEMO MODE
+// ============================================================
+let demoIdx = 0;
+document.getElementById('scan-frame').addEventListener('click', () => {
+  showProduct(demoIdx % PRODUCT_COUNT);
+  demoIdx++;
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  buildReferences();
+  startCamera();
+  setTimeout(scanFrame, 1000);
+});
+</script>
+</body>
+</html>
