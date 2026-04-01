@@ -6,407 +6,447 @@
 <title>Holder AR — acosmeticstory</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
+:root{--gold:#c8b89a;--bg:#0a0a0a;--card:rgba(255,255,255,0.04)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Pretendard',-apple-system,sans-serif;background:#0a0a0a;color:#fff;overflow:hidden;height:100dvh;width:100vw;position:relative}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:#fff;overflow:hidden;height:100dvh;width:100vw}
 
-/* Camera */
+/* ---- Camera ---- */
 #camera-view{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;z-index:0}
 #scan-overlay{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;pointer-events:none}
-#scan-frame{width:220px;height:72px;border:2px solid rgba(200,184,154,0.5);border-radius:10px;position:relative;animation:breathe 2.5s ease-in-out infinite;pointer-events:auto}
+#scan-frame{width:220px;height:72px;border:2px solid rgba(200,184,154,0.5);border-radius:10px;position:relative;animation:breathe 2.5s ease-in-out infinite;pointer-events:auto;cursor:pointer}
 @keyframes breathe{0%,100%{transform:scale(1);border-color:rgba(200,184,154,0.35)}50%{transform:scale(1.03);border-color:rgba(200,184,154,0.6)}}
 #scan-label{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:rgba(255,255,255,0.5);white-space:nowrap}
-#scan-hint{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:rgba(200,184,154,0.5);white-space:nowrap;display:none}
 
-/* Top bar */
+/* ---- Top bar ---- */
 #top-bar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent)}
-#brand{font-size:0.75rem;letter-spacing:0.08em;color:rgba(255,255,255,0.7)}
-#btn-grid{background:none;border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:0.7rem;padding:6px 12px;border-radius:20px;cursor:pointer}
+#brand{font-size:0.72rem;letter-spacing:0.06em;color:rgba(255,255,255,0.7)}
+.top-btn{background:none;border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:0.68rem;padding:5px 11px;border-radius:20px;cursor:pointer}
 
-/* Info Panel (slide up) */
-#info-panel{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(to top,rgba(10,10,10,0.97),rgba(10,10,10,0.85));border-top:1px solid rgba(200,184,154,0.15);transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);padding:20px 16px 32px;max-height:70dvh;overflow-y:auto}
+/* ---- Info Panel ---- */
+#info-panel{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(to top,rgba(10,10,10,0.97) 70%,rgba(10,10,10,0.8));border-top:1px solid rgba(200,184,154,0.12);transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);padding:20px 16px 28px;max-height:65dvh;overflow-y:auto}
 #info-panel.show{transform:translateY(0)}
-#p-name{font-size:1.1rem;font-weight:600;margin-bottom:2px}
-#p-sub{font-size:0.75rem;color:rgba(255,255,255,0.45);margin-bottom:10px}
-#p-pattern-wrap{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px}
-#p-pattern-img{height:24px;image-rendering:pixelated;border-radius:3px}
-#p-pattern-label{font-size:0.65rem;color:rgba(200,184,154,0.6)}
-#p-image-wrap{width:100%;display:flex;justify-content:center;margin-bottom:16px}
-#p-image{max-width:280px;max-height:220px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,0.03)}
-#p-actions{display:flex;gap:8px;margin-top:12px}
-#p-actions button{flex:1;padding:10px 0;border-radius:8px;font-size:0.8rem;font-weight:500;cursor:pointer;border:none;transition:background 0.2s}
-#btn-more{background:#c8b89a;color:#0a0a0a}
-#btn-more:active{background:#b5a68a}
+.p-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.p-type-badge{font-size:0.55rem;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase}
+.p-type-badge.ju{background:rgba(200,184,154,0.2);color:var(--gold)}
+.p-type-badge.sai{background:rgba(120,180,220,0.2);color:#78b4dc}
+#p-name{font-size:1.05rem;font-weight:600}
+#p-price{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:14px}
+#p-image-wrap{width:100%;display:flex;justify-content:center;margin-bottom:14px}
+#p-image{max-width:260px;max-height:200px;object-fit:contain;border-radius:8px}
+#p-actions{display:flex;gap:8px}
+#p-actions button{flex:1;padding:10px 0;border-radius:8px;font-size:0.78rem;font-weight:500;cursor:pointer;border:none}
 #btn-rescan{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
-#btn-rescan:active{background:rgba(255,255,255,0.15)}
+#btn-buy{background:rgba(200,184,154,0.12);color:var(--gold)}
+#btn-more{background:var(--gold);color:var(--bg)}
 
-/* 3D Carousel Modal */
-#carousel-modal{position:fixed;inset:0;z-index:100;background:rgba(5,5,5,0.96);display:none;flex-direction:column;align-items:center;justify-content:center}
+/* ---- Carousel Modal ---- */
+#carousel-modal{position:fixed;inset:0;z-index:100;background:rgba(5,5,5,0.97);display:none;flex-direction:column}
 #carousel-modal.open{display:flex}
-#carousel-close{position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;z-index:101;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.06)}
-#carousel-title{font-size:1rem;font-weight:600;margin-bottom:24px;color:#c8b89a}
-#carousel-scene{width:300px;height:320px;perspective:800px;position:relative}
-#carousel-ring{width:100%;height:100%;position:absolute;transform-style:preserve-3d;animation:spin 18s linear infinite}
-#carousel-ring.paused{animation-play-state:paused}
-@keyframes spin{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
-.carousel-card{position:absolute;width:160px;height:210px;left:50%;top:50%;margin-left:-80px;margin-top:-105px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
-.carousel-card img{max-width:92%;max-height:92%;object-fit:contain}
-#carousel-hint{position:absolute;bottom:50px;font-size:0.7rem;color:rgba(255,255,255,0.3)}
-#carousel-pattern{position:absolute;bottom:80px;height:20px;image-rendering:pixelated;border-radius:3px;border:1px solid rgba(200,184,154,0.2)}
+#c-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
+#c-title{font-size:0.9rem;font-weight:600;color:var(--gold)}
+#c-close{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.06)}
 
-/* Grid Select Panel */
+/* Swipeable horizontal carousel */
+#c-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;touch-action:pan-y}
+#c-track{display:flex;gap:0;transition:transform 0.35s cubic-bezier(0.25,1,0.5,1);will-change:transform}
+#c-track.dragging{transition:none}
+.c-slide{flex:0 0 80vw;max-width:360px;display:flex;flex-direction:column;align-items:center;padding:0 10px}
+.c-slide-img-wrap{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.c-slide-img-wrap img{max-width:88%;max-height:88%;object-fit:contain}
+.c-slide-name{font-size:0.85rem;font-weight:600;margin-bottom:4px}
+.c-slide-sub{font-size:0.65rem;color:rgba(255,255,255,0.35)}
+.c-slide-buy{margin-top:10px;padding:8px 24px;border-radius:20px;border:1px solid rgba(200,184,154,0.3);background:none;color:var(--gold);font-size:0.7rem;cursor:pointer;text-decoration:none;display:inline-block}
+
+/* Dots */
+#c-dots{display:flex;gap:6px;justify-content:center;padding:16px 0 24px}
+.c-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all 0.3s}
+.c-dot.active{background:var(--gold);width:18px;border-radius:3px}
+
+/* ---- Grid Panel ---- */
 #grid-panel{position:fixed;inset:0;z-index:50;background:rgba(5,5,5,0.97);display:none;flex-direction:column;overflow-y:auto}
 #grid-panel.open{display:flex}
-#grid-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;background:rgba(5,5,5,0.97);z-index:1}
-#grid-header span{font-size:0.85rem;font-weight:600}
-#grid-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
-#grid-body{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
-.grid-item{text-align:center;cursor:pointer;border-radius:10px;padding:8px;transition:background 0.2s}
-.grid-item:active{background:rgba(200,184,154,0.1)}
-.grid-item img.g-product{width:100%;aspect-ratio:1;object-fit:contain;border-radius:6px;background:rgba(255,255,255,0.03)}
-.grid-item .g-label{font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:5px}
-.grid-item .g-pattern{height:16px;width:100%;margin-top:4px;border-radius:3px;image-rendering:pixelated;object-fit:contain;background:rgba(255,255,255,0.02)}
+#grid-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;background:rgba(5,5,5,0.97);z-index:1}
+#grid-header span{font-size:0.82rem;font-weight:600}
+.g-tabs{display:flex;gap:6px}
+.g-tab{padding:4px 12px;border-radius:14px;font-size:0.65rem;border:1px solid rgba(255,255,255,0.12);background:none;color:rgba(255,255,255,0.5);cursor:pointer}
+.g-tab.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+#grid-close{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer}
+#grid-body{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px}
+.grid-item{text-align:center;cursor:pointer;border-radius:12px;padding:10px;background:var(--card);transition:background 0.2s}
+.grid-item:active{background:rgba(200,184,154,0.08)}
+.grid-item img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:8px}
+.grid-item .gi-name{font-size:0.72rem;font-weight:500;margin-top:6px}
+.grid-item .gi-price{font-size:0.6rem;color:rgba(255,255,255,0.35);margin-top:2px}
 
 /* Toast */
-#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(200,184,154,0.9);color:#0a0a0a;padding:8px 18px;border-radius:20px;font-size:0.75rem;font-weight:500;opacity:0;transition:all 0.3s;z-index:200;pointer-events:none;white-space:nowrap}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(200,184,154,0.92);color:var(--bg);padding:8px 18px;border-radius:20px;font-size:0.72rem;font-weight:500;opacity:0;transition:all 0.3s;z-index:200;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<!-- Camera -->
 <video id="camera-view" autoplay playsinline muted></video>
 
-<!-- Scan overlay -->
 <div id="scan-overlay">
-  <div id="scan-frame">
-    <div id="scan-hint">탭하여 데모 보기</div>
+  <div id="scan-frame" onclick="demoNext()">
     <div id="scan-label">홀더 패턴에 카메라를 비춰주세요</div>
   </div>
 </div>
 
-<!-- Top bar -->
 <div id="top-bar">
-  <div id="brand">HOLDER AR · acosmeticstory</div>
-  <button id="btn-grid" onclick="toggleGrid()">직접 선택</button>
+  <div id="brand">HOLDER AR</div>
+  <button class="top-btn" onclick="toggleGrid()">전체 보기</button>
 </div>
 
-<!-- Info panel -->
 <div id="info-panel">
-  <div id="p-name"></div>
-  <div id="p-sub"></div>
-  <div id="p-pattern-wrap">
-    <img id="p-pattern-img" src="" alt="pattern">
-    <span id="p-pattern-label">인식된 패턴</span>
+  <div class="p-head">
+    <span id="p-badge" class="p-type-badge ju">JU</span>
+    <span id="p-name"></span>
   </div>
+  <div id="p-price"></div>
   <div id="p-image-wrap"><img id="p-image" src="" alt="product"></div>
   <div id="p-actions">
     <button id="btn-rescan" onclick="hideProduct()">다시 스캔</button>
+    <button id="btn-buy" onclick="buyProduct()">구매하기</button>
     <button id="btn-more" onclick="openCarousel()">더 보기</button>
   </div>
 </div>
 
-<!-- 3D Carousel Modal -->
 <div id="carousel-modal">
-  <button id="carousel-close" onclick="closeCarousel()">×</button>
-  <div id="carousel-title"></div>
-  <div id="carousel-scene">
-    <div id="carousel-ring"></div>
+  <div id="c-header">
+    <span id="c-title">Holder Collection</span>
+    <button id="c-close" onclick="closeCarousel()">×</button>
   </div>
-  <img id="carousel-pattern" src="" alt="pattern">
-  <div id="carousel-hint">터치하여 일시정지</div>
+  <div id="c-main">
+    <div id="c-track"></div>
+  </div>
+  <div id="c-dots"></div>
 </div>
 
-<!-- Grid panel -->
 <div id="grid-panel">
   <div id="grid-header">
-    <span>제품 선택 (30종)</span>
-    <button id="grid-close" onclick="toggleGrid()">×</button>
+    <span>Holder Collection</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="g-tabs">
+        <button class="g-tab active" onclick="filterGrid('all',this)">ALL</button>
+        <button class="g-tab" onclick="filterGrid('ju',this)">JU</button>
+        <button class="g-tab" onclick="filterGrid('sai',this)">SAI</button>
+      </div>
+      <button id="grid-close" onclick="toggleGrid()">×</button>
+    </div>
   </div>
   <div id="grid-body"></div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script>
 // ============================================================
-// CONFIG
+// PRODUCT DATA — Real Shopify CDN URLs
 // ============================================================
-const PRODUCT_COUNT = 30;
-const SCAN_INTERVAL = 800;
-const MATCH_THRESHOLD = 0.82;
+const CDN = 'https://cdn.shopify.com/s/files/1/0944/0398/5780/files/';
+const SHOP = 'https://www.acosmeticstory.com/products/';
 
-// ============================================================
-// PRODUCT DATA
-// ============================================================
-const products = [];
-for (let i = 1; i <= PRODUCT_COUNT; i++) {
-  const num2 = String(i).padStart(2, '0');
-  const num3 = String(i).padStart(3, '0');
-  products.push({
-    id: i,
-    barcode: 'JU-' + num3,
-    name: 'JU Holder No.' + i,
-    sub: 'acosmeticstory \u00b7 ju series',
-    image: 'images/JU_' + num2 + '.png',
-    pattern: 'patterns/JU_' + num3 + '.png',
-    gallery: ['images/JU_' + num2 + '.png']
-  });
-}
+const products = [
+  // JU-01 ~ JU-10
+  {id:'JU-01',type:'ju',name:'Ju-01',price:'₩152,000',handle:'ju-1',
+   images:[CDN+'JU_01__._d0eb1bfc-fd37-4264-b0fc-46eea24ef6e1.png?v=1767162173',CDN+'JU_01__._c7d2fad2-d999-493b-847b-333cfba65f40.png?v=1767162174',CDN+'JU_01-_._9c77b6db-6cda-40ce-9666-0dbd742220a3.png?v=1767162173',CDN+'JU_01-__1._cc565fa5-0da1-42c4-a848-735ad4374a23.png?v=1767162173']},
+  {id:'JU-02',type:'ju',name:'JU-02',price:'₩152,000',handle:'ju-double-clear-white-inner-%EC%82%AC%EB%B3%B8-1',
+   images:[CDN+'JU_02__._ee780168-75e0-481c-9a11-c349e5063929.png?v=1767847652',CDN+'JU_02__._fe5f4367-3785-40c0-bb77-3fceb5ff1b12.png?v=1767847652',CDN+'JU_02__-1._e767d943-6a1b-4a10-b6a2-02baccdb5b3b.png?v=1767141761',CDN+'JU_02__._51fc6006-d9bd-419c-8691-32d699c310e4.png?v=1767141761']},
+  {id:'JU-03',type:'ju',name:'JU-03',price:'₩152,000',handle:'ju-double-matte-clear-cap-white-inner-clear-body-holder-%EC%82%AC%EB%B3%B8',
+   images:[CDN+'JU_03__._f1f6c5a6-7232-4ca0-b348-1bff23bfcf9c.png?v=1767162320']},
+  {id:'JU-04',type:'ju',name:'JU-04',price:'₩152,000',handle:'ju-05-holder',
+   images:[CDN+'JU_04__._f1f752b1-f227-4dc9-8b24-8b25fae5f513.png?v=1767163219']},
+  {id:'JU-05',type:'ju',name:'JU-05',price:'₩152,000',handle:'ju-09-holder',
+   images:[CDN+'JU_05__._cbbaf14e-0712-4661-92d8-c0e29acaf38f.png?v=1767163322']},
+  {id:'JU-06',type:'ju',name:'JU-06',price:'₩152,000',handle:'ju-11-holder',
+   images:[CDN+'JU_06__._2f30ed7c-fcbd-4051-8b7a-d1cb46a2806c.png?v=1767163386']},
+  {id:'JU-07',type:'ju',name:'JU-07',price:'₩152,000',handle:'ju-13-holder-1',
+   images:[CDN+'JU_07__._f2250aa8-7ec3-431a-961d-95b8cb3ecda0.png?v=1767163424']},
+  {id:'JU-08',type:'ju',name:'JU-08',price:'₩152,000',handle:'ju-15-holder-%EC%82%AC%EB%B3%B8',
+   images:[CDN+'JU_08__._854428a4-c060-453d-b728-f66ffbbc40c1.png?v=1767163458']},
+  {id:'JU-09',type:'ju',name:'JU-09',price:'₩152,000',handle:'ju-16-holder',
+   images:[CDN+'JU_09__._fefff6aa-2e16-4757-a154-6c243b674d5e.png?v=1767164246']},
+  {id:'JU-10',type:'ju',name:'JU-10',price:'₩152,000',handle:'ju-17-holder',
+   images:[CDN+'JU_10__._f7f80804-99ca-43b9-8b63-9bfb923cb08d.png?v=1767164651']},
 
-// ============================================================
-// PATTERN MATCHING
-// ============================================================
-function getDescriptor(imgData, w, h) {
-  const desc = new Float32Array(w * h);
-  for (let i = 0; i < w * h; i++) desc[i] = imgData[i * 4] / 255;
-  return desc;
-}
-
-function cosineSim(a, b) {
-  let dot = 0, na = 0, nb = 0;
-  for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i];
-  }
-  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-8);
-}
-
-const DESC_W = 40, DESC_H = 12;
-const referenceDescriptors = [];
-
-function buildReferences() {
-  const c = document.createElement('canvas');
-  c.width = DESC_W; c.height = DESC_H;
-  const ctx = c.getContext('2d');
-  let loaded = 0;
-
-  products.forEach((p, idx) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      ctx.clearRect(0, 0, DESC_W, DESC_H);
-      ctx.drawImage(img, 0, 0, DESC_W, DESC_H);
-      const data = ctx.getImageData(0, 0, DESC_W, DESC_H).data;
-      referenceDescriptors[idx] = getDescriptor(data, DESC_W, DESC_H);
-      loaded++;
-      if (loaded === PRODUCT_COUNT) {
-        console.log('All ' + PRODUCT_COUNT + ' pattern references loaded');
-        showToast('패턴 ' + PRODUCT_COUNT + '종 로드 완료');
-      }
-    };
-    img.onerror = () => {
-      console.warn('Pattern load failed:', p.pattern);
-      loaded++;
-    };
-    img.src = p.pattern;
-  });
-}
+  // SAI-01 ~ SAI-10
+  {id:'SAI-01',type:'sai',name:'SAI15-M01',price:'₩152,000',handle:'sai15-m36',
+   images:[CDN+'SAInew_1__._582ffc2c-2a4e-4949-b7cd-17965fd76ce1.png?v=1767336255',CDN+'SAInew_1_10_._54e17bff-9584-4bf5-8ab8-32981bbf952f.png?v=1767336255',CDN+'SAInew_1__._be1e4635-684c-4005-9614-9a771ab0641f.png?v=1767336228']},
+  {id:'SAI-02',type:'sai',name:'SAI15-M02',price:'₩152,000',handle:'sai15-m35',
+   images:[CDN+'SAInew_2__._66af85f6-4c9d-4870-a8fe-ad24f00cc0cf.png?v=1767336659',CDN+'SAInew_2_10_._551ca192-ee0e-4f72-837f-b3c6782d9587.png?v=1767336659',CDN+'SAInew_2__._ca3b3342-c966-4a14-bfda-faccb2ca5b8d.png?v=1767336659']},
+  {id:'SAI-03',type:'sai',name:'SAI15-M03',price:'₩152,000',handle:'sai15-m34',
+   images:[CDN+'SAInew_3__._3dd7bd4d-844b-4682-a17a-6ebb9b7c27b5.png?v=1767336737',CDN+'SAInew_3_10_._b99f765c-a038-4809-9ee3-82976d0098f7.png?v=1767336737',CDN+'SAInew_3__._b50f4dee-d323-453d-a141-71c53efb1e82.png?v=1767336737']},
+  {id:'SAI-04',type:'sai',name:'SAI15-M04',price:'₩152,000',handle:'sai15-m33',
+   images:[CDN+'SAInew_4__._23d66e85-6195-40f6-a359-2058a3afd06e.png?v=1767336839',CDN+'SAInew_4_10_._172b1b82-b5a1-4ddd-9f9a-5c4bb03179c1.png?v=1767336839',CDN+'SAInew_4__._509230e9-9415-4c42-9db8-8698d5cd0bad.png?v=1767336839']},
+  {id:'SAI-05',type:'sai',name:'SAI15-M05',price:'₩152,000',handle:'sai15-m32',
+   images:[CDN+'SAInew_5__._9a24e578-b786-4e74-9ead-3f1eae203686.png?v=1767336905',CDN+'SAInew_5_10_._81acb18c-ffbe-4c38-842a-c7b2cb0d9025.png?v=1767336906',CDN+'SAInew_5__._d914f3e5-d99c-4f61-a114-9e7a4d885f3e.png?v=1767336906']},
+  {id:'SAI-06',type:'sai',name:'SAI15-M06',price:'₩152,000',handle:'sai15-m31',
+   images:[CDN+'SAInew_6__._7bc1dd70-ba99-4781-8216-11ae324e6350.png?v=1767336984',CDN+'SAInew_6_10_._8e4a7834-93e8-4880-befe-ab8f619e4be8.png?v=1767336984',CDN+'SAInew_6__._a62ae3b2-639b-4e2a-8a37-20cf5177a783.png?v=1767336984']},
+  {id:'SAI-07',type:'sai',name:'SAI15-M07',price:'₩152,000',handle:'sai15-m30',
+   images:[CDN+'SAInew_7__._0b87063f-753b-4705-b403-6e9470c0912c.png?v=1767337012',CDN+'SAInew_7_10_._d44efbea-8272-422e-9cd9-4e70607fde5f.png?v=1767337013',CDN+'SAInew_7__._338c4174-c777-43a2-b499-5bb3d7a2b0df.png?v=1767337012']},
+  {id:'SAI-08',type:'sai',name:'SAI15-M08',price:'₩152,000',handle:'sai15-m29',
+   images:[CDN+'SAInew_8__._e9bbee03-87a0-41f4-86f3-e6950814d832.png?v=1767337122',CDN+'SAInew_8_10_._f4c07efe-ba9b-4ea6-bc35-e23da6551886.png?v=1767337122',CDN+'SAInew_8__._13e89d16-ab56-4e19-9b99-56fcdf3524a2.png?v=1767337122']},
+  {id:'SAI-09',type:'sai',name:'SAI15-M09',price:'₩152,000',handle:'sai15-m28',
+   images:[CDN+'SAInew_10__._909ccd03-9849-44c2-98fc-eaa152d39c85.png?v=1767337262',CDN+'SAInew_10_10_._4f69dae8-5b20-4710-a0ee-6a6cebd2b509.png?v=1767337262',CDN+'SAInew_10__._61f21d6c-f37e-4d0e-b127-5907d3ce6def.png?v=1767337262']},
+  {id:'SAI-10',type:'sai',name:'SAI15-M10',price:'₩152,000',handle:'sai15-m27',
+   images:[CDN+'SAInew_11__._bce64a6d-a6c8-4a72-bf6d-7cbd2621ebff.png?v=1767337321',CDN+'SAInew_11_10_._dbcaebc2-e522-41c1-9859-0d56bf6fc01c.png?v=1767337321',CDN+'SAInew_11__._c07217de-5d10-4513-9b65-5e4a7f140e56.png?v=1767337321']}
+];
 
 // ============================================================
 // CAMERA
 // ============================================================
-let stream = null;
-async function startCamera() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-    document.getElementById('camera-view').srcObject = stream;
-    document.getElementById('scan-hint').style.display = 'none';
-  } catch (e) {
-    console.warn('Camera unavailable:', e.message);
-    document.getElementById('scan-label').textContent = '카메라 없음 \u2014 직접 선택 또는 탭하여 데모';
-    document.getElementById('scan-hint').style.display = 'block';
+async function startCamera(){
+  try{
+    const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+    document.getElementById('camera-view').srcObject=s;
+  }catch(e){
+    document.getElementById('scan-label').textContent='카메라 없음 — 탭하여 데모 / 전체 보기';
   }
-}
-
-// ============================================================
-// SCANNING
-// ============================================================
-let scanning = true;
-let scanTimer = null;
-const captureCanvas = document.createElement('canvas');
-captureCanvas.width = DESC_W; captureCanvas.height = DESC_H;
-const captureCtx = captureCanvas.getContext('2d');
-
-function scanFrame() {
-  if (!scanning) return;
-  const video = document.getElementById('camera-view');
-  if (!video.srcObject || video.readyState < 2) {
-    scanTimer = setTimeout(scanFrame, 500);
-    return;
-  }
-
-  const vw = video.videoWidth, vh = video.videoHeight;
-  const cropW = vw * 0.55, cropH = vh * 0.18;
-  const sx = (vw - cropW) / 2, sy = (vh - cropH) / 2;
-
-  captureCtx.drawImage(video, sx, sy, cropW, cropH, 0, 0, DESC_W, DESC_H);
-
-  const imgData = captureCtx.getImageData(0, 0, DESC_W, DESC_H);
-  const d = imgData.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const g = d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114;
-    const bw = g > 128 ? 255 : 0;
-    d[i] = d[i+1] = d[i+2] = bw;
-  }
-  captureCtx.putImageData(imgData, 0, 0);
-  const captured = getDescriptor(d, DESC_W, DESC_H);
-
-  let bestIdx = -1, bestSim = 0;
-  for (let i = 0; i < referenceDescriptors.length; i++) {
-    if (!referenceDescriptors[i]) continue;
-    const sim = cosineSim(captured, referenceDescriptors[i]);
-    if (sim > bestSim) { bestSim = sim; bestIdx = i; }
-  }
-
-  if (bestSim >= MATCH_THRESHOLD && bestIdx >= 0) {
-    showProduct(bestIdx);
-  }
-
-  scanTimer = setTimeout(scanFrame, SCAN_INTERVAL);
 }
 
 // ============================================================
 // PRODUCT DISPLAY
 // ============================================================
-let currentProduct = -1;
+let currentIdx=-1;
 
-function showProduct(idx) {
-  if (currentProduct === idx) return;
-  currentProduct = idx;
-  scanning = false;
-  if (scanTimer) { clearTimeout(scanTimer); scanTimer = null; }
-  const p = products[idx];
-
-  document.getElementById('p-name').textContent = p.name;
-  document.getElementById('p-sub').textContent = p.sub;
-  document.getElementById('p-image').src = p.image;
-  document.getElementById('p-pattern-img').src = p.pattern;
+function showProduct(idx){
+  currentIdx=idx;
+  const p=products[idx];
+  document.getElementById('p-badge').textContent=p.type.toUpperCase();
+  document.getElementById('p-badge').className='p-type-badge '+p.type;
+  document.getElementById('p-name').textContent=p.name;
+  document.getElementById('p-price').textContent=p.price;
+  document.getElementById('p-image').src=p.images[0];
   document.getElementById('info-panel').classList.add('show');
-  document.getElementById('scan-overlay').style.display = 'none';
-
-  if (navigator.vibrate) navigator.vibrate(60);
+  document.getElementById('scan-overlay').style.display='none';
+  if(navigator.vibrate)navigator.vibrate(50);
 }
 
-function hideProduct() {
-  currentProduct = -1;
-  scanning = true;
+function hideProduct(){
+  currentIdx=-1;
   document.getElementById('info-panel').classList.remove('show');
-  document.getElementById('scan-overlay').style.display = 'flex';
-  scanFrame();
+  document.getElementById('scan-overlay').style.display='flex';
 }
 
-// ============================================================
-// 3D CAROUSEL
-// ============================================================
-function openCarousel() {
-  const modal = document.getElementById('carousel-modal');
-  const ring = document.getElementById('carousel-ring');
-  const p = products[currentProduct];
-  if (!p) return;
-
-  document.getElementById('carousel-title').textContent = p.name;
-  document.getElementById('carousel-pattern').src = p.pattern;
-
-  // Build 6 cards (MVP: same image repeated; production: multi-angle)
-  ring.innerHTML = '';
-  const count = 6;
-  const angleStep = 360 / count;
-  const radius = 200;
-
-  for (let i = 0; i < count; i++) {
-    const card = document.createElement('div');
-    card.className = 'carousel-card';
-    card.style.transform = 'rotateY(' + (i * angleStep) + 'deg) translateZ(' + radius + 'px)';
-    const img = document.createElement('img');
-    img.src = p.image;
-    img.alt = p.name + ' view ' + (i + 1);
-    card.appendChild(img);
-    ring.appendChild(card);
-  }
-
-  modal.classList.add('open');
-  ring.classList.remove('paused');
-  ring.onpointerdown = () => ring.classList.add('paused');
-  ring.onpointerup = () => ring.classList.remove('paused');
-}
-
-function closeCarousel() {
-  document.getElementById('carousel-modal').classList.remove('open');
-}
-
-// ============================================================
-// GRID SELECT
-// ============================================================
-let gridBuilt = false;
-
-function toggleGrid() {
-  const panel = document.getElementById('grid-panel');
-  if (panel.classList.contains('open')) {
-    panel.classList.remove('open');
-    return;
-  }
-  if (!gridBuilt) buildGrid();
-  panel.classList.add('open');
-}
-
-function buildGrid() {
-  const body = document.getElementById('grid-body');
-  products.forEach((p, idx) => {
-    const item = document.createElement('div');
-    item.className = 'grid-item';
-    item.onclick = () => { toggleGrid(); showProduct(idx); };
-
-    const img = document.createElement('img');
-    img.className = 'g-product';
-    img.src = p.image;
-    img.alt = p.name;
-    img.loading = 'lazy';
-
-    const label = document.createElement('div');
-    label.className = 'g-label';
-    label.textContent = p.barcode;
-
-    const pattern = document.createElement('img');
-    pattern.className = 'g-pattern';
-    pattern.src = p.pattern;
-    pattern.alt = 'pattern ' + p.barcode;
-
-    item.appendChild(img);
-    item.appendChild(label);
-    item.appendChild(pattern);
-    body.appendChild(item);
-  });
-  gridBuilt = true;
-}
-
-// ============================================================
-// TOAST
-// ============================================================
-function showToast(msg, duration) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration || 2000);
+function buyProduct(){
+  if(currentIdx<0)return;
+  window.open(SHOP+products[currentIdx].handle,'_blank');
 }
 
 // ============================================================
 // DEMO MODE
 // ============================================================
-let demoIdx = 0;
-document.getElementById('scan-frame').addEventListener('click', () => {
-  showProduct(demoIdx % PRODUCT_COUNT);
-  demoIdx++;
-});
+let demoI=0;
+function demoNext(){showProduct(demoI%products.length);demoI++;}
+
+// ============================================================
+// INTERACTIVE CAROUSEL (drag/swipe, snap, momentum)
+// ============================================================
+let cSlideIdx=0;
+let cDragStartX=0, cDragCurrentX=0, cDragging=false, cStartTime=0;
+const SLIDE_W=()=>Math.min(window.innerWidth*0.8,360);
+
+function openCarousel(startIdx){
+  const modal=document.getElementById('carousel-modal');
+  const track=document.getElementById('c-track');
+  const dots=document.getElementById('c-dots');
+
+  if(startIdx===undefined) startIdx=currentIdx>=0?currentIdx:0;
+  cSlideIdx=startIdx;
+
+  // Build slides for ALL products
+  track.innerHTML='';
+  dots.innerHTML='';
+  products.forEach((p,i)=>{
+    // Slide
+    const slide=document.createElement('div');
+    slide.className='c-slide';
+    slide.style.minWidth=SLIDE_W()+'px';
+
+    const imgWrap=document.createElement('div');
+    imgWrap.className='c-slide-img-wrap';
+    const img=document.createElement('img');
+    img.src=p.images[0];
+    img.alt=p.name;
+    img.loading=i<5?'eager':'lazy';
+    imgWrap.appendChild(img);
+
+    // Mini gallery row if multiple images
+    if(p.images.length>1){
+      imgWrap.style.cursor='pointer';
+      let imgIdx=0;
+      imgWrap.onclick=(e)=>{
+        e.stopPropagation();
+        imgIdx=(imgIdx+1)%p.images.length;
+        img.src=p.images[imgIdx];
+      };
+    }
+
+    const name=document.createElement('div');
+    name.className='c-slide-name';
+    name.textContent=p.name;
+
+    const sub=document.createElement('div');
+    sub.className='c-slide-sub';
+    sub.textContent=p.type.toUpperCase()+' · '+p.price;
+
+    const buy=document.createElement('a');
+    buy.className='c-slide-buy';
+    buy.textContent='구매하기';
+    buy.href=SHOP+p.handle;
+    buy.target='_blank';
+    buy.onclick=(e)=>e.stopPropagation();
+
+    slide.appendChild(imgWrap);
+    slide.appendChild(name);
+    slide.appendChild(sub);
+    slide.appendChild(buy);
+    track.appendChild(slide);
+
+    // Dot
+    const dot=document.createElement('div');
+    dot.className='c-dot'+(i===cSlideIdx?' active':'');
+    dot.onclick=()=>goSlide(i);
+    dots.appendChild(dot);
+  });
+
+  updateTrack(false);
+  modal.classList.add('open');
+  bindCarouselTouch();
+}
+
+function goSlide(idx){
+  cSlideIdx=Math.max(0,Math.min(products.length-1,idx));
+  updateTrack(true);
+}
+
+function updateTrack(animate){
+  const track=document.getElementById('c-track');
+  const sw=SLIDE_W();
+  const offset=-cSlideIdx*sw+(window.innerWidth-sw)/2;
+  if(animate){
+    track.classList.remove('dragging');
+  }else{
+    track.classList.add('dragging');
+    requestAnimationFrame(()=>{track.classList.remove('dragging');
+      track.style.transform='translateX('+offset+'px)';});
+    return;
+  }
+  track.style.transform='translateX('+offset+'px)';
+  // Update dots
+  document.querySelectorAll('.c-dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===cSlideIdx);
+  });
+}
+
+function bindCarouselTouch(){
+  const main=document.getElementById('c-main');
+  const track=document.getElementById('c-track');
+
+  const onStart=(x)=>{cDragging=true;cDragStartX=x;cDragCurrentX=x;cStartTime=Date.now();track.classList.add('dragging');};
+  const onMove=(x)=>{
+    if(!cDragging)return;
+    cDragCurrentX=x;
+    const dx=cDragCurrentX-cDragStartX;
+    const sw=SLIDE_W();
+    const base=-cSlideIdx*sw+(window.innerWidth-sw)/2;
+    track.style.transform='translateX('+(base+dx)+'px)';
+  };
+  const onEnd=()=>{
+    if(!cDragging)return;
+    cDragging=false;
+    track.classList.remove('dragging');
+    const dx=cDragCurrentX-cDragStartX;
+    const dt=Date.now()-cStartTime;
+    const velocity=dx/Math.max(dt,1);
+
+    // Snap: if fast swipe or dragged > 25%
+    if(Math.abs(velocity)>0.4||Math.abs(dx)>SLIDE_W()*0.25){
+      if(dx<0)goSlide(cSlideIdx+1);
+      else goSlide(cSlideIdx-1);
+    }else{
+      goSlide(cSlideIdx);
+    }
+  };
+
+  main.ontouchstart=(e)=>onStart(e.touches[0].clientX);
+  main.ontouchmove=(e)=>{e.preventDefault();onMove(e.touches[0].clientX);};
+  main.ontouchend=onEnd;
+  main.onpointerdown=(e)=>{if(e.pointerType==='mouse'){onStart(e.clientX);main.setPointerCapture(e.pointerId);}};
+  main.onpointermove=(e)=>{if(e.pointerType==='mouse')onMove(e.clientX);};
+  main.onpointerup=(e)=>{if(e.pointerType==='mouse')onEnd();};
+}
+
+function closeCarousel(){
+  document.getElementById('carousel-modal').classList.remove('open');
+}
+
+// ============================================================
+// GRID
+// ============================================================
+let gridBuilt=false, gridFilter='all';
+
+function toggleGrid(){
+  const p=document.getElementById('grid-panel');
+  if(p.classList.contains('open')){p.classList.remove('open');return;}
+  if(!gridBuilt)buildGrid();
+  p.classList.add('open');
+}
+
+function buildGrid(){
+  const body=document.getElementById('grid-body');
+  body.innerHTML='';
+  products.forEach((p,i)=>{
+    if(gridFilter!=='all'&&p.type!==gridFilter)return;
+    const item=document.createElement('div');
+    item.className='grid-item';
+    item.onclick=()=>{toggleGrid();showProduct(i);};
+
+    const img=document.createElement('img');
+    img.src=p.images[0];
+    img.alt=p.name;
+    img.loading='lazy';
+
+    const name=document.createElement('div');
+    name.className='gi-name';
+    name.textContent=p.name;
+
+    const price=document.createElement('div');
+    price.className='gi-price';
+    price.textContent=p.price;
+
+    item.appendChild(img);
+    item.appendChild(name);
+    item.appendChild(price);
+    body.appendChild(item);
+  });
+  gridBuilt=true;
+}
+
+function filterGrid(type,btn){
+  gridFilter=type;
+  document.querySelectorAll('.g-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  gridBuilt=false;
+  buildGrid();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
 
 // ============================================================
 // INIT
 // ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  buildReferences();
+window.addEventListener('DOMContentLoaded',()=>{
   startCamera();
-  setTimeout(scanFrame, 1000);
+  showToast('JU 10종 + SAI 10종 로드 완료');
 });
 </script>
 </body>
