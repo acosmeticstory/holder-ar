@@ -30,9 +30,13 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .p-type-badge.ju{background:rgba(200,184,154,0.2);color:var(--gold)}
 .p-type-badge.sai{background:rgba(120,180,220,0.2);color:#78b4dc}
 #p-name{font-size:1.05rem;font-weight:600}
-#p-price{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:14px}
-#p-image-wrap{width:100%;display:flex;justify-content:center;margin-bottom:14px}
-#p-image{max-width:260px;max-height:200px;object-fit:contain;border-radius:8px}
+.p-img-box{flex:1;text-align:center;background:var(--card);border-radius:10px;padding:8px;max-width:48%}
+.p-img-box img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:6px}
+.p-img-label{font-size:0.55rem;color:rgba(255,255,255,0.3);margin-top:4px}
+#p-specs{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:0.7rem}
+#p-specs th{text-align:left;color:rgba(255,255,255,0.35);padding:5px 8px;font-weight:400;border-bottom:1px solid rgba(255,255,255,0.06);width:25%}
+#p-specs td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.06)}
+#p-specs .spec-header{color:var(--gold);font-weight:600;font-size:0.6rem;text-transform:uppercase;padding:6px 8px 3px;border:none}
 #p-actions{display:flex;gap:8px}
 #p-actions button{flex:1;padding:10px 0;border-radius:8px;font-size:0.78rem;font-weight:500;cursor:pointer;border:none}
 #btn-rescan{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
@@ -93,7 +97,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 </div>
 
 <div id="top-bar">
-  <div id="brand">HOLDER AR</div>
+  <img id="brand-logo" src="logo.png" alt="acosmeticstory" style="height:16px;opacity:0.8">
   <button class="top-btn" onclick="toggleGrid()">전체 보기</button>
 </div>
 
@@ -102,8 +106,11 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
     <span id="p-badge" class="p-type-badge ju">JU</span>
     <span id="p-name"></span>
   </div>
-  <div id="p-price"></div>
-  <div id="p-image-wrap"><img id="p-image" src="" alt="product"></div>
+  <div id="p-images-row" style="display:flex;gap:8px;justify-content:center;margin-bottom:12px">
+    <div class="p-img-box"><img id="p-img-bare" src="" alt="without core"><div class="p-img-label">holder</div></div>
+    <div class="p-img-box"><img id="p-img-core" src="" alt="with core"><div class="p-img-label">with core</div></div>
+  </div>
+  <table id="p-specs"><tbody></tbody></table>
   <div id="p-actions">
     <button id="btn-rescan" onclick="hideProduct()">다시 스캔</button>
     <button id="btn-buy" onclick="buyProduct()">구매하기</button>
@@ -148,48 +155,49 @@ const CDN = 'https://cdn.shopify.com/s/files/1/0944/0398/5780/files/';
 const SHOP = 'https://www.acosmeticstory.com/products/';
 
 const products = [
-  // JU-01 ~ JU-10
-  {id:'JU-01',type:'ju',name:'Ju-01',price:'₩152,000',handle:'ju-1',
+  // JU-01 ~ JU-10 — images[2]=without core, images[3]=with core
+  {id:'JU-01',type:'ju',name:'Ju-01',handle:'ju-1',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_01__._d0eb1bfc-fd37-4264-b0fc-46eea24ef6e1.png?v=1767162173',CDN+'JU_01__._c7d2fad2-d999-493b-847b-333cfba65f40.png?v=1767162174',CDN+'JU_01-_._9c77b6db-6cda-40ce-9666-0dbd742220a3.png?v=1767162173',CDN+'JU_01-__1._cc565fa5-0da1-42c4-a848-735ad4374a23.png?v=1767162173']},
-  {id:'JU-02',type:'ju',name:'JU-02',price:'₩152,000',handle:'ju-double-clear-white-inner-%EC%82%AC%EB%B3%B8-1',
+  {id:'JU-02',type:'ju',name:'JU-02',handle:'ju-double-clear-white-inner-%EC%82%AC%EB%B3%B8-1',
    images:[CDN+'JU_02__._ee780168-75e0-481c-9a11-c349e5063929.png?v=1767847652',CDN+'JU_02__._fe5f4367-3785-40c0-bb77-3fceb5ff1b12.png?v=1767847652',CDN+'JU_02__-1._e767d943-6a1b-4a10-b6a2-02baccdb5b3b.png?v=1767141761',CDN+'JU_02__._51fc6006-d9bd-419c-8691-32d699c310e4.png?v=1767141761']},
-  {id:'JU-03',type:'ju',name:'JU-03',price:'₩152,000',handle:'ju-double-matte-clear-cap-white-inner-clear-body-holder-%EC%82%AC%EB%B3%B8',
+  {id:'JU-03',type:'ju',name:'JU-03',handle:'ju-double-matte-clear-cap-white-inner-clear-body-holder-%EC%82%AC%EB%B3%B8',
    images:[CDN+'JU_03__._f1f6c5a6-7232-4ca0-b348-1bff23bfcf9c.png?v=1767162320',CDN+'JU_03__._fe52388a-1363-40b0-b23d-2dc33a1f908b.png?v=1767162320',CDN+'JU_03__._3230de13-5017-4890-8880-f4c4abf40494.png?v=1767162320',CDN+'JU_03___1._581ca2e2-0ce6-442e-8787-4f45dfdb1c90.png?v=1767162320']},
-  {id:'JU-04',type:'ju',name:'JU-04',price:'₩152,000',handle:'ju-05-holder',
+  {id:'JU-04',type:'ju',name:'JU-04',handle:'ju-05-holder',
    images:[CDN+'JU_04__._f1f752b1-f227-4dc9-8b24-8b25fae5f513.png?v=1767163219',CDN+'JU_04__._80a38c97-40cb-4c77-88b5-06df3fbbb727.png?v=1767163219',CDN+'JU_04__._a8963268-3846-46d1-a2b9-98fa0a9d5163.png?v=1767163219',CDN+'JU_04___1._7b8044b2-0896-40ff-81e4-540ceeb14fd7.png?v=1767163219']},
-  {id:'JU-05',type:'ju',name:'JU-05',price:'₩152,000',handle:'ju-09-holder',
+  {id:'JU-05',type:'ju',name:'JU-05',handle:'ju-09-holder',
    images:[CDN+'JU_05__._cbbaf14e-0712-4661-92d8-c0e29acaf38f.png?v=1767163322',CDN+'JU_05__._646ab444-010b-4378-ac7c-3ea2214285b2.png?v=1767163322',CDN+'JU_05___1._34b21697-3aa4-40a6-8a0a-7992d93eb2b8.png?v=1767163322']},
-  {id:'JU-06',type:'ju',name:'JU-06',price:'₩152,000',handle:'ju-11-holder',
+  {id:'JU-06',type:'ju',name:'JU-06',handle:'ju-11-holder',
    images:[CDN+'JU_06__._2f30ed7c-fcbd-4051-8b7a-d1cb46a2806c.png?v=1767163386',CDN+'JU_06__._d7034d5f-870a-406d-8e77-e5c5f14bf6e0.png?v=1767163386',CDN+'JU_06__._1832690c-73d7-45c0-b668-fa4663e273a5.png?v=1767163386',CDN+'JU_06___1._dda36fcb-6a0c-483f-a206-3a613df903ea.png?v=1767163386']},
-  {id:'JU-07',type:'ju',name:'JU-07',price:'₩152,000',handle:'ju-13-holder-1',
+  {id:'JU-07',type:'ju',name:'JU-07',handle:'ju-13-holder-1',
    images:[CDN+'JU_07__._f2250aa8-7ec3-431a-961d-95b8cb3ecda0.png?v=1767163424',CDN+'JU_07__._2c50527c-533b-4da9-89c4-d3460906ab46.png?v=1767163424',CDN+'JU_07__._54fc75ac-ec0a-498c-86de-1abc828bc3ae.png?v=1767163424']},
-  {id:'JU-08',type:'ju',name:'JU-08',price:'₩152,000',handle:'ju-15-holder-%EC%82%AC%EB%B3%B8',
+  {id:'JU-08',type:'ju',name:'JU-08',handle:'ju-15-holder-%EC%82%AC%EB%B3%B8',
    images:[CDN+'JU_08__._854428a4-c060-453d-b728-f66ffbbc40c1.png?v=1767163458',CDN+'JU_08__._5b62cc0b-ca12-46b0-a2aa-456a333bc114.png?v=1767163458',CDN+'JU_08__._55c37f8c-c5f1-458e-9927-85fc34055f96.png?v=1767157357']},
-  {id:'JU-09',type:'ju',name:'JU-09',price:'₩152,000',handle:'ju-16-holder',
+  {id:'JU-09',type:'ju',name:'JU-09',handle:'ju-16-holder',
    images:[CDN+'JU_09__._fefff6aa-2e16-4757-a154-6c243b674d5e.png?v=1767164246',CDN+'JU_09__._70a70ea9-de00-4914-a574-9f41e728961a.png?v=1767164246',CDN+'JU_09__._4d0e035a-d459-44f3-a335-620270467cc2.png?v=1767164246']},
-  {id:'JU-10',type:'ju',name:'JU-10',price:'₩152,000',handle:'ju-17-holder',
+  {id:'JU-10',type:'ju',name:'JU-10',handle:'ju-17-holder',
    images:[CDN+'JU_10__._f7f80804-99ca-43b9-8b63-9bfb923cb08d.png?v=1767164651',CDN+'JU_10__._59f004b4-41c4-40a8-adcf-569a02f68eff.png?v=1767164651',CDN+'JU_10__._325f2a32-6610-44c1-877b-c0961dd98946.png?v=1767141034']},
 
   // SAI-01 ~ SAI-10
-  {id:'SAI-01',type:'sai',name:'SAI15-M01',price:'₩152,000',handle:'sai15-m36',
+  {id:'SAI-01',type:'sai',name:'SAI15-M01',handle:'sai15-m36',
    images:[CDN+'SAInew_1__._582ffc2c-2a4e-4949-b7cd-17965fd76ce1.png?v=1767336255',CDN+'SAInew_1_10_._54e17bff-9584-4bf5-8ab8-32981bbf952f.png?v=1767336255',CDN+'SAInew_1__._be1e4635-684c-4005-9614-9a771ab0641f.png?v=1767336228']},
-  {id:'SAI-02',type:'sai',name:'SAI15-M02',price:'₩152,000',handle:'sai15-m35',
+  {id:'SAI-02',type:'sai',name:'SAI15-M02',handle:'sai15-m35',
    images:[CDN+'SAInew_2__._66af85f6-4c9d-4870-a8fe-ad24f00cc0cf.png?v=1767336659',CDN+'SAInew_2_10_._551ca192-ee0e-4f72-837f-b3c6782d9587.png?v=1767336659',CDN+'SAInew_2__._ca3b3342-c966-4a14-bfda-faccb2ca5b8d.png?v=1767336659']},
-  {id:'SAI-03',type:'sai',name:'SAI15-M03',price:'₩152,000',handle:'sai15-m34',
+  {id:'SAI-03',type:'sai',name:'SAI15-M03',handle:'sai15-m34',
    images:[CDN+'SAInew_3__._3dd7bd4d-844b-4682-a17a-6ebb9b7c27b5.png?v=1767336737',CDN+'SAInew_3_10_._b99f765c-a038-4809-9ee3-82976d0098f7.png?v=1767336737',CDN+'SAInew_3__._b50f4dee-d323-453d-a141-71c53efb1e82.png?v=1767336737']},
-  {id:'SAI-04',type:'sai',name:'SAI15-M04',price:'₩152,000',handle:'sai15-m33',
+  {id:'SAI-04',type:'sai',name:'SAI15-M04',handle:'sai15-m33',
    images:[CDN+'SAInew_4__._23d66e85-6195-40f6-a359-2058a3afd06e.png?v=1767336839',CDN+'SAInew_4_10_._172b1b82-b5a1-4ddd-9f9a-5c4bb03179c1.png?v=1767336839',CDN+'SAInew_4__._509230e9-9415-4c42-9db8-8698d5cd0bad.png?v=1767336839']},
-  {id:'SAI-05',type:'sai',name:'SAI15-M05',price:'₩152,000',handle:'sai15-m32',
+  {id:'SAI-05',type:'sai',name:'SAI15-M05',handle:'sai15-m32',
    images:[CDN+'SAInew_5__._9a24e578-b786-4e74-9ead-3f1eae203686.png?v=1767336905',CDN+'SAInew_5_10_._81acb18c-ffbe-4c38-842a-c7b2cb0d9025.png?v=1767336906',CDN+'SAInew_5__._d914f3e5-d99c-4f61-a114-9e7a4d885f3e.png?v=1767336906']},
-  {id:'SAI-06',type:'sai',name:'SAI15-M06',price:'₩152,000',handle:'sai15-m31',
+  {id:'SAI-06',type:'sai',name:'SAI15-M06',handle:'sai15-m31',
    images:[CDN+'SAInew_6__._7bc1dd70-ba99-4781-8216-11ae324e6350.png?v=1767336984',CDN+'SAInew_6_10_._8e4a7834-93e8-4880-befe-ab8f619e4be8.png?v=1767336984',CDN+'SAInew_6__._a62ae3b2-639b-4e2a-8a37-20cf5177a783.png?v=1767336984']},
-  {id:'SAI-07',type:'sai',name:'SAI15-M07',price:'₩152,000',handle:'sai15-m30',
+  {id:'SAI-07',type:'sai',name:'SAI15-M07',handle:'sai15-m30',
    images:[CDN+'SAInew_7__._0b87063f-753b-4705-b403-6e9470c0912c.png?v=1767337012',CDN+'SAInew_7_10_._d44efbea-8272-422e-9cd9-4e70607fde5f.png?v=1767337013',CDN+'SAInew_7__._338c4174-c777-43a2-b499-5bb3d7a2b0df.png?v=1767337012']},
-  {id:'SAI-08',type:'sai',name:'SAI15-M08',price:'₩152,000',handle:'sai15-m29',
+  {id:'SAI-08',type:'sai',name:'SAI15-M08',handle:'sai15-m29',
    images:[CDN+'SAInew_8__._e9bbee03-87a0-41f4-86f3-e6950814d832.png?v=1767337122',CDN+'SAInew_8_10_._f4c07efe-ba9b-4ea6-bc35-e23da6551886.png?v=1767337122',CDN+'SAInew_8__._13e89d16-ab56-4e19-9b99-56fcdf3524a2.png?v=1767337122']},
-  {id:'SAI-09',type:'sai',name:'SAI15-M09',price:'₩152,000',handle:'sai15-m28',
+  {id:'SAI-09',type:'sai',name:'SAI15-M09',handle:'sai15-m28',
    images:[CDN+'SAInew_10__._909ccd03-9849-44c2-98fc-eaa152d39c85.png?v=1767337262',CDN+'SAInew_10_10_._4f69dae8-5b20-4710-a0ee-6a6cebd2b509.png?v=1767337262',CDN+'SAInew_10__._61f21d6c-f37e-4d0e-b127-5907d3ce6def.png?v=1767337262']},
-  {id:'SAI-10',type:'sai',name:'SAI15-M10',price:'₩152,000',handle:'sai15-m27',
+  {id:'SAI-10',type:'sai',name:'SAI15-M10',handle:'sai15-m27',
    images:[CDN+'SAInew_11__._bce64a6d-a6c8-4a72-bf6d-7cbd2621ebff.png?v=1767337321',CDN+'SAInew_11_10_._dbcaebc2-e522-41c1-9859-0d56bf6fc01c.png?v=1767337321',CDN+'SAInew_11__._c07217de-5d10-4513-9b65-5e4a7f140e56.png?v=1767337321']}
 ];
 
@@ -216,8 +224,34 @@ function showProduct(idx){
   document.getElementById('p-badge').textContent=p.type.toUpperCase();
   document.getElementById('p-badge').className='p-type-badge '+p.type;
   document.getElementById('p-name').textContent=p.name;
-  document.getElementById('p-price').textContent=p.price;
-  document.getElementById('p-image').src=p.images[0];
+
+  // Image 3 = without core (index 2), Image 4 = with core (index 3)
+  document.getElementById('p-img-bare').src=p.images[2]||p.images[0];
+  document.getElementById('p-img-core').src=p.images[3]||p.images[p.images.length-1];
+
+  // Specs table
+  const tbody=document.querySelector('#p-specs tbody');
+  tbody.innerHTML='';
+  if(p.specs){
+    const s=p.specs;
+    const rows=[
+      ['','Cap','Body'],
+      ['Color',s.cap.color,s.body.color],
+      ['Opacity',s.cap.opacity,s.body.opacity],
+      ['Finish',s.cap.finish,s.body.finish],
+      ['Effect',s.cap.effect,s.body.effect]
+    ];
+    rows.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      if(i===0){
+        tr.innerHTML='<td class="spec-header"></td><td class="spec-header">'+r[1]+'</td><td class="spec-header">'+r[2]+'</td>';
+      }else{
+        tr.innerHTML='<th>'+r[0]+'</th><td>'+r[1]+'</td><td>'+r[2]+'</td>';
+      }
+      tbody.appendChild(tr);
+    });
+  }
+
   document.getElementById('info-panel').classList.add('show');
   document.getElementById('scan-overlay').style.display='none';
   if(navigator.vibrate)navigator.vibrate(50);
@@ -227,11 +261,87 @@ function hideProduct(){
   currentIdx=-1;
   document.getElementById('info-panel').classList.remove('show');
   document.getElementById('scan-overlay').style.display='flex';
+  scanning=true;
+  scanFrame();
 }
 
 function buyProduct(){
   if(currentIdx<0)return;
   window.open(SHOP+products[currentIdx].handle,'_blank');
+}
+
+// ============================================================
+// PATTERN RECOGNITION
+// ============================================================
+const DESC_W=50, DESC_H=15;
+const refDescs=[];
+let scanning=true, scanTimer=null;
+
+function getDesc(data,w,h){
+  const d=new Float32Array(w*h);
+  for(let i=0;i<w*h;i++) d[i]=data[i*4]/255;
+  return d;
+}
+function cosine(a,b){
+  let dot=0,na=0,nb=0;
+  for(let i=0;i<a.length;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];}
+  return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-8);
+}
+
+function loadPatternRefs(){
+  const c=document.createElement('canvas');c.width=DESC_W;c.height=DESC_H;
+  const ctx=c.getContext('2d');
+  let loaded=0;
+  const patternFiles=[];
+  for(let i=1;i<=10;i++) patternFiles.push('patterns/JU_'+String(i).padStart(3,'0')+'.png');
+  for(let i=1;i<=10;i++) patternFiles.push('patterns/SAI_'+String(i).padStart(3,'0')+'.png');
+
+  patternFiles.forEach((src,idx)=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{
+      ctx.clearRect(0,0,DESC_W,DESC_H);
+      ctx.drawImage(img,0,0,DESC_W,DESC_H);
+      refDescs[idx]=getDesc(ctx.getImageData(0,0,DESC_W,DESC_H).data,DESC_W,DESC_H);
+      loaded++;
+      if(loaded===patternFiles.length) showToast('패턴 인식 준비 완료');
+    };
+    img.onerror=()=>{loaded++;};
+    img.src=src;
+  });
+}
+
+const capC=document.createElement('canvas');capC.width=DESC_W;capC.height=DESC_H;
+const capCtx=capC.getContext('2d');
+
+function scanFrame(){
+  if(!scanning||currentIdx>=0) return;
+  const v=document.getElementById('camera-view');
+  if(!v.srcObject||v.readyState<2){scanTimer=setTimeout(scanFrame,500);return;}
+
+  const vw=v.videoWidth,vh=v.videoHeight;
+  const cropW=vw*0.55,cropH=vh*0.18;
+  capCtx.drawImage(v,(vw-cropW)/2,(vh-cropH)/2,cropW,cropH,0,0,DESC_W,DESC_H);
+
+  const imgD=capCtx.getImageData(0,0,DESC_W,DESC_H);
+  const d=imgD.data;
+  // Grayscale + threshold
+  for(let i=0;i<d.length;i+=4){
+    const g=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
+    d[i]=d[i+1]=d[i+2]=g>128?255:0;
+  }
+  capCtx.putImageData(imgD,0,0);
+  const cap=getDesc(d,DESC_W,DESC_H);
+
+  let bestI=-1,bestS=0;
+  for(let i=0;i<refDescs.length;i++){
+    if(!refDescs[i])continue;
+    const s=cosine(cap,refDescs[i]);
+    if(s>bestS){bestS=s;bestI=i;}
+  }
+  if(bestS>=0.82&&bestI>=0) showProduct(bestI);
+
+  scanTimer=setTimeout(scanFrame,600);
 }
 
 // ============================================================
@@ -271,17 +381,17 @@ function openCarousel(startIdx) {
     card.setAttribute('data-idx', i);
 
     const img = document.createElement('img');
-    img.src = p.images[0];
+    img.src = p.images[2] || p.images[0];
     img.alt = p.name;
     img.loading = 'lazy';
 
-    // Tap image to cycle angles
-    let imgI = 0;
-    if (p.images.length > 1) {
+    // Tap image to toggle core/no-core
+    let showCore = false;
+    if (p.images.length >= 4) {
       img.addEventListener('click', (e) => {
         e.stopPropagation();
-        imgI = (imgI + 1) % p.images.length;
-        img.src = p.images[imgI];
+        showCore = !showCore;
+        img.src = showCore ? p.images[3] : p.images[2];
       });
     }
 
@@ -291,7 +401,7 @@ function openCarousel(startIdx) {
 
     const sub = document.createElement('div');
     sub.className = 'g3d-sub';
-    sub.textContent = p.type.toUpperCase() + ' · ' + p.price;
+    sub.textContent = p.type.toUpperCase() + ' holder';
 
     const buy = document.createElement('a');
     buy.className = 'g3d-buy';
@@ -432,7 +542,7 @@ function buildGrid(){
     item.onclick=()=>{toggleGrid();showProduct(i);};
 
     const img=document.createElement('img');
-    img.src=p.images[0];
+    img.src=p.images[2]||p.images[0];
     img.alt=p.name;
     img.loading='lazy';
 
@@ -440,13 +550,13 @@ function buildGrid(){
     name.className='gi-name';
     name.textContent=p.name;
 
-    const price=document.createElement('div');
-    price.className='gi-price';
-    price.textContent=p.price;
+    const sub=document.createElement('div');
+    sub.className='gi-price';
+    sub.textContent=p.type.toUpperCase()+' holder';
 
     item.appendChild(img);
     item.appendChild(name);
-    item.appendChild(price);
+    item.appendChild(sub);
     body.appendChild(item);
   });
   gridBuilt=true;
@@ -474,7 +584,8 @@ function showToast(msg){
 // ============================================================
 window.addEventListener('DOMContentLoaded',()=>{
   startCamera();
-  showToast('JU 10종 + SAI 10종 로드 완료');
+  loadPatternRefs();
+  setTimeout(scanFrame,1500);
 });
 </script>
 </body>
