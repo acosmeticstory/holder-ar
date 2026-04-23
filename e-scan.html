@@ -478,15 +478,14 @@ async function startBarcode(videoEl) {
   zxingReader = new ZXing.BrowserMultiFormatReader(hints);
   setLayer('layer1','active');
   window.__zxingStats = { calls: 0, results: 0, errs: 0, lastErr: '', lastResult: '' };
-  // 2026-04-23 오후: decodeFromVideoElement 가 v0.21.3 에서 이미 srcObject 붙은
-  // video 에 대해 내부 루프를 안 돌리는 현상 → 직접 canvas 에 그려서 decodeFromCanvas
-  // 호출하는 수동 루프로 전환. 훨씬 명시적.
+  // 2026-04-23 저녁: v0.21.3 UMD 에는 `decodeFromCanvas` 없음(TypeError) →
+  // `decodeBitmap(BinaryBitmap)` 저수준 API 직접 사용. 필요 클래스:
+  // HTMLCanvasElementLuminanceSource → HybridBinarizer → BinaryBitmap
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   async function scanLoop() {
     while (!stopped) {
       if (videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
-        // 과한 해상도는 속도 저해 — 다운샘플 (긴 변 640px)
         const maxDim = 640;
         const scale = Math.min(1, maxDim / Math.max(videoEl.videoWidth, videoEl.videoHeight));
         canvas.width = Math.round(videoEl.videoWidth * scale);
@@ -494,7 +493,10 @@ async function startBarcode(videoEl) {
         ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
         window.__zxingStats.calls++;
         try {
-          const result = zxingReader.decodeFromCanvas(canvas);
+          const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+          const binarizer = new ZXing.HybridBinarizer(luminance);
+          const bitmap = new ZXing.BinaryBitmap(binarizer);
+          const result = zxingReader.decodeBitmap(bitmap);
           if (result) {
             window.__zxingStats.results++;
             const text = result.getText();
@@ -507,10 +509,9 @@ async function startBarcode(videoEl) {
         } catch(e) {
           window.__zxingStats.errs++;
           const name = (e && e.name) || 'unknown';
-          window.__zxingStats.lastErr = name;
-          // NotFoundException 은 바코드 못 찾음 = 정상
+          window.__zxingStats.lastErr = `${name}:${(e && e.message || '').slice(0,30)}`;
           if (name !== 'NotFoundException' && name !== 'NotFoundException2') {
-            console.warn('[zxing] unexpected err:', name, e && e.message);
+            console.warn('[zxing]', name, e && e.message, e);
           }
         }
       }
