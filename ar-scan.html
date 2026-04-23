@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>AR Scan · Holder AR</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; width: 100%; overflow: hidden; background: #000; color: #fff; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+#cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; background: #000; }
+#work { display: none; }
+
+#mask {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.55) 65%);
+}
+
+/* Reticle — 3.33:1 ratio like 12mm × 40mm strip, slightly padded */
+#reticle {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(78vw, 440px);
+  aspect-ratio: 3.5 / 1;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 10px;
+  z-index: 3; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.08);
+}
+#reticle::before, #reticle::after {
+  content: ''; position: absolute; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,184,154,0.6), transparent);
+  animation: sweep 1.8s ease-in-out infinite;
+}
+#reticle::before { top: 50%; }
+#reticle::after { top: 50%; animation-delay: 0.9s; }
+@keyframes sweep { 0%,100%{opacity:0.2} 50%{opacity:0.9} }
+
+#corner-tl, #corner-tr, #corner-bl, #corner-br {
+  position: absolute; width: 18px; height: 18px; border: 2px solid #c8b89a;
+  z-index: 4; pointer-events: none;
+}
+/* Corner decorations positioned inside reticle */
+#reticle .c { position: absolute; width: 18px; height: 18px; border: 2px solid #c8b89a; }
+#reticle .c.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+#reticle .c.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+#reticle .c.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+#reticle .c.br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+#hud-top {
+  position: absolute; top: env(safe-area-inset-top, 0); left: 0; right: 0;
+  z-index: 10; padding: 14px 16px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+  display: flex; justify-content: space-between; align-items: center;
+}
+#brand { font-size: 0.7rem; letter-spacing: 0.15em; color: rgba(255,255,255,0.7); }
+.pill {
+  display: inline-flex; border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px; overflow: hidden; backdrop-filter: blur(8px);
+}
+.pill button {
+  background: none; color: rgba(255,255,255,0.6); border: none;
+  font: inherit; font-size: 0.7rem; padding: 6px 14px; cursor: pointer;
+}
+.pill button.active { background: #c8b89a; color: #0a0a0a; font-weight: 600; }
+
+#hud-bottom {
+  position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0) + 20px);
+  z-index: 10; padding: 14px 16px;
+  text-align: center;
+  pointer-events: none;
+}
+#status {
+  display: inline-block;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  padding: 10px 18px; border-radius: 999px;
+  font-size: 0.85rem; color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+#debug {
+  display: inline-block;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  padding: 6px 12px; border-radius: 8px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.65rem; color: #c8b89a;
+  margin-top: 10px;
+  letter-spacing: 0.02em;
+  max-width: 94vw;
+  word-break: break-all;
+  border: 1px solid rgba(200,184,154,0.2);
+}
+
+#result {
+  position: absolute; inset: 0; z-index: 50;
+  background: rgba(5,5,5,0.97); backdrop-filter: blur(20px);
+  display: none; flex-direction: column;
+  padding: 24px 20px; padding-top: calc(env(safe-area-inset-top, 0) + 24px);
+  overflow-y: auto;
+}
+#result.show { display: flex; }
+#result .close {
+  position: absolute; top: calc(env(safe-area-inset-top, 0) + 16px); right: 16px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: none; color: #fff; font-size: 1.3rem;
+  cursor: pointer;
+}
+.r-badge {
+  align-self: flex-start;
+  font-size: 0.58rem; padding: 3px 10px; border-radius: 12px;
+  letter-spacing: 0.15em; font-weight: 600; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.r-badge.ju { background: rgba(61,90,76,0.3); color: #a4c2b3; }
+.r-badge.sai { background: rgba(107,76,59,0.3); color: #c9a48a; }
+#r-name { font-family: Georgia, serif; font-size: 1.8rem; letter-spacing: 2px; margin-bottom: 4px; }
+#r-sub { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 18px; }
+#r-img {
+  width: 100%; max-height: 52vh; object-fit: contain;
+  background: rgba(255,255,255,0.03); border-radius: 14px;
+  margin-bottom: 18px;
+}
+#r-meta {
+  font-family: ui-monospace, monospace;
+  font-size: 0.65rem; color: rgba(255,255,255,0.3);
+  word-break: break-all; margin-bottom: 18px;
+}
+#r-meta .k { color: rgba(255,255,255,0.5); }
+.r-actions { display: flex; gap: 10px; margin-top: auto; }
+.r-actions a, .r-actions button {
+  flex: 1; padding: 14px 0; border-radius: 10px; font: inherit;
+  font-size: 0.85rem; font-weight: 500; text-align: center; text-decoration: none;
+  border: none; cursor: pointer;
+}
+#r-buy { background: #c8b89a; color: #0a0a0a; }
+#r-rescan { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+
+#error-banner {
+  position: absolute; top: 56px; left: 16px; right: 16px; z-index: 20;
+  background: rgba(180,50,50,0.9); color: #fff;
+  padding: 12px 14px; border-radius: 10px;
+  font-size: 0.75rem; display: none;
+}
+#error-banner.show { display: block; }
+
+/* Preview thumbnail of what decoder saw (debug) */
+#preview {
+  position: absolute; bottom: calc(env(safe-area-inset-bottom, 0) + 80px); left: 12px;
+  max-width: 40vw;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px; z-index: 11;
+  background: #000; display: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+#preview.show { display: block; }
+</style>
+</head>
+<body>
+
+<video id="cam" autoplay playsinline muted></video>
+<canvas id="work"></canvas>
+<canvas id="preview"></canvas>
+
+<div id="mask"></div>
+
+<div id="reticle">
+  <span class="c tl"></span><span class="c tr"></span>
+  <span class="c bl"></span><span class="c br"></span>
+</div>
+
+<div id="hud-top">
+  <span id="brand">HOLDER AR</span>
+  <div class="pill">
+    <button id="m-bar" class="active" type="button">B-bar</button>
+    <button id="m-dot" type="button">B-dot</button>
+  </div>
+</div>
+
+<div id="error-banner"></div>
+
+<div id="hud-bottom">
+  <div id="status">12mm 스트립을 프레임 안에 맞춰주세요</div>
+  <div id="debug"></div>
+</div>
+
+<div id="result">
+  <button class="close" id="r-close" type="button">×</button>
+  <span class="r-badge" id="r-badge">JU</span>
+  <h1 id="r-name">—</h1>
+  <div id="r-sub">—</div>
+  <img id="r-img" alt="" src="">
+  <div id="r-meta"><span class="k">code</span> <span id="r-code"></span></div>
+  <div class="r-actions">
+    <button id="r-rescan" type="button">다시 스캔</button>
+    <a id="r-buy" href="#" target="_blank" rel="noopener">제품 페이지 →</a>
+  </div>
+</div>
+
+<script>
+/* ====================================================================
+   Holder AR · custom B-bar / B-dot decoder
+   ==================================================================== */
+
+// ---- Symbol system (must match examples/_generate.js) ----
+const PALETTE = [
+  [61, 90, 76],    // 0 Ju-green
+  [107, 76, 59],   // 1 brown
+  [26, 26, 26],    // 2 black
+  [90, 90, 88],    // 3 warm-gray
+  [138, 133, 120]  // 4 taupe
+];
+const N_CELLS = 14;
+
+// ---- Product catalog (code → product) ----
+// Codes match the 4 sample SVGs already in /examples/
+const CATALOG = {
+  '0,7,11,3,9,14,1,6,12,4,8,13,2,5':
+    { id: 'Ju-46', badge: 'JU', handle: 'ju-46', sub: '본연 no.46' },
+  '3,10,8,0,6,12,2,14,5,11,7,1,9,13':
+    { id: 'Ju-17', badge: 'JU', handle: 'ju-30-holder', sub: '본연 no.17' },
+  '6,2,13,9,0,7,14,3,11,5,1,8,12,4':
+    { id: 'SAI15-M01', badge: 'SAI', handle: 'sai15-m36', sub: 'sai 15 · m01' },
+  '11,4,7,0,13,6,2,9,14,1,12,5,10,8':
+    { id: 'SAI15-M02', badge: 'SAI', handle: 'sai15-m35', sub: 'sai 15 · m02' },
+};
+const SHOP_BASE = 'https://www.acosmeticstory.com';
+
+// ---- DOM ----
+const $ = id => document.getElementById(id);
+const cam = $('cam'), work = $('work'), preview = $('preview');
+const statusEl = $('status'), debugEl = $('debug'), errBar = $('error-banner');
+const reticle = $('reticle'), resultEl = $('result');
+
+// ---- Mode state ----
+let mode = 'bar';
+$('m-bar').addEventListener('click', () => setMode('bar'));
+$('m-dot').addEventListener('click', () => setMode('dot'));
+function setMode(m) {
+  mode = m;
+  $('m-bar').classList.toggle('active', m === 'bar');
+  $('m-dot').classList.toggle('active', m === 'dot');
+  resetDetection();
+}
+
+// ---- Camera ----
+async function startCam() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    cam.srcObject = stream;
+    await new Promise(r => cam.onloadedmetadata = r);
+    cam.play();
+    requestAnimationFrame(loop);
+  } catch (e) {
+    showError('카메라 접근 실패: ' + e.message + '\n→ HTTPS 여부 + 카메라 권한 확인');
+    console.error(e);
+  }
+}
+function showError(msg) { errBar.textContent = msg; errBar.classList.add('show'); }
+
+// ---- Decoder ----
+const ctx = work.getContext('2d', { willReadFrequently: true });
+const pctx = preview.getContext('2d');
+
+function isBg(r, g, b) {
+  // strip bg #F0EDE6 ≈ (240,237,230); card #FAF9F5 ≈ (250,249,245)
+  // permissive thresholds to tolerate camera color cast
+  const avg = (r + g + b) / 3;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  return avg > 175 && (max - min) < 40;
+}
+
+function rgbToPaletteIdx(r, g, b) {
+  let bd = Infinity, bi = 0;
+  for (let i = 0; i < PALETTE.length; i++) {
+    const dr = r - PALETTE[i][0], dg = g - PALETTE[i][1], db = b - PALETTE[i][2];
+    const d = dr * dr + dg * dg + db * db;
+    if (d < bd) { bd = d; bi = i; }
+  }
+  return bi;
+}
+
+/**
+ * Decode strip image.
+ * Returns { code: number[], confidence: number } or null.
+ */
+function decodeStrip(imgData, mode, dbg) {
+  const { data, width, height } = imgData;
+  const px = (x, y) => ((y | 0) * width + (x | 0)) * 4;
+
+  // Row metrics: activity AND transitions (bg↔non-bg flips).
+  // Real strip rows have many transitions (14 bars → ~28 flips).
+  // Solid dark regions (monitor bezel, shadows) have near-zero transitions → rejected.
+  const rowAct = new Int32Array(height);
+  const rowTrans = new Int32Array(height);
+  for (let y = 0; y < height; y++) {
+    let a = 0, t = 0;
+    let prevBg = true;
+    for (let x = 0; x < width; x++) {
+      const i = px(x, y);
+      const bg = isBg(data[i], data[i+1], data[i+2]);
+      if (!bg) a++;
+      if (x > 0 && bg !== prevBg) t++;
+      prevBg = bg;
+    }
+    rowAct[y] = a;
+    rowTrans[y] = t;
+  }
+
+  // A "strip row" has activity AND enough transitions.
+  const actMin = Math.max(width * 0.03, 6);
+  const transMin = 8; // at least 4 bars visible
+  const runs = [];
+  let rs = -1, rp = 0;
+  for (let y = 0; y < height; y++) {
+    if (rowAct[y] > actMin && rowTrans[y] >= transMin) {
+      if (rs < 0) rs = y;
+      if (rowTrans[y] > rp) rp = rowTrans[y];
+    } else if (rs >= 0) {
+      runs.push({ yStart: rs, yEnd: y - 1, peak: rp, len: y - rs });
+      rs = -1; rp = 0;
+    }
+  }
+  if (rs >= 0) runs.push({ yStart: rs, yEnd: height - 1, peak: rp, len: height - rs });
+  const good = runs.filter(r => r.len >= 6).sort((a,b) => b.len * b.peak - a.len * a.peak);
+  if (good.length === 0) { if (dbg) { dbg.err = 'no_strip'; dbg.runs = runs.length; } return null; }
+  const strip = good[0];
+  const yStart = strip.yStart, yEnd = strip.yEnd;
+
+  // Column activity inside strip rows only
+  const colAct = new Int32Array(width);
+  for (let x = 0; x < width; x++) {
+    let c = 0;
+    for (let y = yStart; y <= yEnd; y++) {
+      const i = px(x, y);
+      if (!isBg(data[i], data[i+1], data[i+2])) c++;
+    }
+    colAct[x] = c;
+  }
+
+  // Horizontal bounds: leftmost/rightmost column with activity
+  const colMin = Math.max((yEnd - yStart + 1) * 0.08, 2);
+  let xStart = -1, xEnd = -1;
+  for (let x = 0; x < width; x++) if (colAct[x] >= colMin) { if (xStart < 0) xStart = x; xEnd = x; }
+  if (xStart < 0 || xEnd - xStart < 40) { if (dbg) dbg.err = 'narrow'; return null; }
+
+  // Validate: real strips have bg gaps between bars (not solid dark blocks)
+  let bgCols = 0;
+  for (let x = xStart; x <= xEnd; x++) if (colAct[x] < 2) bgCols++;
+  const bgRatio = bgCols / (xEnd - xStart + 1);
+  if (bgRatio < 0.15) { if (dbg) { dbg.err = 'solid(bg=' + bgRatio.toFixed(2) + ')'; dbg.yStart = yStart; dbg.yEnd = yEnd; dbg.xStart = xStart; dbg.xEnd = xEnd; } return null; }
+
+  if (dbg) { dbg.yStart = yStart; dbg.yEnd = yEnd; dbg.xStart = xStart; dbg.xEnd = xEnd; dbg.runs = runs.length; dbg.bgRatio = bgRatio; }
+
+  // Step 3: split into N_CELLS
+  const stripW = xEnd - xStart + 1;
+  const cellW = stripW / N_CELLS;
+  const stripH = yEnd - yStart + 1;
+
+  const code = new Array(N_CELLS);
+  let okCells = 0;
+
+  for (let c = 0; c < N_CELLS; c++) {
+    const cx0 = Math.round(xStart + c * cellW);
+    const cx1 = Math.round(xStart + (c + 1) * cellW);
+    let cr = 0, cg = 0, cb = 0, cnt = 0;
+    // Inner 80% vertically to avoid edges
+    const yInset = Math.floor(stripH * 0.1);
+    for (let y = yStart + yInset; y <= yEnd - yInset; y++) {
+      for (let x = cx0; x < cx1; x++) {
+        const i = px(x, y);
+        const r = data[i], g = data[i+1], b = data[i+2];
+        if (!isBg(r, g, b)) { cr += r; cg += g; cb += b; cnt++; }
+      }
+    }
+    if (cnt < 3) { code[c] = -1; continue; }
+    const mr = cr / cnt, mg = cg / cnt, mb = cb / cnt;
+    const colorIdx = rgbToPaletteIdx(mr, mg, mb);
+    const cellArea = (cx1 - cx0) * (stripH - 2 * yInset);
+    const ratio = cnt / cellArea;
+
+    let sizeIdx;
+    if (mode === 'bar') {
+      // Bar widths 6/4/2 in strip-width 17 → ratios ≈ 0.35 / 0.24 / 0.12 of CELL WIDTH
+      // Vertically bar spans most of strip, so area ratio ≈ width ratio
+      if (ratio > 0.27) sizeIdx = 0;
+      else if (ratio > 0.16) sizeIdx = 1;
+      else sizeIdx = 2;
+    } else {
+      // Dot area (πr²) over cell area (17*44) → 0.15 / 0.067 / 0.026
+      if (ratio > 0.095) sizeIdx = 0;
+      else if (ratio > 0.04) sizeIdx = 1;
+      else sizeIdx = 2;
+    }
+
+    code[c] = sizeIdx * 5 + colorIdx;
+    okCells++;
+  }
+
+  if (okCells < N_CELLS - 1) { if (dbg) dbg.err = 'cells(' + okCells + ')'; return null; }
+  for (let c = 0; c < N_CELLS; c++) {
+    if (code[c] < 0) code[c] = c > 0 ? code[c-1] : code[c+1] || 0;
+  }
+  // Variety check: valid strips have multiple distinct symbols.
+  // Reject if any single symbol dominates (typical false-positive: solid dark region decoded as all-same).
+  const freq = {};
+  for (const v of code) freq[v] = (freq[v] || 0) + 1;
+  let maxFreq = 0;
+  for (const k in freq) if (freq[k] > maxFreq) maxFreq = freq[k];
+  if (maxFreq > N_CELLS * 0.55) { if (dbg) dbg.err = 'uniform(' + maxFreq + '/' + N_CELLS + ')'; return null; }
+  return { code, confidence: okCells / N_CELLS };
+}
+
+// ---- Main loop ----
+let lastCode = null;
+let sameCount = 0;
+let paused = false;
+
+function resetDetection() {
+  lastCode = null; sameCount = 0;
+  statusEl.textContent = '12mm 스트립을 프레임 안에 맞춰주세요';
+  debugEl.textContent = '';
+  preview.classList.remove('show');
+}
+
+function loop() {
+  if (paused) return;
+  if (cam.readyState >= 2 && cam.videoWidth > 0) {
+    try {
+      const vW = cam.videoWidth, vH = cam.videoHeight;
+
+      // Scan the FULL frame — decoder finds the strip wherever it is.
+      // Downsample to 640 wide for speed.
+      const TW = 640;
+      const TH = Math.round(TW * vH / vW);
+      work.width = TW; work.height = TH;
+      ctx.drawImage(cam, 0, 0, TW, TH);
+      const img = ctx.getImageData(0, 0, TW, TH);
+
+      const dbg = {};
+      const result = decodeStrip(img, mode, dbg);
+
+      // Preview thumbnail with detected bounds overlay
+      const pw = 220, ph = Math.round(pw * TH / TW);
+      preview.width = pw; preview.height = ph;
+      pctx.drawImage(work, 0, 0, pw, ph);
+      preview.classList.add('show');
+      if (dbg.yStart !== undefined) {
+        const sx = pw / TW, sy = ph / TH;
+        pctx.strokeStyle = result ? '#80ff80' : '#ffaa00';
+        pctx.lineWidth = 2;
+        pctx.strokeRect(dbg.xStart * sx, dbg.yStart * sy,
+                        (dbg.xEnd - dbg.xStart) * sx, (dbg.yEnd - dbg.yStart) * sy);
+      }
+
+      if (result && result.confidence > 0.9) {
+        const key = result.code.join(',');
+        const matchable = !!CATALOG[key];
+        debugEl.textContent = '[' + mode + ' ' + vW + '×' + vH + '] strip ' +
+          (dbg.xEnd - dbg.xStart) + '×' + (dbg.yEnd - dbg.yStart) + 'px · ' +
+          key + (matchable ? '  ✓' : '  (unknown)');
+        if (lastCode === key) {
+          sameCount++;
+          statusEl.textContent = '인식중… ' + Math.min(sameCount, 3) + '/3';
+          if (sameCount >= 3) {
+            onMatch(key);
+            return;
+          }
+        } else {
+          lastCode = key; sameCount = 1;
+        }
+      } else {
+        debugEl.textContent = '[' + vW + '×' + vH + '] ' + (dbg.err || 'no_strip') +
+          (dbg.runs !== undefined ? ' · runs=' + dbg.runs : '');
+        sameCount = Math.max(0, sameCount - 1);
+      }
+    } catch (e) {
+      debugEl.textContent = 'frame err: ' + e.message;
+      console.warn('frame error:', e);
+    }
+  } else {
+    debugEl.textContent = 'waiting for camera (readyState=' + cam.readyState + ', ' + cam.videoWidth + '×' + cam.videoHeight + ')';
+  }
+  requestAnimationFrame(loop);
+}
+
+async function onMatch(codeKey) {
+  paused = true;
+  const product = CATALOG[codeKey];
+  if (!product) {
+    statusEl.textContent = '알 수 없는 코드 — 다른 제품일 수 있음';
+    debugEl.textContent = codeKey;
+    setTimeout(() => { paused = false; resetDetection(); requestAnimationFrame(loop); }, 2400);
+    return;
+  }
+  statusEl.textContent = product.id + ' — 제품 불러오는 중…';
+
+  // Fetch Shopify product JSON to get image
+  let imgUrl = '';
+  try {
+    const resp = await fetch(`${SHOP_BASE}/products/${product.handle}.json`, { cache: 'no-store' });
+    if (resp.ok) {
+      const data = await resp.json();
+      imgUrl = data.product?.images?.[0]?.src || '';
+    }
+  } catch (e) { console.warn('shopify fetch failed:', e); }
+
+  // Display result
+  $('r-badge').className = 'r-badge ' + product.badge.toLowerCase();
+  $('r-badge').textContent = product.badge;
+  $('r-name').textContent = product.id;
+  $('r-sub').textContent = product.sub;
+  $('r-code').textContent = codeKey;
+  $('r-img').src = imgUrl || '';
+  $('r-img').style.display = imgUrl ? '' : 'none';
+  $('r-buy').href = `${SHOP_BASE}/products/${product.handle}`;
+  resultEl.classList.add('show');
+}
+
+$('r-close').addEventListener('click', closeResult);
+$('r-rescan').addEventListener('click', closeResult);
+function closeResult() {
+  resultEl.classList.remove('show');
+  paused = false; resetDetection();
+  requestAnimationFrame(loop);
+}
+
+// ---- Init ----
+if (!('mediaDevices' in navigator)) {
+  showError('이 브라우저는 카메라 API를 지원하지 않습니다.');
+} else {
+  startCam();
+}
+</script>
+</body>
+</html>

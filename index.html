@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Holder AR — acosmeticstory</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{--gold:#c8b89a;--bg:#0a0a0a;--card:rgba(255,255,255,0.04)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -13,7 +14,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 /* ---- Camera ---- */
 #camera-view{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;z-index:0}
 #scan-overlay{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;pointer-events:none}
-#scan-frame{width:220px;height:72px;border:2px solid rgba(200,184,154,0.5);border-radius:10px;position:relative;animation:breathe 2.5s ease-in-out infinite;pointer-events:auto;cursor:pointer}
+#scan-frame{width:260px;height:160px;border:2px solid rgba(200,184,154,0.5);border-radius:10px;position:relative;animation:breathe 2.5s ease-in-out infinite;pointer-events:auto;cursor:pointer}
 @keyframes breathe{0%,100%{transform:scale(1);border-color:rgba(200,184,154,0.35)}50%{transform:scale(1.03);border-color:rgba(200,184,154,0.6)}}
 #scan-label{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:0.7rem;color:rgba(255,255,255,0.5);white-space:nowrap}
 
@@ -84,15 +85,26 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 /* Toast */
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(200,184,154,0.92);color:var(--bg);padding:8px 18px;border-radius:20px;font-size:0.72rem;font-weight:500;opacity:0;transition:all 0.3s;z-index:200;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Barcode reader overrides */
+#barcode-reader video{object-fit:cover!important;border-radius:8px}
+#barcode-reader{background:transparent!important}
+#barcode-reader img[alt="Info icon"]{display:none!important}
+#qr-shaded-region{border-color:rgba(200,184,154,0.4)!important}
+
+/* Manual input */
+#manual-input{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:6px;width:90%;max-width:340px}
+#manual-input input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid rgba(200,184,154,0.3);background:rgba(0,0,0,0.6);color:#fff;font-size:0.8rem;font-family:inherit}
+#manual-input input::placeholder{color:rgba(255,255,255,0.3)}
+#manual-input button{padding:8px 14px;border-radius:8px;border:none;background:var(--gold);color:var(--bg);font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
 
-<video id="camera-view" autoplay playsinline muted></video>
-
 <div id="scan-overlay">
-  <div id="scan-frame" onclick="demoNext()">
-    <div id="scan-label">홀더 패턴에 카메라를 비춰주세요</div>
+  <div id="scan-frame">
+    <div id="barcode-reader" style="width:100%;height:100%;border-radius:8px;overflow:hidden"></div>
+    <div id="scan-label">바코드(GTIN-13)에 카메라를 비춰주세요</div>
   </div>
 </div>
 
@@ -145,6 +157,11 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
   <div id="grid-body"></div>
 </div>
 
+<div id="manual-input">
+  <input id="barcode-input" type="text" placeholder="GTIN-13 또는 Lot 번호 입력" inputmode="numeric">
+  <button onclick="manualLookup()">조회</button>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -154,62 +171,155 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 const CDN = 'https://cdn.shopify.com/s/files/1/0944/0398/5780/files/';
 const SHOP = 'https://www.acosmeticstory.com/products/';
 
+// GTIN-13 → 제품 매핑 테이블
+// 실제 GTIN-13 바코드와 Lot 번호를 여기에 입력하세요
+const gtinMap = {};  // 아래 products 배열에서 자동 생성
+
 const products = [
-  // JU-01 ~ JU-10 — images[2]=without core, images[3]=with core
-  {id:'JU-01',type:'ju',name:'Ju-01',handle:'ju-1',
+  // JU-01 ~ JU-10
+  {id:'JU-01',type:'ju',name:'Ju-01',gtin:'8809912345011',lot:'LOT2026-JU01',handle:'ju-1',
    specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_01__._d0eb1bfc-fd37-4264-b0fc-46eea24ef6e1.png?v=1767162173',CDN+'JU_01__._c7d2fad2-d999-493b-847b-333cfba65f40.png?v=1767162174',CDN+'JU_01-_._9c77b6db-6cda-40ce-9666-0dbd742220a3.png?v=1767162173',CDN+'JU_01-__1._cc565fa5-0da1-42c4-a848-735ad4374a23.png?v=1767162173']},
-  {id:'JU-02',type:'ju',name:'JU-02',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-double-clear-white-inner-%EC%82%AC%EB%B3%B8-1',
+  {id:'JU-02',type:'ju',name:'JU-02',gtin:'8809912345028',lot:'LOT2026-JU02',handle:'ju-double-clear-white-inner-%EC%82%AC%EB%B3%B8-1',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_02__._ee780168-75e0-481c-9a11-c349e5063929.png?v=1767847652',CDN+'JU_02__._fe5f4367-3785-40c0-bb77-3fceb5ff1b12.png?v=1767847652',CDN+'JU_02__-1._e767d943-6a1b-4a10-b6a2-02baccdb5b3b.png?v=1767141761',CDN+'JU_02__._51fc6006-d9bd-419c-8691-32d699c310e4.png?v=1767141761']},
-  {id:'JU-03',type:'ju',name:'JU-03',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-double-matte-clear-cap-white-inner-clear-body-holder-%EC%82%AC%EB%B3%B8',
+  {id:'JU-03',type:'ju',name:'JU-03',gtin:'8809912345035',lot:'LOT2026-JU03',handle:'ju-double-matte-clear-cap-white-inner-clear-body-holder-%EC%82%AC%EB%B3%B8',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_03__._f1f6c5a6-7232-4ca0-b348-1bff23bfcf9c.png?v=1767162320',CDN+'JU_03__._fe52388a-1363-40b0-b23d-2dc33a1f908b.png?v=1767162320',CDN+'JU_03__._3230de13-5017-4890-8880-f4c4abf40494.png?v=1767162320',CDN+'JU_03___1._581ca2e2-0ce6-442e-8787-4f45dfdb1c90.png?v=1767162320']},
-  {id:'JU-04',type:'ju',name:'JU-04',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-05-holder',
+  {id:'JU-04',type:'ju',name:'JU-04',gtin:'8809912345042',lot:'LOT2026-JU04',handle:'ju-05-holder',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_04__._f1f752b1-f227-4dc9-8b24-8b25fae5f513.png?v=1767163219',CDN+'JU_04__._80a38c97-40cb-4c77-88b5-06df3fbbb727.png?v=1767163219',CDN+'JU_04__._a8963268-3846-46d1-a2b9-98fa0a9d5163.png?v=1767163219',CDN+'JU_04___1._7b8044b2-0896-40ff-81e4-540ceeb14fd7.png?v=1767163219']},
-  {id:'JU-05',type:'ju',name:'JU-05',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-09-holder',
+  {id:'JU-05',type:'ju',name:'JU-05',gtin:'8809912345059',lot:'LOT2026-JU05',handle:'ju-09-holder',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_05__._cbbaf14e-0712-4661-92d8-c0e29acaf38f.png?v=1767163322',CDN+'JU_05__._646ab444-010b-4378-ac7c-3ea2214285b2.png?v=1767163322',CDN+'JU_05___1._34b21697-3aa4-40a6-8a0a-7992d93eb2b8.png?v=1767163322']},
-  {id:'JU-06',type:'ju',name:'JU-06',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-11-holder',
+  {id:'JU-06',type:'ju',name:'JU-06',gtin:'8809912345066',lot:'LOT2026-JU06',handle:'ju-11-holder',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_06__._2f30ed7c-fcbd-4051-8b7a-d1cb46a2806c.png?v=1767163386',CDN+'JU_06__._d7034d5f-870a-406d-8e77-e5c5f14bf6e0.png?v=1767163386',CDN+'JU_06__._1832690c-73d7-45c0-b668-fa4663e273a5.png?v=1767163386',CDN+'JU_06___1._dda36fcb-6a0c-483f-a206-3a613df903ea.png?v=1767163386']},
-  {id:'JU-07',type:'ju',name:'JU-07',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-13-holder-1',
+  {id:'JU-07',type:'ju',name:'JU-07',gtin:'8809912345073',lot:'LOT2026-JU07',handle:'ju-13-holder-1',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_07__._f2250aa8-7ec3-431a-961d-95b8cb3ecda0.png?v=1767163424',CDN+'JU_07__._2c50527c-533b-4da9-89c4-d3460906ab46.png?v=1767163424',CDN+'JU_07__._54fc75ac-ec0a-498c-86de-1abc828bc3ae.png?v=1767163424']},
-  {id:'JU-08',type:'ju',name:'JU-08',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-15-holder-%EC%82%AC%EB%B3%B8',
+  {id:'JU-08',type:'ju',name:'JU-08',gtin:'8809912345080',lot:'LOT2026-JU08',handle:'ju-15-holder-%EC%82%AC%EB%B3%B8',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_08__._854428a4-c060-453d-b728-f66ffbbc40c1.png?v=1767163458',CDN+'JU_08__._5b62cc0b-ca12-46b0-a2aa-456a333bc114.png?v=1767163458',CDN+'JU_08__._55c37f8c-c5f1-458e-9927-85fc34055f96.png?v=1767157357']},
-  {id:'JU-09',type:'ju',name:'JU-09',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-16-holder',
+  {id:'JU-09',type:'ju',name:'JU-09',gtin:'8809912345097',lot:'LOT2026-JU09',handle:'ju-16-holder',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_09__._fefff6aa-2e16-4757-a154-6c243b674d5e.png?v=1767164246',CDN+'JU_09__._70a70ea9-de00-4914-a574-9f41e728961a.png?v=1767164246',CDN+'JU_09__._4d0e035a-d459-44f3-a335-620270467cc2.png?v=1767164246']},
-  {id:'JU-10',type:'ju',name:'JU-10',specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'ju-17-holder',
+  {id:'JU-10',type:'ju',name:'JU-10',gtin:'8809912345103',lot:'LOT2026-JU10',handle:'ju-17-holder',
+   specs:{cap:{color:'Silver',opacity:'Solid',finish:'Matte',effect:'Metal'},body:{color:'Dark Brown',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'JU_10__._f7f80804-99ca-43b9-8b63-9bfb923cb08d.png?v=1767164651',CDN+'JU_10__._59f004b4-41c4-40a8-adcf-569a02f68eff.png?v=1767164651',CDN+'JU_10__._325f2a32-6610-44c1-877b-c0961dd98946.png?v=1767141034']},
 
   // SAI-01 ~ SAI-10
-  {id:'SAI-01',type:'sai',name:'SAI15-M01',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m36',
+  {id:'SAI-01',type:'sai',name:'SAI15-M01',gtin:'8809912345110',lot:'LOT2026-SAI01',handle:'sai15-m36',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_1__._582ffc2c-2a4e-4949-b7cd-17965fd76ce1.png?v=1767336255',CDN+'SAInew_1_10_._54e17bff-9584-4bf5-8ab8-32981bbf952f.png?v=1767336255',CDN+'SAInew_1__._be1e4635-684c-4005-9614-9a771ab0641f.png?v=1767336228']},
-  {id:'SAI-02',type:'sai',name:'SAI15-M02',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m35',
+  {id:'SAI-02',type:'sai',name:'SAI15-M02',gtin:'8809912345127',lot:'LOT2026-SAI02',handle:'sai15-m35',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_2__._66af85f6-4c9d-4870-a8fe-ad24f00cc0cf.png?v=1767336659',CDN+'SAInew_2_10_._551ca192-ee0e-4f72-837f-b3c6782d9587.png?v=1767336659',CDN+'SAInew_2__._ca3b3342-c966-4a14-bfda-faccb2ca5b8d.png?v=1767336659']},
-  {id:'SAI-03',type:'sai',name:'SAI15-M03',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m34',
+  {id:'SAI-03',type:'sai',name:'SAI15-M03',gtin:'8809912345134',lot:'LOT2026-SAI03',handle:'sai15-m34',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_3__._3dd7bd4d-844b-4682-a17a-6ebb9b7c27b5.png?v=1767336737',CDN+'SAInew_3_10_._b99f765c-a038-4809-9ee3-82976d0098f7.png?v=1767336737',CDN+'SAInew_3__._b50f4dee-d323-453d-a141-71c53efb1e82.png?v=1767336737']},
-  {id:'SAI-04',type:'sai',name:'SAI15-M04',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m33',
+  {id:'SAI-04',type:'sai',name:'SAI15-M04',gtin:'8809912345141',lot:'LOT2026-SAI04',handle:'sai15-m33',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_4__._23d66e85-6195-40f6-a359-2058a3afd06e.png?v=1767336839',CDN+'SAInew_4_10_._172b1b82-b5a1-4ddd-9f9a-5c4bb03179c1.png?v=1767336839',CDN+'SAInew_4__._509230e9-9415-4c42-9db8-8698d5cd0bad.png?v=1767336839']},
-  {id:'SAI-05',type:'sai',name:'SAI15-M05',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m32',
+  {id:'SAI-05',type:'sai',name:'SAI15-M05',gtin:'8809912345158',lot:'LOT2026-SAI05',handle:'sai15-m32',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_5__._9a24e578-b786-4e74-9ead-3f1eae203686.png?v=1767336905',CDN+'SAInew_5_10_._81acb18c-ffbe-4c38-842a-c7b2cb0d9025.png?v=1767336906',CDN+'SAInew_5__._d914f3e5-d99c-4f61-a114-9e7a4d885f3e.png?v=1767336906']},
-  {id:'SAI-06',type:'sai',name:'SAI15-M06',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m31',
+  {id:'SAI-06',type:'sai',name:'SAI15-M06',gtin:'8809912345165',lot:'LOT2026-SAI06',handle:'sai15-m31',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_6__._7bc1dd70-ba99-4781-8216-11ae324e6350.png?v=1767336984',CDN+'SAInew_6_10_._8e4a7834-93e8-4880-befe-ab8f619e4be8.png?v=1767336984',CDN+'SAInew_6__._a62ae3b2-639b-4e2a-8a37-20cf5177a783.png?v=1767336984']},
-  {id:'SAI-07',type:'sai',name:'SAI15-M07',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m30',
+  {id:'SAI-07',type:'sai',name:'SAI15-M07',gtin:'8809912345172',lot:'LOT2026-SAI07',handle:'sai15-m30',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_7__._0b87063f-753b-4705-b403-6e9470c0912c.png?v=1767337012',CDN+'SAInew_7_10_._d44efbea-8272-422e-9cd9-4e70607fde5f.png?v=1767337013',CDN+'SAInew_7__._338c4174-c777-43a2-b499-5bb3d7a2b0df.png?v=1767337012']},
-  {id:'SAI-08',type:'sai',name:'SAI15-M08',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m29',
+  {id:'SAI-08',type:'sai',name:'SAI15-M08',gtin:'8809912345189',lot:'LOT2026-SAI08',handle:'sai15-m29',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_8__._e9bbee03-87a0-41f4-86f3-e6950814d832.png?v=1767337122',CDN+'SAInew_8_10_._f4c07efe-ba9b-4ea6-bc35-e23da6551886.png?v=1767337122',CDN+'SAInew_8__._13e89d16-ab56-4e19-9b99-56fcdf3524a2.png?v=1767337122']},
-  {id:'SAI-09',type:'sai',name:'SAI15-M09',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m28',
+  {id:'SAI-09',type:'sai',name:'SAI15-M09',gtin:'8809912345196',lot:'LOT2026-SAI09',handle:'sai15-m28',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_10__._909ccd03-9849-44c2-98fc-eaa152d39c85.png?v=1767337262',CDN+'SAInew_10_10_._4f69dae8-5b20-4710-a0ee-6a6cebd2b509.png?v=1767337262',CDN+'SAInew_10__._61f21d6c-f37e-4d0e-b127-5907d3ce6def.png?v=1767337262']},
-  {id:'SAI-10',type:'sai',name:'SAI15-M10',specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},handle:'sai15-m27',
+  {id:'SAI-10',type:'sai',name:'SAI15-M10',gtin:'8809912345202',lot:'LOT2026-SAI10',handle:'sai15-m27',
+   specs:{cap:{color:'Gold',opacity:'Solid',finish:'Glossy',effect:'Metal'},body:{color:'Deep Red',opacity:'Clear',finish:'Glossy',effect:'None'}},
    images:[CDN+'SAInew_11__._bce64a6d-a6c8-4a72-bf6d-7cbd2621ebff.png?v=1767337321',CDN+'SAInew_11_10_._dbcaebc2-e522-41c1-9859-0d56bf6fc01c.png?v=1767337321',CDN+'SAInew_11__._c07217de-5d10-4513-9b65-5e4a7f140e56.png?v=1767337321']}
 ];
 
+// GTIN → 제품 인덱스 매핑 자동 생성
+products.forEach((p, i) => { if (p.gtin) gtinMap[p.gtin] = i; });
+
 // ============================================================
-// CAMERA
+// BARCODE SCANNER
 // ============================================================
-async function startCamera(){
-  try{
-    const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
-    document.getElementById('camera-view').srcObject=s;
-  }catch(e){
-    document.getElementById('scan-label').textContent='카메라 없음 — 탭하여 데모 / 전체 보기';
+let html5QrCode = null;
+let scannerRunning = false;
+
+async function startBarcodeScanner(){
+  try {
+    html5QrCode = new Html5Qrcode('barcode-reader');
+    const config = {
+      fps: 10,
+      qrbox: { width: 240, height: 140 },
+      formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128 ]
+    };
+
+    await html5QrCode.start(
+      { facingMode: 'environment' },
+      config,
+      onBarcodeScanned,
+      () => {} // ignore scan failures
+    );
+    scannerRunning = true;
+    showToast('바코드 스캐너 준비 완료');
+  } catch(e) {
+    console.error('Scanner error:', e);
+    document.getElementById('scan-label').textContent = '카메라 없음 — 전체 보기로 탐색하세요';
+  }
+}
+
+function onBarcodeScanned(decodedText, decodedResult) {
+  const code = decodedText.trim();
+  console.log('Scanned:', code, decodedResult.result.format?.formatName);
+
+  // GTIN-13으로 제품 찾기
+  if (gtinMap[code] !== undefined) {
+    stopScanner();
+    showProduct(gtinMap[code]);
+    showToast('제품 인식: ' + products[gtinMap[code]].name);
+    return;
+  }
+
+  // Lot 번호로 제품 찾기
+  const lotMatch = products.findIndex(p => p.lot === code);
+  if (lotMatch >= 0) {
+    stopScanner();
+    showProduct(lotMatch);
+    showToast('Lot 인식: ' + products[lotMatch].name);
+    return;
+  }
+
+  showToast('등록되지 않은 바코드: ' + code);
+}
+
+async function stopScanner() {
+  if (html5QrCode && scannerRunning) {
+    try { await html5QrCode.stop(); } catch(e) {}
+    scannerRunning = false;
+  }
+}
+
+async function restartScanner() {
+  if (html5QrCode && !scannerRunning) {
+    try {
+      const config = {
+        fps: 10,
+        qrbox: { width: 240, height: 140 },
+        formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128 ]
+      };
+      await html5QrCode.start(
+        { facingMode: 'environment' },
+        config,
+        onBarcodeScanned,
+        () => {}
+      );
+      scannerRunning = true;
+    } catch(e) { console.error('Restart error:', e); }
   }
 }
 
@@ -232,6 +342,24 @@ function showProduct(idx){
   // Specs table
   const tbody=document.querySelector('#p-specs tbody');
   tbody.innerHTML='';
+
+  // GTIN & Lot 정보
+  if(p.gtin||p.lot){
+    const infoRows=[
+      ['GTIN-13', p.gtin||'-'],
+      ['제조번호(Lot)', p.lot||'-']
+    ];
+    infoRows.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML='<th>'+r[0]+'</th><td colspan="2">'+r[1]+'</td>';
+      tbody.appendChild(tr);
+    });
+    // 구분선
+    const sep=document.createElement('tr');
+    sep.innerHTML='<td colspan="3" style="padding:2px;border-bottom:1px solid rgba(200,184,154,0.15)"></td>';
+    tbody.appendChild(sep);
+  }
+
   if(p.specs){
     const s=p.specs;
     const rows=[
@@ -254,6 +382,7 @@ function showProduct(idx){
 
   document.getElementById('info-panel').classList.add('show');
   document.getElementById('scan-overlay').style.display='none';
+  document.getElementById('manual-input').style.display='none';
   if(navigator.vibrate)navigator.vibrate(50);
 }
 
@@ -261,8 +390,8 @@ function hideProduct(){
   currentIdx=-1;
   document.getElementById('info-panel').classList.remove('show');
   document.getElementById('scan-overlay').style.display='flex';
-  scanning=true;
-  scanFrame();
+  document.getElementById('manual-input').style.display='flex';
+  restartScanner();
 }
 
 function buyProduct(){
@@ -271,78 +400,45 @@ function buyProduct(){
 }
 
 // ============================================================
-// PATTERN RECOGNITION
+// (바코드 스캐너는 위에서 정의됨)
 // ============================================================
-const DESC_W=50, DESC_H=15;
-const refDescs=[];
-let scanning=true, scanTimer=null;
 
-function getDesc(data,w,h){
-  const d=new Float32Array(w*h);
-  for(let i=0;i<w*h;i++) d[i]=data[i*4]/255;
-  return d;
+// ============================================================
+// MANUAL BARCODE INPUT
+// ============================================================
+function manualLookup() {
+  const input = document.getElementById('barcode-input');
+  const code = input.value.trim();
+  if (!code) return;
+
+  // GTIN으로 찾기
+  if (gtinMap[code] !== undefined) {
+    stopScanner();
+    showProduct(gtinMap[code]);
+    showToast('제품 인식: ' + products[gtinMap[code]].name);
+    input.value = '';
+    return;
+  }
+
+  // Lot으로 찾기
+  const lotMatch = products.findIndex(p => p.lot === code);
+  if (lotMatch >= 0) {
+    stopScanner();
+    showProduct(lotMatch);
+    showToast('Lot 인식: ' + products[lotMatch].name);
+    input.value = '';
+    return;
+  }
+
+  showToast('등록되지 않은 코드: ' + code);
 }
-function cosine(a,b){
-  let dot=0,na=0,nb=0;
-  for(let i=0;i<a.length;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];}
-  return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-8);
-}
 
-function loadPatternRefs(){
-  const c=document.createElement('canvas');c.width=DESC_W;c.height=DESC_H;
-  const ctx=c.getContext('2d');
-  let loaded=0;
-  const patternFiles=[];
-  for(let i=1;i<=10;i++) patternFiles.push('patterns/JU_'+String(i).padStart(3,'0')+'.png');
-  for(let i=1;i<=10;i++) patternFiles.push('patterns/SAI_'+String(i).padStart(3,'0')+'.png');
-
-  patternFiles.forEach((src,idx)=>{
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{
-      ctx.clearRect(0,0,DESC_W,DESC_H);
-      ctx.drawImage(img,0,0,DESC_W,DESC_H);
-      refDescs[idx]=getDesc(ctx.getImageData(0,0,DESC_W,DESC_H).data,DESC_W,DESC_H);
-      loaded++;
-      if(loaded===patternFiles.length) showToast('패턴 인식 준비 완료');
-    };
-    img.onerror=()=>{loaded++;};
-    img.src=src;
+// Enter 키로 조회
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('barcode-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') manualLookup();
   });
-}
-
-const capC=document.createElement('canvas');capC.width=DESC_W;capC.height=DESC_H;
-const capCtx=capC.getContext('2d');
-
-function scanFrame(){
-  if(!scanning||currentIdx>=0) return;
-  const v=document.getElementById('camera-view');
-  if(!v.srcObject||v.readyState<2){scanTimer=setTimeout(scanFrame,500);return;}
-
-  const vw=v.videoWidth,vh=v.videoHeight;
-  const cropW=vw*0.55,cropH=vh*0.18;
-  capCtx.drawImage(v,(vw-cropW)/2,(vh-cropH)/2,cropW,cropH,0,0,DESC_W,DESC_H);
-
-  const imgD=capCtx.getImageData(0,0,DESC_W,DESC_H);
-  const d=imgD.data;
-  // Grayscale + threshold
-  for(let i=0;i<d.length;i+=4){
-    const g=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
-    d[i]=d[i+1]=d[i+2]=g>128?255:0;
-  }
-  capCtx.putImageData(imgD,0,0);
-  const cap=getDesc(d,DESC_W,DESC_H);
-
-  let bestI=-1,bestS=0;
-  for(let i=0;i<refDescs.length;i++){
-    if(!refDescs[i])continue;
-    const s=cosine(cap,refDescs[i]);
-    if(s>bestS){bestS=s;bestI=i;}
-  }
-  if(bestS>=0.82&&bestI>=0) showProduct(bestI);
-
-  scanTimer=setTimeout(scanFrame,600);
-}
+});
 
 // ============================================================
 // DEMO MODE
@@ -583,9 +679,7 @@ function showToast(msg){
 // INIT
 // ============================================================
 window.addEventListener('DOMContentLoaded',()=>{
-  startCamera();
-  loadPatternRefs();
-  setTimeout(scanFrame,1500);
+  startBarcodeScanner();
 });
 </script>
 </body>

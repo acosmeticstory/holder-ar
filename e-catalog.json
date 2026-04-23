@@ -1,0 +1,41 @@
+{
+  "_comment": "E안 테스트 카탈로그 · EAN-13 및 제품명 → Shopify handle 매핑. 실제 발번 전 테스트용 prefix 880 9999 사용.",
+  "products": [
+    {
+      "ean13": "8809999000013",
+      "name": "Ju NSS.01",
+      "ocrPattern": "Ju\\s*NSS\\.01",
+      "color": "Blue",
+      "structure": "Single Cap · Monomateria",
+      "shopifyHandle": "ju-46",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-46"
+    },
+    {
+      "ean13": "8809999000020",
+      "name": "Ju NSS.02",
+      "ocrPattern": "Ju\\s*NSS\\.02",
+      "color": "Amber",
+      "structure": "Single Cap · Monomateria",
+      "shopifyHandle": "ju-30-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-30-holder"
+    },
+    {
+      "ean13": "8809999000037",
+      "name": "Sai NSS.01",
+      "ocrPattern": "Sai\\s*NSS\\.01",
+      "color": "Clear",
+      "structure": "Dual Cap · Monomateria",
+      "shopifyHandle": "sai15-m36",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36"
+    },
+    {
+      "ean13": "8809999000044",
+      "name": "Sai NSS.02",
+      "ocrPattern": "Sai\\s*NSS\\.02",
+      "color": "Rose",
+      "structure": "Dual Cap · Monomateria",
+      "shopifyHandle": "sai15-m35",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35"
+    }
+  ]
+}
