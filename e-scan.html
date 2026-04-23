@@ -399,7 +399,8 @@ async function showResult(product, via, rawValue) {
   $('rShopTitle').textContent = '';
   $('rShopPrice').textContent = '';
   $('result').classList.add('show');
-  setMini('scan','인식 완료');
+  setText('status','일시정지 — 결과 보는 중','wait');
+  setMini('scan','제품 정보 확인 중 · "다시 스캔"으로 재개');
   navigator.vibrate && navigator.vibrate(80);
 
   const shop = await fetchShopify(product.shopifyHandle);
@@ -485,7 +486,10 @@ async function startBarcode(videoEl) {
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   async function scanLoop() {
     while (!stopped) {
-      if (videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
+      // 결과 카드가 떠 있는 동안은 디코딩 일시정지 (사용자가 제품 내용 볼 시간)
+      // "다시 스캔" 버튼 → dismissResult() → .show 제거되면 자동 재개
+      const paused = $('result').classList.contains('show');
+      if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
         const maxDim = 640;
         const scale = Math.min(1, maxDim / Math.max(videoEl.videoWidth, videoEl.videoHeight));
         canvas.width = Math.round(videoEl.videoWidth * scale);
@@ -522,6 +526,11 @@ async function startBarcode(videoEl) {
   // 1초마다 HUD 업데이트 (debug 모드에서만 표시)
   setInterval(() => {
     if (stopped) return;
+    // 결과 카드 중엔 HUD 갱신도 멈춤 (화면 정보 안정적으로 보이도록)
+    if ($('result').classList.contains('show')) {
+      setText('status','일시정지 — 결과 보는 중','wait');
+      return;
+    }
     const s = window.__zxingStats;
     setText('lastHit',
       `calls:${s.calls} res:${s.results} err:${s.errs} last:${s.lastResult||s.lastErr||'―'}`,
