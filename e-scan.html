@@ -477,18 +477,39 @@ async function startBarcode(videoEl) {
   hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
   zxingReader = new ZXing.BrowserMultiFormatReader(hints, 150);
   setLayer('layer1','active');
+  // 디버그 카운터 — zxing 콜백이 실제로 호출되고 있는지, 결과/에러 비율 확인용
+  window.__zxingStats = { calls: 0, results: 0, errs: 0, lastErr: '', lastResult: '' };
   try {
     // 이미 start된 video element에서 연속 디코드
     zxingReader.decodeFromVideoElement(videoEl, (result, err) => {
       if (stopped) return;
+      window.__zxingStats.calls++;
       if (result) {
+        window.__zxingStats.results++;
         const text = result.getText();
+        window.__zxingStats.lastResult = text;
+        console.log('[zxing] decoded:', text, 'format:', result.getBarcodeFormat());
         const prod = matchByEan(text);
         if (prod) showResult(prod, 'ean', text);
         else setText('lastHit', `EAN · ${text} (미등록)`, 'err');
+      } else if (err) {
+        window.__zxingStats.errs++;
+        const name = err && err.name || 'unknown';
+        window.__zxingStats.lastErr = name;
+        // NotFoundException 은 매 프레임 정상 (바코드 못 찾음). 그 외만 주목.
+        if (name !== 'NotFoundException' && name !== 'NotFoundException2') {
+          console.warn('[zxing] unexpected err:', name, err.message);
+        }
       }
-      // err는 NotFoundException이 계속 발생하는게 정상 (프레임마다 못찾으면 throw)
     });
+    // 1초마다 HUD 에 호출/결과/에러 수치 갱신 (debug 모드에서 보임)
+    setInterval(() => {
+      if (stopped) return;
+      const s = window.__zxingStats;
+      setText('lastHit',
+        `calls:${s.calls} res:${s.results} err:${s.errs} last:${s.lastResult||s.lastErr||'―'}`,
+        s.results ? 'ok' : 'wait');
+    }, 1000);
     setText('status', '스캔 중…', 'ok');
     setLayer('layer1','active');
   } catch(e) {
