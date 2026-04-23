@@ -1,5 +1,5 @@
 {
-  "_comment": "E안 테스트 카탈로그 · EAN-13 및 제품명 → Shopify handle 매핑. 실제 발번 전 테스트용 prefix 880 9999 사용.",
+  "_comment": "Holder AR 바코드-only MVP (2026-04-23) · EAN-13(=GTIN-13) → Shopify handle 매핑. 테스트 prefix 880 9999. ocrPattern 필드는 OCR layer 제거 후에도 후속 복구용으로 보존.",
   "products": [
     {
       "ean13": "8809999000013",
