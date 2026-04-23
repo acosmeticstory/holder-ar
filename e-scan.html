@@ -466,10 +466,13 @@ async function startBarcode(videoEl) {
     showError('zxing 라이브러리 로드 실패', 'CDN 접근 실패. WiFi 연결 확인 후 새로고침.');
     return;
   }
-  // 280423: 오탐 감소를 위해 EAN-13(= GTIN-13) 단일 포맷으로 제한
+  // 2026-04-22 목업에서 검증된 포맷 셋 그대로 복귀 (1종만 주면 어제보다 안 잡히는 현상 있음)
   const hints = new Map();
   hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-    ZXing.BarcodeFormat.EAN_13
+    ZXing.BarcodeFormat.EAN_13,
+    ZXing.BarcodeFormat.EAN_8,
+    ZXing.BarcodeFormat.CODE_128,
+    ZXing.BarcodeFormat.UPC_A
   ]);
   hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
   zxingReader = new ZXing.BrowserMultiFormatReader(hints, 150);
