@@ -1,0 +1,46 @@
+Proprietary License — All Rights Reserved
+
+Copyright (c) 2026 주식회사 텐저블스토리 (TANGIBLESTORY)
+Brand: acosmeticstory
+
+All source code, HTML/CSS/JavaScript, design assets, brand identifiers,
+product imagery, barcode data, catalog JSON, and any other materials
+contained within this repository are the exclusive property of
+주식회사 텐저블스토리 (TANGIBLESTORY).
+
+UNAUTHORIZED USE, REPRODUCTION, MODIFICATION, OR DISTRIBUTION OF ANY
+PORTION OF THIS REPOSITORY, IN WHOLE OR IN PART, IN ANY FORM OR BY
+ANY MEANS, IS STRICTLY PROHIBITED WITHOUT PRIOR WRITTEN PERMISSION
+FROM THE COPYRIGHT HOLDER.
+
+This includes, but is not limited to:
+  - Copying or republishing the source files
+  - Forking the repository for derivative works (other than the
+    GitHub-built-in Fork facility for the purpose of submitting
+    pull requests back to this repository)
+  - Embedding any portion of the code in another website or
+    application
+  - Using the brand name "acosmeticstory" or "tangiblestory" in
+    derivative works
+  - Reusing the catalog data, barcode numbers, or product imagery
+    for any commercial or promotional purpose
+
+Public visibility of this repository on GitHub is for the purposes of:
+  (a) hosting the live web application at
+      <https://acosmeticstory.github.io/holder-ar/> via GitHub Pages,
+  (b) transparency of the technical implementation, and
+  (c) issue tracking and pull-request collaboration with invited
+      contributors.
+
+It does NOT constitute a grant of any rights under copyright,
+trademark, or other intellectual property law.
+
+For permission inquiries, contact: acosmeticstory@gmail.com
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE
+FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holder AR 테스트 라벨 · acosmeticstory (MUJI-style rectangular EAN-13)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR','DM Sans',sans-serif;background:#eeeae0;padding:24px 16px;color:#222}
+.head{max-width:1040px;margin:0 auto 20px;padding:0 8px}
+.head h1{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;margin-bottom:4px;color:#3d5a4c}
+.head p{font-size:13px;color:#666;line-height:1.6}
+.head .hint{margin-top:8px;padding:10px 14px;background:#fff;border-left:3px solid #3d5a4c;border-radius:0 6px 6px 0;font-size:13px;color:#3d5a4c}
+.head .btns{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.head button{padding:8px 14px;font-size:13px;background:#3d5a4c;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:500}
+.head button:hover{background:#2e4538}
+
+.grid{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.box{background:#faf9f6;border:1px solid #d4d0c8;border-radius:4px;padding:22px 24px;min-height:180px;display:flex;gap:16px;align-items:center;position:relative;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.box .tag{position:absolute;top:8px;right:10px;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:1.5px;color:#aaa;font-weight:500}
+.box .left{flex:1;min-width:0}
+.box .brand{font-family:'DM Sans',sans-serif;font-size:11px;color:#8a8578;letter-spacing:.3px;margin-bottom:10px}
+.box .pname{font-family:'DM Sans',sans-serif;font-size:30px;font-weight:300;letter-spacing:.5px;line-height:1;margin-bottom:8px;color:#1a1a1a}
+.box .pname b{font-weight:700}
+.box .pdesc{font-family:'DM Sans',sans-serif;font-size:11px;color:#555;line-height:1.6;margin-bottom:16px}
+.box .bottom{font-family:'DM Sans',sans-serif;font-size:9px;color:#8a8578;letter-spacing:.3px;margin-top:10px}
+.box .bar{margin-top:6px}
+/* 기본 화면 테스트용 50mm (어제 목업 사이즈와 유사). 실물 인쇄는 @media print 에서 25mm 강제. */
+.box .bar svg{display:block;width:var(--bar-w,50mm);height:auto}
+.box .pimg{width:90px;height:90px;flex-shrink:0;border-radius:4px;position:relative;overflow:hidden}
+.box .pimg.blue{background:radial-gradient(circle at 35% 25%,#d0e0ea 0%,#6a9ab5 35%,#2d5068 90%)}
+.box .pimg.amber{background:radial-gradient(circle at 35% 25%,#f5e4b8 0%,#c89843 35%,#7a5a1e 90%)}
+.box .pimg.clear{background:radial-gradient(circle at 35% 25%,#f5f4f0 0%,#c8c6c0 35%,#7a7770 90%)}
+.box .pimg.rose{background:radial-gradient(circle at 35% 25%,#f5dadf 0%,#c47890 35%,#7a3a4e 90%)}
+.box .pimg::before{content:"";position:absolute;bottom:14px;left:14px;right:14px;height:40px;border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;background:linear-gradient(180deg,rgba(255,255,255,0.25) 0%,rgba(0,0,0,0.15) 100%)}
+.box .pimg::after{content:"";position:absolute;bottom:30px;left:28px;width:12px;height:7px;background:rgba(255,255,255,.55);border-radius:50%;filter:blur(1px)}
+
+@media(max-width:720px){
+.grid{grid-template-columns:1fr}
+.box{padding:18px 18px;min-height:150px}
+.box .pname{font-size:26px}
+.box .pimg{width:72px;height:72px}
+/* 모바일에서도 실측 25mm 유지 (CSS mm 기준 고정) */
+}
+
+@media print{
+body{background:#fff;padding:10mm}
+.head{display:none}
+.grid{gap:10mm}
+.box{box-shadow:none;border:1px solid #999;break-inside:avoid;page-break-inside:avoid}
+.box .bar svg{width:25mm !important} /* 인쇄는 항상 실물 25mm */
+}
+
+/* 바 폭 토글 버튼 */
+.size-toggle{display:inline-flex;gap:4px;margin-left:10px;vertical-align:middle}
+.size-toggle button{padding:6px 10px;font-size:12px;background:rgba(255,255,255,.7);color:#3d5a4c;border:1px solid #3d5a4c;border-radius:3px;cursor:pointer;font-weight:500}
+.size-toggle button.active{background:#3d5a4c;color:#fff}
+</style>
+</head>
+<body>
+
+<div class="head">
+<h1>Holder AR · 테스트 라벨 (acosmeticstory)</h1>
+<p>MUJI 헤어 터번 타월 라벨 실측 기준 · EAN-13(=GTIN-13) <b>25mm × 7~8mm</b> · 가드 디센더 제거(flat) · 바 폭·간격·quiet zone 표준 유지 · 4종</p>
+<div class="hint">
+스펙 근거: <code>무인양품 라벨 및 바코드.jpg</code> + <code>280423_EAN-13_바코드_검토_정리.md</code>. 실물 최종 크기는 <b>25mm × 7.5mm</b>.<br>
+<b>화면 테스트</b>에서는 폰 카메라 분해능 한계로 25mm가 판독 불가 → 기본 <b>100mm(4×)</b>로 렌더. 인쇄는 자동으로 실측 25mm로 나감.<br>
+바 폭 변경:
+<span class="size-toggle">
+<button data-w="25mm">25mm (실물)</button>
+<button data-w="50mm" class="active">50mm (2×)</button>
+<button data-w="75mm">75mm (3×)</button>
+<button data-w="100mm">100mm (4×)</button>
+<button data-w="150mm">150mm (6×)</button>
+</span>
+</div>
+<div class="btns">
+<button onclick="window.print()">인쇄 / PDF 저장 (실물 25mm)</button>
+<button onclick="location.href='./index.html?debug=1'">→ E-scan 스캐너 열기</button>
+</div>
+</div>
+
+<div class="grid">
+
+<div class="box">
+<span class="tag">8809999000013</span>
+<div class="left">
+<div class="brand">acosmeticstory</div>
+<div class="pname">Ju <b>NSS.01</b></div>
+<div class="pdesc">Uncoated Finish | Single Cap Structure<br>Monomateria | Color Code 01 · Blue</div>
+<div class="bar"><svg data-ean="8809999000013"></svg></div>
+<div class="bottom">Korean Skincare Chart Holder</div>
+</div>
+<div class="pimg blue"></div>
+</div>
+
+<div class="box">
+<span class="tag">8809999000020</span>
+<div class="left">
+<div class="brand">acosmeticstory</div>
+<div class="pname">Ju <b>NSS.02</b></div>
+<div class="pdesc">Uncoated Finish | Single Cap Structure<br>Monomateria | Color Code 02 · Amber</div>
+<div class="bar"><svg data-ean="8809999000020"></svg></div>
+<div class="bottom">Korean Skincare Chart Holder</div>
+</div>
+<div class="pimg amber"></div>
+</div>
+
+<div class="box">
+<span class="tag">8809999000037</span>
+<div class="left">
+<div class="brand">acosmeticstory</div>
+<div class="pname">Sai <b>NSS.01</b></div>
+<div class="pdesc">Matte Finish | Dual Cap Structure<br>Monomateria | Color Code 03 · Clear</div>
+<div class="bar"><svg data-ean="8809999000037"></svg></div>
+<div class="bottom">Korean Skincare Chart Holder</div>
+</div>
+<div class="pimg clear"></div>
+</div>
+
+<div class="box">
+<span class="tag">8809999000044</span>
+<div class="left">
+<div class="brand">acosmeticstory</div>
+<div class="pname">Sai <b>NSS.02</b></div>
+<div class="pdesc">Matte Finish | Dual Cap Structure<br>Monomateria | Color Code 04 · Rose</div>
+<div class="bar"><svg data-ean="8809999000044"></svg></div>
+<div class="bottom">Korean Skincare Chart Holder</div>
+</div>
+<div class="pimg rose"></div>
+</div>
+
+</div>
+
+<script>
+// JsBarcode 내부 params 는 2026-04-22 검증본 값 유지 (얇게 하면 zxing 판독 실패).
+// 실제 표시 크기·비율은 CSS var(--bar-w) 로만 조절. SVG 는 vector 이므로 scale 무손실.
+// `flat: true` → 가드 디센더 제거 (MUJI 스타일, 바 패턴은 불변 → zxing 판독 영향 X)
+document.querySelectorAll('svg[data-ean]').forEach(svg => {
+  const ean = svg.getAttribute('data-ean');
+  JsBarcode(svg, ean, {
+    format: 'EAN13',
+    flat: true,
+    width: 1.6,
+    height: 44,
+    displayValue: true,
+    fontSize: 11,
+    textMargin: 2,
+    margin: 2,
+    background: '#faf9f6'
+  });
+});
+
+// 바 폭 토글 — --bar-w CSS 변수 갱신
+document.querySelectorAll('.size-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.documentElement.style.setProperty('--bar-w', btn.dataset.w);
+    document.querySelectorAll('.size-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+  });
+});
+</script>
+
+</body>
+</html>
