@@ -393,7 +393,7 @@ async function showResult(product, via, rawValue) {
   $('rVia').textContent = 'EAN-13 / GTIN-13';
   $('rValue').textContent = rawValue;
   $('rName').innerHTML = product.name.replace(/(\w+)\s+(\S+)/, '$1 <b>$2</b>');
-  $('rSub').textContent = `${product.color} · ${product.structure}`;
+  $('rSub').textContent = [product.color, product.structure].filter(Boolean).join(' · ');
   $('rShopLink').href = product.shopifyUrl;
   $('rImg').innerHTML = '<span id="rImgFallback">Shopify 이미지 로드 중…</span>';
   $('rShopTitle').textContent = '';
