@@ -125,16 +125,15 @@ body.debug .mini-status{display:none}
 
 .tab-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 0 calc(20px + env(safe-area-inset-bottom,0)) 0;-webkit-overflow-scrolling:touch}
 .slider-hint{font-size:11.5px;color:rgba(255,255,255,.45);padding:0 20px 10px;font-family:'DM Sans',sans-serif;letter-spacing:.3px}
-.slider{display:flex;gap:12px;padding:0 20px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.slider::-webkit-scrollbar{display:none}
-.product{flex:0 0 160px;scroll-snap-align:start;background:#252525;border-radius:12px;overflow:hidden;text-decoration:none;color:#fff;display:flex;flex-direction:column;transition:transform .2s}
+.slider{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:0 16px 16px}
+.product{background:#252525;border-radius:12px;overflow:hidden;text-decoration:none;color:#fff;display:flex;flex-direction:column;transition:transform .2s}
 .product:active{transform:scale(.96)}
 .product .p-img{width:100%;aspect-ratio:1;background:#333;display:flex;align-items:center;justify-content:center;font-size:11px;color:#666;overflow:hidden}
 .product .p-img img{width:100%;height:100%;object-fit:cover;display:block}
 .product .p-body{padding:10px 11px 12px}
 .product .p-name{font-size:12.5px;font-weight:600;color:#fff;line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px}
 .product .p-price{font-family:'DM Sans',sans-serif;font-size:12px;color:#c8b89a;font-weight:600}
-.product-skeleton{flex:0 0 160px;scroll-snap-align:start;background:#222;border-radius:12px;height:216px;animation:skeleton 1.3s ease-in-out infinite}
+.product-skeleton{background:#222;border-radius:12px;height:180px;animation:skeleton 1.3s ease-in-out infinite}
 @keyframes skeleton{0%,100%{opacity:1}50%{opacity:.5}}
 
 .tab-empty{padding:40px 20px;text-align:center;color:rgba(255,255,255,.5);font-size:13px;line-height:1.7}
@@ -230,7 +229,6 @@ body.debug .mini-status{display:none}
 <button class="tab" data-handle="sai">Sai<span class="count" id="saiCount"></span></button>
 </div>
 <div class="tab-content">
-<div class="slider-hint">← 좌우로 스와이프하여 둘러보기 →</div>
 <div class="slider" id="slider"></div>
 </div>
 </div>
@@ -484,17 +482,37 @@ async function startBarcode(videoEl) {
   // HTMLCanvasElementLuminanceSource → HybridBinarizer → BinaryBitmap
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  // reticle 영역만 video 좌표로 환산 → ZXing 에 그 영역만 전달
+  // video 는 object-fit:cover 로 화면을 덮으므로 vw/vh ↔ cssWidth/cssHeight 매핑 필요
+  function getReticleVideoRect() {
+    const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
+    const cw = window.innerWidth, ch = window.innerHeight;
+    const reticleEl = document.querySelector('.reticle');
+    if (!reticleEl) return { x:0, y:0, w:vw, h:vh };
+    const r = reticleEl.getBoundingClientRect();
+    const scale = Math.max(cw / vw, ch / vh); // object-fit: cover
+    const dispW = vw * scale, dispH = vh * scale;
+    const offX = (cw - dispW) / 2, offY = (ch - dispH) / 2;
+    // 약간의 여유(8px) 두고 환산
+    const pad = 8;
+    const x = Math.max(0, Math.round((r.left - offX - pad) / scale));
+    const y = Math.max(0, Math.round((r.top - offY - pad) / scale));
+    const w = Math.min(vw - x, Math.round((r.width + pad*2) / scale));
+    const h = Math.min(vh - y, Math.round((r.height + pad*2) / scale));
+    return { x, y, w, h };
+  }
   async function scanLoop() {
     while (!stopped) {
       // 결과 카드가 떠 있는 동안은 디코딩 일시정지 (사용자가 제품 내용 볼 시간)
       // "다시 스캔" 버튼 → dismissResult() → .show 제거되면 자동 재개
       const paused = $('result').classList.contains('show');
       if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
+        const rect = getReticleVideoRect();
         const maxDim = 640;
-        const scale = Math.min(1, maxDim / Math.max(videoEl.videoWidth, videoEl.videoHeight));
-        canvas.width = Math.round(videoEl.videoWidth * scale);
-        canvas.height = Math.round(videoEl.videoHeight * scale);
-        ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        const scale = Math.min(1, maxDim / Math.max(rect.w, rect.h));
+        canvas.width = Math.round(rect.w * scale);
+        canvas.height = Math.round(rect.h * scale);
+        ctx.drawImage(videoEl, rect.x, rect.y, rect.w, rect.h, 0, 0, canvas.width, canvas.height);
         window.__zxingStats.calls++;
         try {
           const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
@@ -605,10 +623,15 @@ boot();
 // ===== 9. 컬렉션 패널 =====
 const SHOPIFY_BASE = 'https://www.acosmeticstory.com';
 const COLLECTIONS = ['ju','sai'];
-const COLLECTION_LIMIT = 10;
+const COLLECTION_LIMIT = 250; // Shopify products.json max
 const collectionCache = {}; // handle -> products[]
 let currentTab = 'ju';
 let collectionLoading = false;
+
+function shopifyThumb(url, w) {
+  if (!url) return url;
+  return url + (url.includes('?') ? '&' : '?') + 'width=' + w;
+}
 
 async function fetchCollection(handle) {
   if (collectionCache[handle]) return collectionCache[handle];
@@ -616,7 +639,7 @@ async function fetchCollection(handle) {
   const r = await fetch(url);
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const d = await r.json();
-  const products = (d.products || []).slice(0, COLLECTION_LIMIT).map(p => ({
+  const products = (d.products || []).map(p => ({
     handle: p.handle,
     title: p.title,
     image: (p.images && p.images[0] && p.images[0].src) || '',
@@ -635,7 +658,7 @@ function renderSlider(products) {
   }
   const html = products.map(p => `
     <a class="product" href="${p.url}" target="_blank" rel="noopener">
-      <div class="p-img">${p.image ? `<img src="${p.image}" alt="" loading="lazy">` : '이미지 없음'}</div>
+      <div class="p-img">${p.image ? `<img src="${shopifyThumb(p.image,300)}" alt="" loading="lazy" decoding="async">` : '이미지 없음'}</div>
       <div class="p-body">
         <div class="p-name">${escapeHtml(p.title)}</div>
         ${p.price ? `<div class="p-price">₩${Number(p.price).toLocaleString()}</div>` : ''}
