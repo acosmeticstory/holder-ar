@@ -9,34 +9,50 @@
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:16px;background:#f5f5f5;color:#111}
   h1{margin:0 0 4px;font-size:18px}
   .meta{font-size:12px;color:#666;margin-bottom:16px}
-  .toolbar{position:sticky;top:0;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar{position:sticky;top:0;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:5}
   .toolbar button{padding:6px 12px;border:1px solid #888;background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
   .toolbar button:hover{background:#eee}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;text-align:center;page-break-inside:avoid;break-inside:avoid}
-  .card .name{font-weight:600;font-size:14px;margin:0 0 6px}
-  .card .handle{font-size:10px;color:#888;margin-bottom:8px;font-family:monospace}
-  .card svg{width:100%;height:80px;display:block}
-  .card .ean{font-family:monospace;font-size:11px;color:#444;margin-top:4px;letter-spacing:1px}
+  .toolbar .size-btn.active{background:#111;color:#fff;border-color:#111}
+  .toolbar .sep{width:1px;height:20px;background:#ddd;margin:0 4px}
+  .grid{display:grid;gap:12px}
+  .card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 8px;text-align:center;page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;align-items:center}
+  .card .name{font-weight:600;font-size:13px;margin:0 0 4px}
+  .card .handle{font-size:9px;color:#888;margin-bottom:6px;font-family:monospace}
+  .card svg{display:block;height:auto}
+  .card .ean{font-family:monospace;font-size:10px;color:#444;margin-top:3px;letter-spacing:0.5px}
+
+  /* 가로 폭 모드 — bar 영역 자체의 물리 폭. 인쇄·실측 일관성 위해 mm 단위 */
+  body.size-20 .grid{grid-template-columns:repeat(auto-fill,minmax(34mm,1fr))}
+  body.size-20 .card svg{width:20mm}
+  body.size-30 .grid{grid-template-columns:repeat(auto-fill,minmax(44mm,1fr))}
+  body.size-30 .card svg{width:30mm}
+  body.size-40 .grid{grid-template-columns:repeat(auto-fill,minmax(56mm,1fr))}
+  body.size-40 .card svg{width:40mm}
+  body.size-fill .grid{grid-template-columns:repeat(3,1fr)}
+  body.size-fill .card svg{width:100%;height:80px}
+
   @media print{
     body{background:#fff;padding:6mm}
     .toolbar,.meta,h1{display:none}
-    .grid{grid-template-columns:repeat(3,1fr);gap:6mm}
-    .card{border:1px dashed #ccc;padding:6mm 4mm}
-    .card svg{height:18mm}
+    .card{border:1px dashed #ccc;padding:4mm 3mm}
+    .card .handle{display:none}
   }
 </style>
 </head>
-<body>
+<body class="size-30">
 <h1>Holder AR · EAN-13 테스트 시트 (Ju 50종)</h1>
-<div class="meta">JsBarcode 3.11.5 / catalog.json 로드 / GS1 Korea prefix 8800353 / 2026-05-11</div>
+<div class="meta">JsBarcode 3.11.5 / catalog.json 로드 / GS1 Korea prefix 8800353 / 가로 폭은 bar 영역 기준 (quiet zone 별도)</div>
 <div class="toolbar">
   <button onclick="window.print()">인쇄 / PDF 저장</button>
-  <button onclick="document.body.classList.toggle('big')">큰 사이즈 토글</button>
-  <span style="font-size:12px;color:#666">A4 3열 그리드 · 스마트폰 카메라 스캔 가능한 크기</span>
+  <span class="sep"></span>
+  <span style="font-size:12px;color:#666">가로 폭:</span>
+  <button class="size-btn" data-size="20">20mm</button>
+  <button class="size-btn active" data-size="30">30mm</button>
+  <button class="size-btn" data-size="40">40mm</button>
+  <button class="size-btn" data-size="fill">화면 채우기</button>
+  <span style="font-size:11px;color:#888;margin-left:auto">권장: 30mm 이상 (GS1 80%~) · 20mm 는 한계 테스트용</span>
 </div>
 <div class="grid" id="grid"></div>
-<style id="big-style">body.big .grid{grid-template-columns:repeat(2,1fr)} body.big .card svg{height:120px}</style>
 <script>
 (async () => {
   const res = await fetch('./catalog.json',{cache:'no-store'});
@@ -52,12 +68,25 @@
       <div class="ean">${p.ean13}</div>
     `;
     grid.appendChild(card);
-    JsBarcode(card.querySelector('svg'), p.ean13, {
+    const svg = card.querySelector('svg');
+    JsBarcode(svg, p.ean13, {
       format: 'EAN13',
       width: 2,
       height: 60,
       displayValue: false,
       margin: 4
+    });
+    // 폭을 CSS(mm) 로 제어할 수 있도록 inline width/height 제거 → viewBox 만 유지
+    svg.removeAttribute('width');
+    svg.removeAttribute('height');
+  });
+
+  // 사이즈 토글
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.size;
+      document.body.className = 'size-' + s;
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
     });
   });
 })();
