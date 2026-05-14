@@ -94,6 +94,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 
 /* ===== MVP UI ===== */
 /* 제품 보기 버튼 (X 자리) */
+.top-actions{display:flex;align-items:center;gap:8px}
+.lang-select{height:32px;max-width:96px;padding:0 24px 0 10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;border-radius:16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.lang-select option{background:#1a1a1a;color:#fff}
 .browse-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;border-radius:20px;cursor:pointer;font-family:'Noto Sans KR','DM Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:.3px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .browse-btn:active{background:rgba(255,255,255,.22)}
 .browse-btn svg{width:14px;height:14px;opacity:.9}
@@ -149,24 +152,38 @@ body.debug .mini-status{display:none}
 <video id="video" autoplay playsinline muted></video>
 
 <div class="reticle"><i></i><em></em></div>
-<div class="reticle-hint">제품의 바코드를 박스 안에 비춰주세요</div>
+<div class="reticle-hint" data-i18n="scanPrompt">제품의 바코드를 박스 안에 비춰주세요</div>
 <div class="focus-ring" id="focusRing"></div>
 
 <div class="topbar">
 <div class="topbar-inner">
 <div class="brand">
-<img class="logo" src="./logo.png" alt="acosmeticstory">
+<img class="logo" src="./acosmeticstory%20white%20logo.png" alt="acosmeticstory">
 <span class="tag">Holder</span>
 </div>
+<div class="top-actions">
+<select class="lang-select" id="langSelect" aria-label="Language">
+<option value="ko">KO</option>
+<option value="en">EN</option>
+<option value="ja">JA</option>
+<option value="zh-CN">简中</option>
+<option value="zh-TW">繁中</option>
+<option value="id">ID</option>
+<option value="bn">BN</option>
+<option value="ar">AR</option>
+<option value="fr">FR</option>
+<option value="de">DE</option>
+</select>
 <button class="browse-btn" id="browseBtn" aria-label="제품 보기">
 <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-<span>제품 보기</span>
+<span data-i18n="browseProducts">제품 보기</span>
 </button>
+</div>
 </div>
 </div>
 
 <!-- 소비자용 미니 상태 -->
-<div class="mini-status" id="miniStatus"><span class="dot"></span><span id="miniStatusText">페이지 로드 중…</span></div>
+<div class="mini-status" id="miniStatus"><span class="dot"></span><span id="miniStatusText" data-i18n="pageLoading">페이지 로드 중…</span></div>
 
 <!-- 디버그 모드(?debug=1)에서만 표시 -->
 <div class="hud debug-only">
@@ -196,32 +213,32 @@ body.debug .mini-status{display:none}
 <div class="value" id="rValue">―</div>
 <h2 id="rName">―</h2>
 <div class="sub" id="rSub">―</div>
-<div class="shopify-img" id="rImg"><span id="rImgFallback">Shopify 이미지 로드 중…</span></div>
+<div class="shopify-img" id="rImg"><span id="rImgFallback" data-i18n="loadingImage">Shopify 이미지 로드 중…</span></div>
 <div class="shopify-title" id="rShopTitle"></div>
 <div class="shopify-price" id="rShopPrice"></div>
 <div class="btns">
-<button class="btn-secondary" onclick="dismissResult()">다시 스캔</button>
-<a class="btn-primary" id="rShopLink" target="_blank" rel="noopener">제품 페이지 →</a>
+<button class="btn-secondary" onclick="dismissResult()" data-i18n="scanAgain">다시 스캔</button>
+<a class="btn-primary" id="rShopLink" target="_blank" rel="noopener" data-i18n="productPage">제품 페이지 →</a>
 </div>
 </div>
 </div>
 
 <div class="err-overlay" id="errOverlay">
 <div class="card">
-<h3 id="errTitle">오류</h3>
+<h3 id="errTitle" data-i18n="errorTitle">오류</h3>
 <p id="errMsg">―</p>
-<p style="margin-top:12px;font-size:11px;opacity:.7">HTTPS 필수. 같은 WiFi에서 접근하면서 자체 서명 인증서 경고는 "고급 → 이동"으로 수락하세요.</p>
+<p style="margin-top:12px;font-size:11px;opacity:.7" data-i18n="httpsNote">HTTPS 필수. 같은 WiFi에서 접근하면서 자체 서명 인증서 경고는 "고급 → 이동"으로 수락하세요.</p>
 <div style="margin-top:16px;display:flex;gap:8px">
-<button onclick="location.reload()" style="flex:1;padding:10px;background:#3d5a4c;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer">새로고침</button>
-<button onclick="document.getElementById('errOverlay').classList.remove('show')" style="flex:1;padding:10px;background:#333;color:#ccc;border:none;border-radius:6px;cursor:pointer">닫기</button>
+<button onclick="location.reload()" style="flex:1;padding:10px;background:#3d5a4c;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer" data-i18n="reload">새로고침</button>
+<button onclick="document.getElementById('errOverlay').classList.remove('show')" style="flex:1;padding:10px;background:#333;color:#ccc;border:none;border-radius:6px;cursor:pointer" data-i18n="close">닫기</button>
 </div>
 </div>
 </div>
 
 <!-- 카메라 자동 시작 실패 시 수동 시작 버튼 -->
 <div id="tapStart" style="display:none;position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.88);align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center">
-<div style="font-size:15px;color:#c8b89a;margin-bottom:14px;line-height:1.6">iOS/Safari는 사용자 탭 후<br>카메라를 시작할 수 있어요</div>
-<button id="tapStartBtn" style="padding:14px 28px;font-size:15px;background:#3d5a4c;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">탭하여 카메라 시작</button>
+<div style="font-size:15px;color:#c8b89a;margin-bottom:14px;line-height:1.6" data-i18n-html="tapStartHint">iOS/Safari는 사용자 탭 후<br>카메라를 시작할 수 있어요</div>
+<button id="tapStartBtn" style="padding:14px 28px;font-size:15px;background:#3d5a4c;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer" data-i18n="tapStartButton">탭하여 카메라 시작</button>
 </div>
 
 <!-- 컬렉션 바텀시트 -->
@@ -229,7 +246,7 @@ body.debug .mini-status{display:none}
 <div class="collection" id="collection" role="dialog" aria-label="제품 컬렉션">
 <div class="collection-grab"><span></span></div>
 <div class="collection-head">
-<h3>Holder 제품</h3>
+<h3 data-i18n="holderProducts">Holder 제품</h3>
 <button class="close-c" id="closeCollection" aria-label="닫기">×</button>
 </div>
 <div class="tabs">
@@ -242,6 +259,162 @@ body.debug .mini-status{display:none}
 </div>
 
 <script>
+// ===== Localization =====
+const I18N = {
+  ko: {
+    title:'Holder AR 스캐너 · EAN-13', scanPrompt:'제품의 바코드를 박스 안에 비춰주세요', browseProducts:'제품 보기', pageLoading:'페이지 로드 중…',
+    scriptStart:'스크립트 시작…', cameraPreparing:'카메라 준비 중…', connectionError:'연결 오류', loadingCatalog:'카탈로그 로드 중…',
+    requestingCamera:'카메라 준비 중…', startingDecoder:'바코드 디코더 시작…', scanning:'스캔 중…', viewingProduct:'제품 정보 확인 중 · "다시 스캔"으로 재개',
+    scanAgain:'다시 스캔', productPage:'제품 페이지 →', errorTitle:'오류', httpsNote:'HTTPS 필수. 같은 WiFi에서 접근하면서 자체 서명 인증서 경고는 "고급 → 이동"으로 수락하세요.',
+    reload:'새로고침', close:'닫기', tapStartHint:'iOS/Safari는 사용자 탭 후<br>카메라를 시작할 수 있어요', tapStartButton:'탭하여 카메라 시작',
+    holderProducts:'Holder 제품', productCollectionAria:'제품 컬렉션', loadingImage:'Shopify 이미지 로드 중…', noImage:'이미지 없음', shopifyFailed:'Shopify 연결 실패',
+    emptyCollection:'이 컬렉션에 표시할 제품이 없습니다.', retry:'다시 시도', collectionLoadFailed:'컬렉션 로드 실패',
+    catalogLoadFailed:'카탈로그 로드 실패', cameraStartFailed:'카메라 시작 실패', unknownError:'알 수 없는 오류', cameraErrorShort:'카메라 오류',
+    cameraChecklist:'체크:\n① HTTPS 경고를 수락했는지\n② 주소창 자물쇠 → 카메라 권한 "허용"\n③ 다른 앱이 카메라를 사용 중이지 않은지\n④ 페이지 새로고침',
+    tapRequired:'탭하여 시작 필요', refocusing:'초점 다시 맞추는 중…'
+  },
+  en: {
+    title:'Holder AR Scanner · EAN-13', scanPrompt:'Place the product barcode inside the box', browseProducts:'Products', pageLoading:'Loading page…',
+    scriptStart:'Starting script…', cameraPreparing:'Preparing camera…', connectionError:'Connection error', loadingCatalog:'Loading catalog…',
+    requestingCamera:'Preparing camera…', startingDecoder:'Starting barcode decoder…', scanning:'Scanning…', viewingProduct:'Checking product · use "Scan again" to resume',
+    scanAgain:'Scan again', productPage:'Product page →', errorTitle:'Error', httpsNote:'HTTPS is required. On the same Wi-Fi, accept the self-signed certificate warning from Advanced → Proceed.',
+    reload:'Reload', close:'Close', tapStartHint:'iOS/Safari may need a tap<br>before starting the camera', tapStartButton:'Tap to start camera',
+    holderProducts:'Holder Products', productCollectionAria:'Product collection', loadingImage:'Loading Shopify image…', noImage:'No image', shopifyFailed:'Shopify connection failed',
+    emptyCollection:'No products to show in this collection.', retry:'Retry', collectionLoadFailed:'Failed to load collection',
+    catalogLoadFailed:'Failed to load catalog', cameraStartFailed:'Failed to start camera', unknownError:'Unknown error', cameraErrorShort:'Camera error',
+    cameraChecklist:'Check:\n1. HTTPS warning accepted\n2. Address bar lock → Camera permission allowed\n3. No other app is using the camera\n4. Reload the page',
+    tapRequired:'Tap required to start', refocusing:'Refocusing…'
+  },
+  ja: {
+    title:'Holder ARスキャナー · EAN-13', scanPrompt:'商品のバーコードを枠内に合わせてください', browseProducts:'商品を見る', pageLoading:'ページを読み込み中…',
+    scriptStart:'スクリプト開始…', cameraPreparing:'カメラを準備中…', connectionError:'接続エラー', loadingCatalog:'カタログを読み込み中…',
+    requestingCamera:'カメラを準備中…', startingDecoder:'バーコードデコーダーを開始中…', scanning:'スキャン中…', viewingProduct:'商品情報を確認中 · 「再スキャン」で再開',
+    scanAgain:'再スキャン', productPage:'商品ページ →', errorTitle:'エラー', httpsNote:'HTTPSが必要です。同じWi-Fiでアクセスし、自己署名証明書の警告は「詳細 → 続行」で許可してください。',
+    reload:'再読み込み', close:'閉じる', tapStartHint:'iOS/Safariではタップ後に<br>カメラを開始できます', tapStartButton:'タップしてカメラ開始',
+    holderProducts:'Holder商品', productCollectionAria:'商品コレクション', loadingImage:'Shopify画像を読み込み中…', noImage:'画像なし', shopifyFailed:'Shopify接続失敗',
+    emptyCollection:'このコレクションに表示する商品がありません。', retry:'再試行', collectionLoadFailed:'コレクションの読み込みに失敗',
+    catalogLoadFailed:'カタログの読み込みに失敗', cameraStartFailed:'カメラの開始に失敗', unknownError:'不明なエラー', cameraErrorShort:'カメラエラー',
+    cameraChecklist:'確認:\n1. HTTPS警告を許可したか\n2. アドレスバーの鍵 → カメラ許可\n3. 他のアプリがカメラを使用していないか\n4. ページを再読み込み',
+    tapRequired:'開始にはタップが必要です', refocusing:'再フォーカス中…'
+  },
+  'zh-CN': {
+    title:'Holder AR 扫描器 · EAN-13', scanPrompt:'请将产品条形码对准框内', browseProducts:'查看产品', pageLoading:'页面加载中…',
+    scriptStart:'脚本启动中…', cameraPreparing:'正在准备相机…', connectionError:'连接错误', loadingCatalog:'目录加载中…',
+    requestingCamera:'正在准备相机…', startingDecoder:'正在启动条码解码器…', scanning:'扫描中…', viewingProduct:'正在确认产品 · 点击“重新扫描”继续',
+    scanAgain:'重新扫描', productPage:'产品页面 →', errorTitle:'错误', httpsNote:'需要 HTTPS。同一 Wi-Fi 下访问时，请在自签名证书警告中选择“高级 → 继续”。',
+    reload:'刷新', close:'关闭', tapStartHint:'iOS/Safari 可能需要点击后<br>才能启动相机', tapStartButton:'点击启动相机',
+    holderProducts:'Holder 产品', productCollectionAria:'产品集合', loadingImage:'正在加载 Shopify 图片…', noImage:'无图片', shopifyFailed:'Shopify 连接失败',
+    emptyCollection:'此集合中没有可显示的产品。', retry:'重试', collectionLoadFailed:'集合加载失败',
+    catalogLoadFailed:'目录加载失败', cameraStartFailed:'相机启动失败', unknownError:'未知错误', cameraErrorShort:'相机错误',
+    cameraChecklist:'请检查:\n1. 是否已接受 HTTPS 警告\n2. 地址栏锁图标 → 允许相机权限\n3. 没有其他应用正在使用相机\n4. 刷新页面',
+    tapRequired:'需要点击才能启动', refocusing:'正在重新对焦…'
+  },
+  'zh-TW': {
+    title:'Holder AR 掃描器 · EAN-13', scanPrompt:'請將產品條碼對準框內', browseProducts:'查看產品', pageLoading:'頁面載入中…',
+    scriptStart:'腳本啟動中…', cameraPreparing:'正在準備相機…', connectionError:'連線錯誤', loadingCatalog:'目錄載入中…',
+    requestingCamera:'正在準備相機…', startingDecoder:'正在啟動條碼解碼器…', scanning:'掃描中…', viewingProduct:'正在確認產品 · 點選「重新掃描」繼續',
+    scanAgain:'重新掃描', productPage:'產品頁面 →', errorTitle:'錯誤', httpsNote:'需要 HTTPS。同一 Wi-Fi 下存取時，請在自簽憑證警告中選擇「進階 → 繼續」。',
+    reload:'重新整理', close:'關閉', tapStartHint:'iOS/Safari 可能需要點一下後<br>才能啟動相機', tapStartButton:'點一下啟動相機',
+    holderProducts:'Holder 產品', productCollectionAria:'產品集合', loadingImage:'正在載入 Shopify 圖片…', noImage:'無圖片', shopifyFailed:'Shopify 連線失敗',
+    emptyCollection:'此集合沒有可顯示的產品。', retry:'重試', collectionLoadFailed:'集合載入失敗',
+    catalogLoadFailed:'目錄載入失敗', cameraStartFailed:'相機啟動失敗', unknownError:'未知錯誤', cameraErrorShort:'相機錯誤',
+    cameraChecklist:'請確認:\n1. 已接受 HTTPS 警告\n2. 位址列鎖頭 → 允許相機權限\n3. 沒有其他 App 正在使用相機\n4. 重新整理頁面',
+    tapRequired:'需要點一下才能啟動', refocusing:'正在重新對焦…'
+  },
+  id: {
+    title:'Pemindai Holder AR · EAN-13', scanPrompt:'Arahkan barcode produk ke dalam kotak', browseProducts:'Produk', pageLoading:'Memuat halaman…',
+    scriptStart:'Memulai skrip…', cameraPreparing:'Menyiapkan kamera…', connectionError:'Kesalahan koneksi', loadingCatalog:'Memuat katalog…',
+    requestingCamera:'Menyiapkan kamera…', startingDecoder:'Memulai pembaca barcode…', scanning:'Memindai…', viewingProduct:'Memeriksa produk · gunakan "Pindai lagi" untuk lanjut',
+    scanAgain:'Pindai lagi', productPage:'Halaman produk →', errorTitle:'Kesalahan', httpsNote:'HTTPS wajib. Saat memakai Wi-Fi yang sama, terima peringatan sertifikat melalui Advanced → Proceed.',
+    reload:'Muat ulang', close:'Tutup', tapStartHint:'iOS/Safari mungkin perlu diketuk<br>sebelum kamera dimulai', tapStartButton:'Ketuk untuk mulai kamera',
+    holderProducts:'Produk Holder', productCollectionAria:'Koleksi produk', loadingImage:'Memuat gambar Shopify…', noImage:'Tidak ada gambar', shopifyFailed:'Koneksi Shopify gagal',
+    emptyCollection:'Tidak ada produk untuk ditampilkan di koleksi ini.', retry:'Coba lagi', collectionLoadFailed:'Gagal memuat koleksi',
+    catalogLoadFailed:'Gagal memuat katalog', cameraStartFailed:'Gagal memulai kamera', unknownError:'Kesalahan tidak diketahui', cameraErrorShort:'Kesalahan kamera',
+    cameraChecklist:'Periksa:\n1. Peringatan HTTPS sudah diterima\n2. Ikon gembok alamat → izin kamera diizinkan\n3. Tidak ada aplikasi lain memakai kamera\n4. Muat ulang halaman',
+    tapRequired:'Ketuk untuk memulai', refocusing:'Memfokus ulang…'
+  },
+  bn: {
+    title:'Holder AR স্ক্যানার · EAN-13', scanPrompt:'পণ্যের বারকোডটি বক্সের ভিতরে ধরুন', browseProducts:'পণ্য দেখুন', pageLoading:'পৃষ্ঠা লোড হচ্ছে…',
+    scriptStart:'স্ক্রিপ্ট শুরু হচ্ছে…', cameraPreparing:'ক্যামেরা প্রস্তুত হচ্ছে…', connectionError:'সংযোগ ত্রুটি', loadingCatalog:'ক্যাটালগ লোড হচ্ছে…',
+    requestingCamera:'ক্যামেরা প্রস্তুত হচ্ছে…', startingDecoder:'বারকোড ডিকোডার শুরু হচ্ছে…', scanning:'স্ক্যান হচ্ছে…', viewingProduct:'পণ্য যাচাই হচ্ছে · আবার স্ক্যান করতে "Scan again"',
+    scanAgain:'আবার স্ক্যান', productPage:'পণ্য পৃষ্ঠা →', errorTitle:'ত্রুটি', httpsNote:'HTTPS প্রয়োজন। একই Wi-Fi ব্যবহার করলে self-signed certificate সতর্কতায় Advanced → Proceed নির্বাচন করুন।',
+    reload:'রিলোড', close:'বন্ধ', tapStartHint:'iOS/Safari-তে ক্যামেরা শুরু করার আগে<br>ট্যাপ লাগতে পারে', tapStartButton:'ক্যামেরা শুরু করতে ট্যাপ করুন',
+    holderProducts:'Holder পণ্য', productCollectionAria:'পণ্য সংগ্রহ', loadingImage:'Shopify ছবি লোড হচ্ছে…', noImage:'ছবি নেই', shopifyFailed:'Shopify সংযোগ ব্যর্থ',
+    emptyCollection:'এই সংগ্রহে দেখানোর মতো পণ্য নেই।', retry:'আবার চেষ্টা', collectionLoadFailed:'সংগ্রহ লোড ব্যর্থ',
+    catalogLoadFailed:'ক্যাটালগ লোড ব্যর্থ', cameraStartFailed:'ক্যামেরা শুরু ব্যর্থ', unknownError:'অজানা ত্রুটি', cameraErrorShort:'ক্যামেরা ত্রুটি',
+    cameraChecklist:'পরীক্ষা করুন:\n1. HTTPS সতর্কতা গ্রহণ করেছেন\n2. address bar lock → camera permission allowed\n3. অন্য অ্যাপ ক্যামেরা ব্যবহার করছে না\n4. পৃষ্ঠা রিলোড করুন',
+    tapRequired:'শুরু করতে ট্যাপ প্রয়োজন', refocusing:'ফোকাস আবার করা হচ্ছে…'
+  },
+  ar: {
+    title:'ماسح Holder AR · EAN-13', scanPrompt:'ضع باركود المنتج داخل الإطار', browseProducts:'المنتجات', pageLoading:'جاري تحميل الصفحة…',
+    scriptStart:'جاري بدء السكربت…', cameraPreparing:'جاري تجهيز الكاميرا…', connectionError:'خطأ في الاتصال', loadingCatalog:'جاري تحميل الكتالوج…',
+    requestingCamera:'جاري تجهيز الكاميرا…', startingDecoder:'جاري بدء قارئ الباركود…', scanning:'جاري المسح…', viewingProduct:'جاري التحقق من المنتج · استخدم "المسح مرة أخرى" للمتابعة',
+    scanAgain:'المسح مرة أخرى', productPage:'صفحة المنتج →', errorTitle:'خطأ', httpsNote:'يتطلب HTTPS. عند الاتصال بنفس شبكة Wi‑Fi، اقبل تحذير الشهادة من Advanced → Proceed.',
+    reload:'إعادة تحميل', close:'إغلاق', tapStartHint:'قد يحتاج iOS/Safari إلى نقرة<br>قبل تشغيل الكاميرا', tapStartButton:'انقر لتشغيل الكاميرا',
+    holderProducts:'منتجات Holder', productCollectionAria:'مجموعة المنتجات', loadingImage:'جاري تحميل صورة Shopify…', noImage:'لا توجد صورة', shopifyFailed:'فشل اتصال Shopify',
+    emptyCollection:'لا توجد منتجات لعرضها في هذه المجموعة.', retry:'إعادة المحاولة', collectionLoadFailed:'فشل تحميل المجموعة',
+    catalogLoadFailed:'فشل تحميل الكتالوج', cameraStartFailed:'فشل تشغيل الكاميرا', unknownError:'خطأ غير معروف', cameraErrorShort:'خطأ في الكاميرا',
+    cameraChecklist:'تحقق من:\n1. قبول تحذير HTTPS\n2. قفل شريط العنوان → السماح للكاميرا\n3. لا يوجد تطبيق آخر يستخدم الكاميرا\n4. أعد تحميل الصفحة',
+    tapRequired:'يلزم النقر للبدء', refocusing:'جاري إعادة التركيز…'
+  },
+  fr: {
+    title:'Scanner Holder AR · EAN-13', scanPrompt:'Placez le code-barres du produit dans le cadre', browseProducts:'Produits', pageLoading:'Chargement de la page…',
+    scriptStart:'Démarrage du script…', cameraPreparing:'Préparation de la caméra…', connectionError:'Erreur de connexion', loadingCatalog:'Chargement du catalogue…',
+    requestingCamera:'Préparation de la caméra…', startingDecoder:'Démarrage du lecteur de code-barres…', scanning:'Scan en cours…', viewingProduct:'Vérification du produit · utilisez « Scanner à nouveau » pour reprendre',
+    scanAgain:'Scanner à nouveau', productPage:'Page produit →', errorTitle:'Erreur', httpsNote:'HTTPS est requis. Sur le même Wi-Fi, acceptez l’avertissement de certificat via Avancé → Continuer.',
+    reload:'Recharger', close:'Fermer', tapStartHint:'iOS/Safari peut demander un appui<br>avant de lancer la caméra', tapStartButton:'Appuyer pour lancer la caméra',
+    holderProducts:'Produits Holder', productCollectionAria:'Collection de produits', loadingImage:'Chargement de l’image Shopify…', noImage:'Aucune image', shopifyFailed:'Connexion Shopify échouée',
+    emptyCollection:'Aucun produit à afficher dans cette collection.', retry:'Réessayer', collectionLoadFailed:'Échec du chargement de la collection',
+    catalogLoadFailed:'Échec du chargement du catalogue', cameraStartFailed:'Échec du démarrage de la caméra', unknownError:'Erreur inconnue', cameraErrorShort:'Erreur caméra',
+    cameraChecklist:'Vérifiez:\n1. Avertissement HTTPS accepté\n2. Cadenas de la barre d’adresse → caméra autorisée\n3. Aucune autre app n’utilise la caméra\n4. Rechargez la page',
+    tapRequired:'Appui requis pour démarrer', refocusing:'Mise au point…'
+  },
+  de: {
+    title:'Holder AR Scanner · EAN-13', scanPrompt:'Produkt-Barcode in den Rahmen halten', browseProducts:'Produkte', pageLoading:'Seite wird geladen…',
+    scriptStart:'Skript wird gestartet…', cameraPreparing:'Kamera wird vorbereitet…', connectionError:'Verbindungsfehler', loadingCatalog:'Katalog wird geladen…',
+    requestingCamera:'Kamera wird vorbereitet…', startingDecoder:'Barcode-Decoder wird gestartet…', scanning:'Scannen…', viewingProduct:'Produkt wird geprüft · mit „Erneut scannen“ fortfahren',
+    scanAgain:'Erneut scannen', productPage:'Produktseite →', errorTitle:'Fehler', httpsNote:'HTTPS ist erforderlich. Im selben WLAN die Zertifikatswarnung über Erweitert → Fortfahren akzeptieren.',
+    reload:'Neu laden', close:'Schließen', tapStartHint:'iOS/Safari benötigt ggf. ein Tippen,<br>bevor die Kamera startet', tapStartButton:'Tippen, um Kamera zu starten',
+    holderProducts:'Holder Produkte', productCollectionAria:'Produktkollektion', loadingImage:'Shopify-Bild wird geladen…', noImage:'Kein Bild', shopifyFailed:'Shopify-Verbindung fehlgeschlagen',
+    emptyCollection:'In dieser Kollektion gibt es keine Produkte.', retry:'Erneut versuchen', collectionLoadFailed:'Kollektion konnte nicht geladen werden',
+    catalogLoadFailed:'Katalog konnte nicht geladen werden', cameraStartFailed:'Kamera konnte nicht gestartet werden', unknownError:'Unbekannter Fehler', cameraErrorShort:'Kamerafehler',
+    cameraChecklist:'Prüfen:\n1. HTTPS-Warnung akzeptiert\n2. Schloss in der Adressleiste → Kamera erlaubt\n3. Keine andere App nutzt die Kamera\n4. Seite neu laden',
+    tapRequired:'Tippen zum Start erforderlich', refocusing:'Fokussiert neu…'
+  }
+};
+const LANG_ALIASES = {
+  ko:'ko', en:'en', ja:'ja', jp:'ja', id:'id', in:'id', bn:'bn', ar:'ar', fr:'fr', de:'de',
+  zh:'zh-CN', 'zh-cn':'zh-CN', 'zh-sg':'zh-CN', 'zh-tw':'zh-TW', 'zh-hk':'zh-TW', 'zh-mo':'zh-TW'
+};
+function normalizeLang(value) {
+  if (!value) return '';
+  const v = String(value).trim();
+  if (I18N[v]) return v;
+  const lower = v.toLowerCase();
+  if (LANG_ALIASES[lower]) return LANG_ALIASES[lower];
+  const base = lower.split('-')[0];
+  return LANG_ALIASES[base] || '';
+}
+const params = new URLSearchParams(location.search);
+let currentLang = normalizeLang(params.get('lang')) || normalizeLang(localStorage.getItem('holderLang')) || normalizeLang(navigator.language) || 'en';
+function t(key) {
+  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || I18N.ko[key] || key;
+}
+function applyStaticI18n() {
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  const browseBtn = $('browseBtn');
+  if (browseBtn) browseBtn.setAttribute('aria-label', t('browseProducts'));
+  const collection = $('collection');
+  if (collection) collection.setAttribute('aria-label', t('productCollectionAria'));
+  const closeCollection = $('closeCollection');
+  if (closeCollection) closeCollection.setAttribute('aria-label', t('close'));
+  const langSelect = $('langSelect');
+  if (langSelect) langSelect.value = currentLang;
+}
 // ===== 전역 에러 캐처 (디버그) =====
 window.addEventListener('error', e => {
   const el = document.getElementById('miniStatusText');
@@ -255,7 +428,7 @@ window.addEventListener('unhandledrejection', e => {
 });
 
 // JS 실행 시작 표시 (JS 자체가 실행되고 있는지 확인용)
-document.getElementById('miniStatusText').textContent = '스크립트 시작…';
+document.getElementById('miniStatusText').textContent = t('scriptStart');
 
 // 라이브러리 로드 확인
 if (typeof ZXing === 'undefined') {
@@ -265,6 +438,17 @@ if (typeof ZXing === 'undefined') {
 const $ = id => document.getElementById(id);
 const setText = (id,t,cls) => { const el=$(id); if(!el)return; el.textContent=t; if(cls){el.className='v '+cls}};
 const setLayer = (id,state) => { const el=$(id); if(!el)return; el.className='layer '+(state||''); };
+applyStaticI18n();
+
+const langSelect = $('langSelect');
+if (langSelect) {
+  langSelect.addEventListener('change', e => {
+    currentLang = normalizeLang(e.target.value) || 'en';
+    localStorage.setItem('holderLang', currentLang);
+    applyStaticI18n();
+    if (!$('result').classList.contains('show')) setMini('scan');
+  });
+}
 
 // 디버그 모드 토글 (?debug=1)
 const DEBUG = new URLSearchParams(location.search).has('debug');
@@ -272,9 +456,9 @@ if (DEBUG) document.body.classList.add('debug');
 
 // 소비자 미니 상태
 const USER_MSGS = {
-  'boot':'카메라 준비 중…',
-  'scan':'제품의 바코드를 박스 안에 비춰주세요',
-  'err':'연결 오류'
+  'boot':'cameraPreparing',
+  'scan':'scanPrompt',
+  'err':'connectionError'
 };
 function setMini(kind, text) {
   const el = $('miniStatus');
@@ -282,7 +466,7 @@ function setMini(kind, text) {
   el.classList.remove('ok','err');
   if (kind === 'scan') el.classList.add('ok');
   else if (kind === 'err') el.classList.add('err');
-  $('miniStatusText').textContent = text || USER_MSGS[kind] || '';
+  $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
 }
 
 let catalog = [];
@@ -416,7 +600,7 @@ async function refocusCameraAt(x, y) {
   lastFocusTapAt = now;
   showFocusRing(x, y);
   setText('focusStatus','초점 재시도 중','wait');
-  setMini('scan','초점 다시 맞추는 중…');
+  setMini('scan', t('refocusing'));
 
   const track = cameraTrack;
   if (!track || typeof track.applyConstraints !== 'function') {
@@ -477,7 +661,7 @@ async function loadCatalog() {
     catalog = d.products;
     console.log('[catalog]', catalog.length, '개 로드');
   } catch(e) {
-    showError('카탈로그 로드 실패', e.message);
+    showError(t('catalogLoadFailed'), e.message);
   }
 }
 
@@ -486,6 +670,7 @@ function matchByEan(code){ return catalog.find(p => p.ean13 === code); }
 
 // ===== 3. Shopify product fetch =====
 async function fetchShopify(handle) {
+  if (!handle) return null;
   try {
     const url = `https://www.acosmeticstory.com/products/${handle}.json`;
     const r = await fetch(url);
@@ -510,24 +695,24 @@ async function showResult(product, via, rawValue) {
   $('rName').innerHTML = product.name.replace(/(\w+)\s+(\S+)/, '$1 <b>$2</b>');
   $('rSub').textContent = [product.color, product.structure].filter(Boolean).join(' · ');
   $('rShopLink').href = product.shopifyUrl;
-  $('rImg').innerHTML = '<span id="rImgFallback">Shopify 이미지 로드 중…</span>';
+  $('rImg').innerHTML = `<span id="rImgFallback">${t('loadingImage')}</span>`;
   $('rShopTitle').textContent = '';
   $('rShopPrice').textContent = '';
   $('result').classList.add('show');
   setText('status','일시정지 — 결과 보는 중','wait');
-  setMini('scan','제품 정보 확인 중 · "다시 스캔"으로 재개');
+  setMini('scan', t('viewingProduct'));
   navigator.vibrate && navigator.vibrate(80);
 
   const shop = await fetchShopify(product.shopifyHandle);
   if (shop) {
     const img = shop.images && shop.images[0];
     if (img) $('rImg').innerHTML = `<img src="${img.src}" alt="">`;
-    else $('rImg').innerHTML = '<span>이미지 없음</span>';
+    else $('rImg').innerHTML = `<span>${t('noImage')}</span>`;
     $('rShopTitle').textContent = shop.title || '';
     const price = shop.variants && shop.variants[0] && shop.variants[0].price;
     if (price) $('rShopPrice').textContent = `₩${Number(price).toLocaleString()}`;
   } else {
-    $('rImg').innerHTML = '<span>Shopify 연결 실패</span>';
+    $('rImg').innerHTML = `<span>${t('shopifyFailed')}</span>`;
   }
 }
 function dismissResult(){
@@ -711,10 +896,10 @@ function showError(title, msg) {
 // ===== 8. Boot =====
 async function bootCore() {
   setText('status','카탈로그 로드…','wait');
-  setMini('boot','카탈로그 로드 중…');
+  setMini('boot', t('loadingCatalog'));
   await loadCatalog();
   setText('status','카메라 권한 요청…','wait');
-  setMini('boot','카메라 준비 중…');
+  setMini('boot', t('requestingCamera'));
   const video = $('video');
   await startCamera(video);
   bindTapToFocus();
@@ -739,7 +924,7 @@ async function boot() {
     console.error('[boot] auto failed:', e);
     // iOS/Safari 등 사용자 탭이 필요한 경우 fallback
     if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError' || e.name === 'NotReadableError')) {
-      setText('status', '탭하여 시작 필요', 'wait');
+      setText('status', t('tapRequired'), 'wait');
       const panel = document.getElementById('tapStart');
       panel.style.display = 'flex';
       document.getElementById('tapStartBtn').onclick = async () => {
@@ -748,19 +933,17 @@ async function boot() {
         catch(e2) {
           console.error('[boot] tap retry failed:', e2);
           setText('status', '오류: ' + (e2.name || 'Error'), 'err');
-          showError('카메라 시작 실패 (' + (e2.name || 'Error') + ')',
-            (e2.message || '알 수 없는 오류') +
-            '\n\n체크:\n① 주소창 자물쇠 아이콘 → 카메라 권한 "허용"\n② HTTPS 경고 수락 확인\n③ 다른 앱이 카메라 사용 중 아닌지');
+          showError(t('cameraStartFailed') + ' (' + (e2.name || 'Error') + ')',
+            (e2.message || t('unknownError')) + '\n\n' + t('cameraChecklist'));
         }
       };
       return;
     }
     setText('status', '오류: ' + (e.name || 'Error'), 'err');
     setText('camera', e.message ? e.message.slice(0,40) : 'failed', 'err');
-    setMini('err','카메라 오류');
-    showError('카메라 시작 실패 (' + (e.name || 'Error') + ')',
-      (e.message || '알 수 없는 오류') +
-      '\n\n체크:\n① HTTPS 경고를 "고급 → 이동"으로 수락했는지\n② 주소창 자물쇠 → 카메라 권한 "허용"\n③ 다른 앱이 카메라 쓰고있지 않은지\n④ 페이지 새로고침');
+    setMini('err', t('cameraErrorShort'));
+    showError(t('cameraStartFailed') + ' (' + (e.name || 'Error') + ')',
+      (e.message || t('unknownError')) + '\n\n' + t('cameraChecklist'));
   }
 }
 boot();
@@ -798,12 +981,12 @@ async function fetchCollection(handle) {
 function renderSlider(products) {
   const slider = $('slider');
   if (!products.length) {
-    slider.innerHTML = `<div class="tab-empty" style="flex:1">이 컬렉션에 표시할 제품이 없습니다.<br><button class="retry" onclick="openCollection(currentTab, true)">다시 시도</button></div>`;
+    slider.innerHTML = `<div class="tab-empty" style="flex:1">${t('emptyCollection')}<br><button class="retry" onclick="openCollection(currentTab, true)">${t('retry')}</button></div>`;
     return;
   }
   const html = products.map(p => `
     <a class="product" href="${p.url}" target="_blank" rel="noopener">
-      <div class="p-img">${p.image ? `<img src="${shopifyThumb(p.image,300)}" alt="" loading="lazy" decoding="async">` : '이미지 없음'}</div>
+      <div class="p-img">${p.image ? `<img src="${shopifyThumb(p.image,300)}" alt="" loading="lazy" decoding="async">` : t('noImage')}</div>
       <div class="p-body">
         <div class="p-name">${escapeHtml(p.title)}</div>
         ${p.price ? `<div class="p-price">₩${Number(p.price).toLocaleString()}</div>` : ''}
@@ -837,7 +1020,7 @@ async function openCollection(handle, forceReload) {
     if (c) c.textContent = products.length ? ` (${products.length})` : '';
   } catch(e) {
     console.error('[collection] fetch err:', e);
-    $('slider').innerHTML = `<div class="tab-empty" style="flex:1">컬렉션 로드 실패<br><small style="opacity:.6">${escapeHtml(e.message)}</small><br><button class="retry" onclick="openCollection('${handle}', true)">다시 시도</button></div>`;
+    $('slider').innerHTML = `<div class="tab-empty" style="flex:1">${t('collectionLoadFailed')}<br><small style="opacity:.6">${escapeHtml(e.message)}</small><br><button class="retry" onclick="openCollection('${handle}', true)">${t('retry')}</button></div>`;
   }
 }
 

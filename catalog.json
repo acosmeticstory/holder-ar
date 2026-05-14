@@ -1,5 +1,5 @@
 {
-  "_comment": "Holder AR catalog · 2026-05-11 Ju 50종 정식 EAN-13 (GS1 Korea prefix 8800353) → Shopify handle 매핑. 파일 출처: barcode_holders/Ju 50종/. Sai-m / Sai-s 는 후속 작업.",
+  "_comment": "Holder AR catalog · 2026-05-11 Ju 50종 정식 EAN-13 (GS1 Korea prefix 8800353) → Shopify handle 매핑. 2026-05-14 Sai-s 01~10 임시 매칭 추가.",
   "products": [
     { "ean13": "8800353210956", "name": "Ju 01", "shopifyHandle": "ju-1",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-1" },
     { "ean13": "8800353210963", "name": "Ju 02", "shopifyHandle": "ju-double-clear-white-inner-사본-1",                                  "shopifyUrl": "https://www.acosmeticstory.com/products/ju-double-clear-white-inner-사본-1" },
@@ -50,6 +50,16 @@
     { "ean13": "8800353211410", "name": "Ju 47", "shopifyHandle": "ju-47",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-47" },
     { "ean13": "8800353211427", "name": "Ju 48", "shopifyHandle": "ju-48",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-48" },
     { "ean13": "8800353211434", "name": "Ju 49", "shopifyHandle": "ju-49",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-49" },
-    { "ean13": "8800353211441", "name": "Ju 50", "shopifyHandle": "ju-51",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-51" }
+    { "ean13": "8800353211441", "name": "Ju 50", "shopifyHandle": "ju-51",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-51" },
+    { "ean13": "8800353211458", "name": "Sai-s 01", "shopifyHandle": "sai15-m36",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36" },
+    { "ean13": "8800353211465", "name": "Sai-s 02", "shopifyHandle": "sai15-m35",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35" },
+    { "ean13": "8800353211472", "name": "Sai-s 03", "shopifyHandle": "sai15-m34",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34" },
+    { "ean13": "8800353211489", "name": "Sai-s 04", "shopifyHandle": "sai15-m33",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33" },
+    { "ean13": "8800353211496", "name": "Sai-s 05", "shopifyHandle": "sai15-m32",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32" },
+    { "ean13": "8800353211502", "name": "Sai-s 06", "shopifyHandle": "sai15-m31",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31" },
+    { "ean13": "8800353211519", "name": "Sai-s 07", "shopifyHandle": "sai15-m30",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30" },
+    { "ean13": "8800353211526", "name": "Sai-s 08", "shopifyHandle": "sai15-m29",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29" },
+    { "ean13": "8800353211533", "name": "Sai-s 09", "shopifyHandle": "sai15-m28",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m28" },
+    { "ean13": "8800353211540", "name": "Sai-s 10", "shopifyHandle": "sai15-m27",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m27" }
   ]
 }
