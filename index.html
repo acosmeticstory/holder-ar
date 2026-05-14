@@ -30,13 +30,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .reticle::after{top:-2px;right:-2px;border-left:none;border-bottom:none;border-radius:0 10px 0 0}
 .reticle i{bottom:-2px;left:-2px;border-right:none;border-top:none;border-radius:0 0 0 10px;display:block}
 .reticle em{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 10px 0;display:block;font-style:normal}
-.reticle-hint{position:fixed;top:calc(50% + min(28vw,135px) + 16px);left:50%;transform:translateX(-50%);z-index:10;width:calc(100vw - 32px);max-width:360px;font-size:12px;line-height:1.45;color:rgba(255,255,255,.82);letter-spacing:.5px;text-align:center;white-space:normal;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.reticle-hint{position:fixed;top:calc(50% + min(28vw,135px) + 16px);left:50%;transform:translateX(-50%);z-index:10;width:calc(100vw - 32px);max-width:360px;font-size:12.5px;line-height:1.45;color:#dff5e4;letter-spacing:.45px;text-align:center;white-space:normal;text-shadow:0 0 10px rgba(158,201,169,.72),0 1px 4px rgba(0,0,0,.7)}
+.reticle-hint::before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#9ec9a9;box-shadow:0 0 12px rgba(158,201,169,.95);animation:guideGlow 1.35s ease-in-out infinite;vertical-align:1px}
 .focus-ring{position:fixed;z-index:15;width:64px;height:64px;margin:-32px 0 0 -32px;border:2px solid #c8b89a;border-radius:50%;pointer-events:none;opacity:0;transform:scale(1.25);transition:opacity .18s ease,transform .18s ease,box-shadow .18s ease}
 .focus-ring.show{opacity:1;transform:scale(1);box-shadow:0 0 0 9999px rgba(0,0,0,.04),0 0 16px rgba(200,184,154,.42)}
 .focus-ring.ok{border-color:#9ec9a9}
 .focus-ring.err{border-color:#e8a090}
-.manual-pulse{animation:manualPulse 1s ease-in-out infinite}
-@keyframes manualPulse{0%,100%{box-shadow:0 0 0 0 rgba(200,184,154,.45);border-color:rgba(255,255,255,.24)}50%{box-shadow:0 0 0 8px rgba(200,184,154,0);border-color:#c8b89a;background:rgba(200,184,154,.24)}}
+.manual-pulse{animation:manualPulse .82s ease-in-out infinite}
+@keyframes guideGlow{0%,100%{opacity:.72;transform:scale(.92)}50%{opacity:1;transform:scale(1.18)}}
+@keyframes manualPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(158,201,169,.72),0 0 0 rgba(158,201,169,0);border-color:#9ec9a9;background:rgba(158,201,169,.22)}50%{transform:scale(1.06);box-shadow:0 0 0 9px rgba(158,201,169,0),0 0 18px rgba(158,201,169,.82);border-color:#dff5e4;background:rgba(158,201,169,.34)}}
 
 /* HUD */
 .hud{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0));left:12px;right:12px;z-index:20;background:rgba(12,14,12,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(200,184,154,.25);border-radius:12px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#c8b89a}
@@ -105,7 +107,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .browse-btn span{white-space:nowrap}
 
 /* 미니 상태 pill (소비자에게 보이는 것) */
-.mini-status{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);z-index:18;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);padding:9px 16px 9px 14px;background:rgba(12,14,12,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(200,184,154,.22);border-radius:24px;font-size:12.5px;line-height:1.35;color:#e8e2d2;letter-spacing:.3px;font-weight:400;white-space:normal}
+.mini-status{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);z-index:18;display:none;align-items:center;gap:8px;max-width:calc(100vw - 32px);padding:9px 16px 9px 14px;background:rgba(12,14,12,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(200,184,154,.22);border-radius:24px;font-size:12.5px;line-height:1.35;color:#e8e2d2;letter-spacing:.3px;font-weight:400;white-space:normal}
+.mini-status.show{display:flex}
 .mini-status .dot{width:7px;height:7px;border-radius:50%;background:#c8b89a;flex-shrink:0;animation:pulse 1.4s ease-in-out infinite}
 .mini-status.ok .dot{background:#9ec9a9}
 .mini-status.err .dot{background:#e8a090}
@@ -485,6 +488,7 @@ function setMini(kind, text) {
   const el = $('miniStatus');
   if (!el) return;
   el.classList.remove('ok','err');
+  el.classList.toggle('show', Boolean(text) || kind === 'err');
   if (kind === 'scan') el.classList.add('ok');
   else if (kind === 'err') el.classList.add('err');
   $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
@@ -744,7 +748,7 @@ async function showResult(product, via, rawValue) {
     const img = shop.images && shop.images[0];
     if (img) $('rImg').innerHTML = `<img src="${img.src}" alt="">`;
     else $('rImg').innerHTML = comingSoonHtml();
-    $('rShopTitle').textContent = product.name || shop.title || '';
+    $('rShopTitle').textContent = '';
   } else {
     $('rImg').innerHTML = comingSoonHtml();
   }
