@@ -27,7 +27,7 @@ body{font-family:'Noto Sans KR','DM Sans',sans-serif;background:#eeeae0;padding:
 .box .pdesc{font-family:'DM Sans',sans-serif;font-size:11px;color:#555;line-height:1.6;margin-bottom:16px}
 .box .bottom{font-family:'DM Sans',sans-serif;font-size:9px;color:#8a8578;letter-spacing:.3px;margin-top:10px}
 .box .bar{margin-top:6px}
-/* 기본 화면 테스트용 50mm (어제 목업 사이즈와 유사). 실물 인쇄는 @media print 에서 25mm 강제. */
+/* 기본 화면 테스트용 50mm. 실물 인쇄는 @media print 에서 20mm 강제. */
 .box .bar svg{display:block;width:var(--bar-w,50mm);height:auto}
 .box .pimg{width:90px;height:90px;flex-shrink:0;border-radius:4px;position:relative;overflow:hidden}
 .box .pimg.blue{background:radial-gradient(circle at 35% 25%,#d0e0ea 0%,#6a9ab5 35%,#2d5068 90%)}
@@ -42,7 +42,7 @@ body{font-family:'Noto Sans KR','DM Sans',sans-serif;background:#eeeae0;padding:
 .box{padding:18px 18px;min-height:150px}
 .box .pname{font-size:26px}
 .box .pimg{width:72px;height:72px}
-/* 모바일에서도 실측 25mm 유지 (CSS mm 기준 고정) */
+/* 모바일에서도 실측 20mm 유지 (CSS mm 기준 고정) */
 }
 
 @media print{
@@ -50,7 +50,7 @@ body{background:#fff;padding:10mm}
 .head{display:none}
 .grid{gap:10mm}
 .box{box-shadow:none;border:1px solid #999;break-inside:avoid;page-break-inside:avoid}
-.box .bar svg{width:25mm !important} /* 인쇄는 항상 실물 25mm */
+.box .bar svg{width:20mm !important} /* 인쇄는 항상 실물 20mm */
 }
 
 /* 바 폭 토글 버튼 */
@@ -63,22 +63,22 @@ body{background:#fff;padding:10mm}
 
 <div class="head">
 <h1>Holder AR · 테스트 라벨 (acosmeticstory)</h1>
-<p>MUJI 헤어 터번 타월 라벨 실측 기준 · EAN-13(=GTIN-13) <b>25mm × 7~8mm</b> · 가드 디센더 제거(flat) · 바 폭·간격·quiet zone 표준 유지 · 4종</p>
+<p>Holder AR 인쇄 테스트 통과 기준 · EAN-13(=GTIN-13) <b>20mm 폭</b> · 가드 디센더 제거(flat) · 바 폭·간격·quiet zone 표준 유지 · 4종</p>
 <div class="hint">
-스펙 근거: <code>무인양품 라벨 및 바코드.jpg</code> + <code>280423_EAN-13_바코드_검토_정리.md</code>. 실물 최종 크기는 <b>25mm × 7.5mm</b>.<br>
-<b>화면 테스트</b>에서는 폰 카메라 분해능 한계로 25mm가 판독 불가 → 기본 <b>100mm(4×)</b>로 렌더. 인쇄는 자동으로 실측 25mm로 나감.<br>
+스펙 근거: 2026-05-14 A4 인쇄본 테스트에서 <b>20mm 판독 성공</b>. 실물 최종 바코드 폭은 <b>20mm</b> 기준.<br>
+<b>화면 테스트</b>는 모니터 픽셀 한계로 실제 인쇄본보다 불리합니다. 인쇄는 자동으로 실측 20mm로 나감.<br>
 바 폭 변경:
 <span class="size-toggle">
-<button data-w="25mm">25mm (실물)</button>
-<button data-w="50mm" class="active">50mm (2×)</button>
+<button data-w="20mm">20mm (실물)</button>
+<button data-w="40mm" class="active">40mm (2×)</button>
+<button data-w="50mm">50mm (2.5×)</button>
 <button data-w="75mm">75mm (3×)</button>
 <button data-w="100mm">100mm (4×)</button>
-<button data-w="150mm">150mm (6×)</button>
 </span>
 </div>
 <div class="btns">
-<button onclick="window.print()">인쇄 / PDF 저장 (실물 25mm)</button>
-<button onclick="location.href='./index.html?debug=1'">→ E-scan 스캐너 열기</button>
+<button onclick="window.print()">인쇄 / PDF 저장 (실물 20mm)</button>
+<button onclick="location.href='./index.html'">→ Holder AR 스캐너 열기</button>
 </div>
 </div>
 

@@ -2,7 +2,7 @@
 
 > 스마트폰 카메라로 acosmeticstory Holder 제품의 EAN-13 바코드를 인식해 제품 정보로 연결하는 WebAR 미니 애플리케이션.
 
-**Live**: <https://acosmeticstory.com/pages/holder_ar>
+**Live**: <https://holders.acosmeticstory.com/>
 **Source mirror**: <https://acosmeticstory.github.io/holder-ar/>
 
 ---
@@ -23,7 +23,7 @@
 |---|---|
 | `index.html` | AR 스캐너 본체. zxing 기반 EAN-13 디코더 + Shopify 제품 정보 fetch |
 | `catalog.json` | EAN-13 ↔ Shopify 제품 핸들 매핑 테이블 |
-| `labels.html` | 디자이너·QA 용 테스트 라벨(4종) · 인쇄 시 자동으로 실측 25mm |
+| `labels.html` | 디자이너·QA 용 테스트 라벨(4종) · 인쇄 시 자동으로 실측 20mm |
 | `logo.png` | 브랜드 로고 (스캐너 상단 표시) |
 
 ---
@@ -63,12 +63,12 @@ npx local-web-server --https --port 8443
 | 항목 | 값 |
 |---|---|
 | 표준 | EAN-13 (= GTIN-13 = JAN-13) |
-| 실물 크기 | 25mm × 7.5mm |
+| 실물 크기 | 20mm 폭 |
 | 가드 바 | 평탄 (디센더 없음, MUJI 스타일) |
-| 모듈 폭 | 0.22mm (25mm ÷ 113 모듈) |
+| 모듈 폭 | 약 0.177mm (20mm ÷ 113 모듈) |
 | Quiet zone | 좌·우 각 ≥ 2.5mm |
 
-상세는 디자이너 가이드 참조 (사내 문서).
+2026-05-14 A4 인쇄본 테스트에서 20mm 판독 성공 확인. 상세는 디자이너 가이드 참조 (사내 문서).
 
 ---
 

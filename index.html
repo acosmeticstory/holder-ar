@@ -31,6 +31,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .reticle i{bottom:-2px;left:-2px;border-right:none;border-top:none;border-radius:0 0 0 10px;display:block}
 .reticle em{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 10px 0;display:block;font-style:normal}
 .reticle-hint{position:fixed;top:calc(50% + min(28vw,135px) + 16px);left:50%;transform:translateX(-50%);z-index:10;font-size:12px;color:rgba(255,255,255,.82);letter-spacing:.5px;text-align:center;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.focus-ring{position:fixed;z-index:15;width:64px;height:64px;margin:-32px 0 0 -32px;border:2px solid #c8b89a;border-radius:50%;pointer-events:none;opacity:0;transform:scale(1.25);transition:opacity .18s ease,transform .18s ease,box-shadow .18s ease}
+.focus-ring.show{opacity:1;transform:scale(1);box-shadow:0 0 0 9999px rgba(0,0,0,.04),0 0 16px rgba(200,184,154,.42)}
+.focus-ring.ok{border-color:#9ec9a9}
+.focus-ring.err{border-color:#e8a090}
 
 /* HUD */
 .hud{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0));left:12px;right:12px;z-index:20;background:rgba(12,14,12,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(200,184,154,.25);border-radius:12px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#c8b89a}
@@ -145,7 +149,8 @@ body.debug .mini-status{display:none}
 <video id="video" autoplay playsinline muted></video>
 
 <div class="reticle"><i></i><em></em></div>
-<div class="reticle-hint">바코드를 프레임 안으로</div>
+<div class="reticle-hint">제품의 바코드를 박스 안에 비춰주세요</div>
+<div class="focus-ring" id="focusRing"></div>
 
 <div class="topbar">
 <div class="topbar-inner">
@@ -167,6 +172,8 @@ body.debug .mini-status{display:none}
 <div class="hud debug-only">
 <div class="hud-row"><span class="k">STATUS</span><span class="v wait" id="status">카메라 초기화 중…</span></div>
 <div class="hud-row"><span class="k">CAMERA</span><span class="v wait" id="camera">―</span></div>
+<div class="hud-row"><span class="k">FOCUS</span><span class="v wait" id="focusStatus">탭하면 초점 재시도</span></div>
+<div class="hud-row"><span class="k">TEST</span><span class="v wait" id="testStatus">대기</span></div>
 <div class="hud-row"><span class="k">LAST HIT</span><span class="v wait" id="lastHit">―</span></div>
 <div class="hud-row"><span class="k">TIME</span><span class="v wait" id="lastTime">― ms</span></div>
 <hr>
@@ -177,6 +184,7 @@ body.debug .mini-status{display:none}
 <div class="stats-row"><span>EAN-13</span><span id="eanStats">0회 · avg ― · min ― · max ―</span></div>
 </div>
 <div class="stats-actions">
+<button class="stats-btn" id="testStart">10초 테스트</button>
 <button class="stats-btn" id="statsReset">초기화</button>
 <button class="stats-btn" id="statsExport">CSV 내보내기</button>
 </div>
@@ -265,7 +273,7 @@ if (DEBUG) document.body.classList.add('debug');
 // 소비자 미니 상태
 const USER_MSGS = {
   'boot':'카메라 준비 중…',
-  'scan':'스캔 중',
+  'scan':'제품의 바코드를 박스 안에 비춰주세요',
   'err':'연결 오류'
 };
 function setMini(kind, text) {
@@ -281,6 +289,9 @@ let catalog = [];
 let lastMatchId = null;
 let stopped = false;
 let zxingReader = null;
+let scanTest = null;
+let cameraTrack = null;
+let lastFocusTapAt = 0;
 
 // ===== 타이밍 계측 =====
 const timing = {
@@ -330,6 +341,41 @@ function resetStats() {
   updateStats();
   setText('lastTime','― ms','wait');
   setText('lastHit','―','wait');
+  scanTest = null;
+  setText('testStatus','대기','wait');
+}
+
+function startDecodeTest(seconds = 10) {
+  const startedAt = performance.now();
+  const startCalls = window.__zxingStats ? window.__zxingStats.calls : 0;
+  const startResults = window.__zxingStats ? window.__zxingStats.results : 0;
+  scanTest = {
+    startedAt,
+    durationMs: seconds * 1000,
+    startCalls,
+    startResults,
+    done: false,
+    hit: null
+  };
+  startScanWindow(`${seconds}s-test`);
+  setText('testStatus', `${seconds}초 판정 중`, 'wait');
+  setTimeout(() => finishDecodeTest(false), seconds * 1000);
+}
+
+function finishDecodeTest(success, rawValue, product) {
+  if (!scanTest || scanTest.done) return;
+  const elapsedMs = Math.round(performance.now() - scanTest.startedAt);
+  const stats = window.__zxingStats || { calls: 0, results: 0 };
+  const calls = Math.max(0, stats.calls - scanTest.startCalls);
+  const results = Math.max(0, stats.results - scanTest.startResults);
+  scanTest.done = true;
+  scanTest.hit = success ? { rawValue, productName: product && product.name, elapsedMs } : null;
+  if (success) {
+    const label = product ? product.name : '미등록 EAN';
+    setText('testStatus', `PASS ${elapsedMs}ms · ${rawValue} · ${label}`, 'ok');
+  } else {
+    setText('testStatus', `FAIL · ${elapsedMs}ms · calls:${calls} res:${results}`, 'err');
+  }
 }
 
 function exportCsv() {
@@ -350,6 +396,77 @@ function exportCsv() {
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+function showFocusRing(x, y, state) {
+  const ring = $('focusRing');
+  if (!ring) return;
+  ring.style.left = `${x}px`;
+  ring.style.top = `${y}px`;
+  ring.classList.remove('show','ok','err');
+  if (state) ring.classList.add(state);
+  requestAnimationFrame(() => ring.classList.add('show'));
+  clearTimeout(showFocusRing.timer);
+  showFocusRing.timer = setTimeout(() => ring.classList.remove('show'), 650);
+}
+
+async function refocusCameraAt(x, y) {
+  const now = performance.now();
+  if (now - lastFocusTapAt < 450) return;
+  lastFocusTapAt = now;
+  showFocusRing(x, y);
+  setText('focusStatus','초점 재시도 중','wait');
+  setMini('scan','초점 다시 맞추는 중…');
+
+  const track = cameraTrack;
+  if (!track || typeof track.applyConstraints !== 'function') {
+    showFocusRing(x, y, 'err');
+    setText('focusStatus','초점 제어 미지원','wait');
+    setTimeout(() => setMini('scan'), 900);
+    return;
+  }
+
+  const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
+  const advanced = [];
+  let mode = '';
+  if (Array.isArray(caps.focusMode)) {
+    if (caps.focusMode.includes('single-shot')) {
+      advanced.push({ focusMode: 'single-shot' });
+      mode = 'single-shot';
+    } else if (caps.focusMode.includes('continuous')) {
+      advanced.push({ focusMode: 'continuous' });
+      mode = 'continuous';
+    }
+  }
+  if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes('continuous')) {
+    advanced.push({ exposureMode: 'continuous' });
+  }
+
+  try {
+    if (advanced.length) {
+      await track.applyConstraints({ advanced });
+      showFocusRing(x, y, 'ok');
+      setText('focusStatus', `초점 재시도 · ${mode || 'auto'}`, 'ok');
+    } else {
+      showFocusRing(x, y, 'ok');
+      setText('focusStatus','자동 초점 모드','wait');
+    }
+    navigator.vibrate && navigator.vibrate(20);
+  } catch(e) {
+    showFocusRing(x, y, 'err');
+    setText('focusStatus', `초점 제어 미지원 · ${e.name || 'Error'}`, 'wait');
+  } finally {
+    setTimeout(() => setMini('scan'), 900);
+  }
+}
+
+function bindTapToFocus() {
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    if (e.target.closest('button,a,.hud,.topbar,.result,.collection,.collection-backdrop,#tapStart')) return;
+    if ($('result').classList.contains('show')) return;
+    refocusCameraAt(e.clientX, e.clientY);
+  }, { passive: true });
 }
 
 // ===== 1. 카탈로그 로드 =====
@@ -420,28 +537,36 @@ function dismissResult(){
   setText('status','스캔 중…','ok');
   setText('lastHit','―','wait');
   setText('lastTime','― ms','wait');
-  setMini('scan','스캔 중');
+  setMini('scan');
   startScanWindow('after-dismiss');
 }
 
 // ===== 5. Layer 1 · zxing-js EAN-13 연속 스캔 =====
 async function startCamera(videoEl) {
-  // 1. getUserMedia로 먼저 스트림을 얻는다 (환경 카메라 우선, 실패 시 fallback)
+  // 1. getUserMedia로 먼저 스트림을 얻는다 (환경 카메라 우선, 고해상도부터 fallback)
   let stream = null;
+  let selectedTry = null;
   const tries = [
-    { video: { facingMode: { exact: 'environment' }, width:{ideal:1280}, height:{ideal:720} } },
-    { video: { facingMode: { ideal: 'environment' }, width:{ideal:1280}, height:{ideal:720} } },
-    { video: { facingMode: 'environment' } },
-    { video: true }
+    { label: '4K exact rear', video: { facingMode: { exact: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
+    { label: '4K rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
+    { label: '1440p rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:2560}, height:{ideal:1440}, frameRate:{ideal:30,max:30} } },
+    { label: '1080p rear target', video: { facingMode: { ideal: 'environment' }, width:{ideal:1920}, height:{ideal:1080}, frameRate:{ideal:30,max:30} } },
+    { label: '720p fallback', video: { facingMode: { ideal: 'environment' }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30,max:30} } },
+    { label: 'rear fallback', video: { facingMode: 'environment' } },
+    { label: 'any camera fallback', video: true }
   ];
   let lastErr = null;
+  window.__cameraAttempts = [];
   for (const c of tries) {
     try {
-      stream = await navigator.mediaDevices.getUserMedia(c);
-      console.log('[camera] got stream with', JSON.stringify(c));
+      stream = await navigator.mediaDevices.getUserMedia({ video: c.video });
+      selectedTry = c;
+      window.__cameraAttempts.push({ label: c.label, ok: true });
+      console.log('[camera] got stream:', c.label, JSON.stringify(c.video));
       break;
     } catch(e) {
-      console.warn('[camera] try failed:', c, e.name, e.message);
+      window.__cameraAttempts.push({ label: c.label, ok: false, error: e.name || 'Error', message: e.message || '' });
+      console.warn('[camera] try failed:', c.label, e.name, e.message);
       lastErr = e;
     }
   }
@@ -455,7 +580,22 @@ async function startCamera(videoEl) {
     if (videoEl.videoWidth > 0) return res();
     videoEl.onloadedmetadata = () => res();
   });
-  setText('camera', `${videoEl.videoWidth}×${videoEl.videoHeight}`, 'ok');
+  const track = stream.getVideoTracks()[0];
+  cameraTrack = track;
+  const settings = track && track.getSettings ? track.getSettings() : {};
+  const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+  const focusModes = Array.isArray(caps.focusMode) ? caps.focusMode.join('/') : 'auto';
+  const actualW = settings.width || videoEl.videoWidth;
+  const actualH = settings.height || videoEl.videoHeight;
+  const actualFps = settings.frameRate ? ` @${Math.round(settings.frameRate)}fps` : '';
+  const targetLabel = selectedTry ? selectedTry.label : 'unknown';
+  window.__cameraSettings = { selected: targetLabel, settings, videoWidth: videoEl.videoWidth, videoHeight: videoEl.videoHeight };
+  window.__cameraCapabilities = caps;
+  console.table(window.__cameraAttempts);
+  console.log('[camera] actual settings:', window.__cameraSettings);
+  console.log('[camera] capabilities:', caps);
+  setText('camera', `${actualW}×${actualH}${actualFps} · ${targetLabel}`, 'ok');
+  setText('focusStatus', `탭 초점 · ${focusModes}`, 'wait');
   return stream;
 }
 
@@ -508,7 +648,9 @@ async function startBarcode(videoEl) {
       const paused = $('result').classList.contains('show');
       if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
         const rect = getReticleVideoRect();
-        const maxDim = 640;
+        // 20~30mm급 소형 EAN-13 테스트를 위해 ROI 다운스케일을 최소화한다.
+        // 1080p 목표 스트림 기준 reticle crop은 보통 1920px 이내라 원본 픽셀을 유지한다.
+        const maxDim = 1920;
         const scale = Math.min(1, maxDim / Math.max(rect.w, rect.h));
         canvas.width = Math.round(rect.w * scale);
         canvas.height = Math.round(rect.h * scale);
@@ -525,6 +667,7 @@ async function startBarcode(videoEl) {
             window.__zxingStats.lastResult = text;
             console.log('[zxing] decoded:', text, 'format:', result.getBarcodeFormat());
             const prod = matchByEan(text);
+            finishDecodeTest(true, text, prod);
             if (prod) showResult(prod, 'ean', text);
             else setText('lastHit', `EAN · ${text} (미등록)`, 'err');
           }
@@ -574,6 +717,7 @@ async function bootCore() {
   setMini('boot','카메라 준비 중…');
   const video = $('video');
   await startCamera(video);
+  bindTapToFocus();
   setText('status','바코드 디코더 시작…','wait');
   await startBarcode(video);
   timing.bootReady = performance.now();
@@ -581,8 +725,9 @@ async function bootCore() {
   console.log('[timing] boot ready:', bootMs, 'ms');
   startScanWindow('boot');
   setText('status', `스캔 중… (boot ${bootMs}ms)`, 'ok');
-  setMini('scan','스캔 중');
+  setMini('scan');
   // stats 버튼 바인딩
+  $('testStart').onclick = () => startDecodeTest(10);
   $('statsReset').onclick = resetStats;
   $('statsExport').onclick = exportCsv;
 }

@@ -2,92 +2,207 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Holder AR · EAN-13 테스트 시트</title>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holder AR · EAN-13 단일 바코드 테스트</title>
 <style>
   *{box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:16px;background:#f5f5f5;color:#111}
-  h1{margin:0 0 4px;font-size:18px}
-  .meta{font-size:12px;color:#666;margin-bottom:16px}
-  .toolbar{position:sticky;top:0;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:5}
-  .toolbar button{padding:6px 12px;border:1px solid #888;background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+  html,body{height:100%;min-height:100%;overflow:hidden}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;background:#f2f2f2;color:#111}
+  button{font:inherit}
+  .app{height:100vh;max-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 320px;overflow:hidden}
+  .main{min-width:0;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  h1{margin:0;font-size:20px;line-height:1.25}
+  .meta{margin-top:5px;font-size:13px;color:#666;line-height:1.45}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .toolbar button{padding:8px 12px;border:1px solid #aaa;background:#fff;border-radius:6px;cursor:pointer;font-size:14px}
   .toolbar button:hover{background:#eee}
   .toolbar .size-btn.active{background:#111;color:#fff;border-color:#111}
-  .toolbar .sep{width:1px;height:20px;background:#ddd;margin:0 4px}
-  .grid{display:grid;gap:12px}
-  .card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 8px;text-align:center;page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;align-items:center}
-  .card .name{font-weight:600;font-size:13px;margin:0 0 4px}
-  .card .handle{font-size:9px;color:#888;margin-bottom:6px;font-family:monospace}
-  .card svg{display:block;height:auto}
-  .card .ean{font-family:monospace;font-size:10px;color:#444;margin-top:3px;letter-spacing:0.5px}
+  .board{flex:1;min-height:0;background:#fff;border:1px solid #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:34px;position:relative;overflow:hidden}
+  .board::before{content:"";position:absolute;inset:20px;border:1px dashed #ddd;border-radius:8px;pointer-events:none}
+  .barcode-wrap{width:min(100%,620px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+  .product-name{font-size:42px;font-weight:800;line-height:1.05;text-align:center;letter-spacing:0}
+  .product-sub{font-size:16px;color:#555;text-align:center}
+  .barcode-box{background:#fff;padding:22px 30px;border-radius:2px;display:flex;align-items:center;justify-content:center;min-height:130px}
+  .barcode-html{display:grid;grid-template-columns:repeat(95,1fr);height:96px;background:#fff}
+  .barcode-html span{height:100%;background:transparent}
+  .barcode-html span.on{background:#000}
+  .ean{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:1.5px}
+  .target{font-size:15px;color:#333;background:#f6f6f6;border:1px solid #e2e2e2;border-radius:8px;padding:10px 14px;text-align:center}
+  .target b{font-weight:800}
+  .side{height:100vh;min-height:0;border-left:1px solid #ddd;background:#fff;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+  .side-head{flex:0 0 auto;padding:16px;border-bottom:1px solid #eee}
+  .side-title{font-size:16px;font-weight:800;margin-bottom:8px}
+  .search{width:100%;padding:11px 12px;border:1px solid #ccc;border-radius:7px;font-size:16px}
+  .list{flex:1 1 auto;min-height:0;overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
+  .item{width:100%;text-align:left;border:1px solid transparent;background:#fff;border-radius:8px;padding:12px 11px;cursor:pointer;display:block}
+  .item:hover{background:#f5f5f5}
+  .item.active{background:#111;color:#fff;border-color:#111}
+  .item .name{font-size:20px;font-weight:800;line-height:1.15}
+  .item .code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;margin-top:4px;color:#777}
+  .item.active .code{color:#ccc}
 
-  /* 가로 폭 모드 — bar 영역 자체의 물리 폭. 인쇄·실측 일관성 위해 mm 단위 */
-  body.size-20 .grid{grid-template-columns:repeat(auto-fill,minmax(34mm,1fr))}
-  body.size-20 .card svg{width:20mm}
-  body.size-30 .grid{grid-template-columns:repeat(auto-fill,minmax(44mm,1fr))}
-  body.size-30 .card svg{width:30mm}
-  body.size-40 .grid{grid-template-columns:repeat(auto-fill,minmax(56mm,1fr))}
-  body.size-40 .card svg{width:40mm}
-  body.size-fill .grid{grid-template-columns:repeat(3,1fr)}
-  body.size-fill .card svg{width:100%;height:80px}
+  body.size-20 .barcode-html{width:20mm}
+  body.size-30 .barcode-html{width:30mm}
+  body.size-40 .barcode-html{width:40mm}
+  body.size-fill .barcode-html{width:min(85vw,520px);max-width:520px}
+
+  @media(max-width:860px){
+    html,body{overflow:auto}
+    .app{min-height:100vh;height:auto;max-height:none;grid-template-columns:1fr;overflow:visible}
+    .main{min-height:72vh}
+    .side{height:46vh;min-height:280px;border-left:none;border-top:1px solid #ddd}
+    .product-name{font-size:34px}
+  }
 
   @media print{
-    body{background:#fff;padding:6mm}
-    .toolbar,.meta,h1{display:none}
-    .card{border:1px dashed #ccc;padding:4mm 3mm}
-    .card .handle{display:none}
+    body{background:#fff;overflow:visible}
+    .app{display:block;height:auto}
+    .top,.side{display:none}
+    .main{padding:0}
+    .board{border:none;min-height:180mm;padding:0}
+    .board::before{display:none}
   }
 </style>
 </head>
-<body class="size-30">
-<h1>Holder AR · EAN-13 테스트 시트 (Ju 50종)</h1>
-<div class="meta">JsBarcode 3.11.5 / catalog.json 로드 / GS1 Korea prefix 8800353 / 가로 폭은 bar 영역 기준 (quiet zone 별도)</div>
-<div class="toolbar">
-  <button onclick="window.print()">인쇄 / PDF 저장</button>
-  <span class="sep"></span>
-  <span style="font-size:12px;color:#666">가로 폭:</span>
-  <button class="size-btn" data-size="20">20mm</button>
-  <button class="size-btn active" data-size="30">30mm</button>
-  <button class="size-btn" data-size="40">40mm</button>
-  <button class="size-btn" data-size="fill">화면 채우기</button>
-  <span style="font-size:11px;color:#888;margin-left:auto">권장: 30mm 이상 (GS1 80%~) · 20mm 는 한계 테스트용</span>
+<body class="size-20">
+<div class="app">
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>Holder AR · 단일 바코드 테스트</h1>
+        <div class="meta">오른쪽에서 제품을 선택하면 왼쪽에 바코드 1개만 표시됩니다. 주변 바코드가 카메라에 같이 들어오지 않도록 만든 테스트 화면입니다.</div>
+      </div>
+      <div class="toolbar">
+        <button onclick="window.print()">인쇄 / PDF</button>
+        <button class="size-btn active" data-size="20">20mm</button>
+        <button class="size-btn" data-size="30">30mm</button>
+        <button class="size-btn" data-size="40">40mm</button>
+        <button class="size-btn" data-size="fill">화면 크게</button>
+      </div>
+    </div>
+    <section class="board" aria-label="선택된 바코드">
+      <div class="barcode-wrap">
+        <div class="product-name" id="productName">제품 선택 중</div>
+        <div class="product-sub" id="productSub">오른쪽 목록에서 제품명을 선택하세요</div>
+        <div class="barcode-box" id="barcodeBox"></div>
+        <div class="ean" id="eanText">―</div>
+        <div class="target">일반 사용자는 <b>3초 안에 인식</b>되기를 기대합니다. 스캐너의 <b>10초 테스트</b>에서 3초 이내 PASS가 목표입니다.</div>
+      </div>
+    </section>
+  </main>
+  <aside class="side">
+    <div class="side-head">
+      <div class="side-title">제품 선택</div>
+      <input class="search" id="search" type="search" placeholder="제품명 또는 EAN 검색">
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
 </div>
-<div class="grid" id="grid"></div>
-<script>
-(async () => {
-  const res = await fetch('./catalog.json',{cache:'no-store'});
-  const data = await res.json();
-  const grid = document.getElementById('grid');
-  data.products.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="name">${p.name}</div>
-      <div class="handle">${p.shopifyHandle}</div>
-      <svg></svg>
-      <div class="ean">${p.ean13}</div>
-    `;
-    grid.appendChild(card);
-    const svg = card.querySelector('svg');
-    JsBarcode(svg, p.ean13, {
-      format: 'EAN13',
-      width: 2,
-      height: 60,
-      displayValue: false,
-      margin: 4
-    });
-    // 폭을 CSS(mm) 로 제어할 수 있도록 inline width/height 제거 → viewBox 만 유지
-    svg.removeAttribute('width');
-    svg.removeAttribute('height');
-  });
 
-  // 사이즈 토글
-  document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const s = btn.dataset.size;
-      document.body.className = 'size-' + s;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
+<script>
+let products = [];
+let selected = null;
+
+function renderBarcode(product) {
+  selected = product;
+  document.getElementById('productName').textContent = product.name;
+  document.getElementById('productSub').textContent = product.shopifyHandle || '';
+  document.getElementById('eanText').textContent = product.ean13;
+  const box = document.getElementById('barcodeBox');
+  try {
+    box.innerHTML = renderEan13Html(product.ean13);
+  } catch(e) {
+    console.error('[barcode render failed]', e);
+    box.innerHTML = `<div style="font-size:18px;font-weight:800;color:#b00020">바코드 렌더링 실패<br>${product.ean13}</div>`;
+  }
+  document.querySelectorAll('.item').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ean === product.ean13);
+  });
+}
+
+function assertEan13(code) {
+  if (!/^\d{13}$/.test(code)) throw new Error('EAN-13 must be 13 digits');
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += Number(code[i]) * (i % 2 === 0 ? 1 : 3);
+  }
+  const check = (10 - (sum % 10)) % 10;
+  if (check !== Number(code[12])) throw new Error(`invalid check digit: ${check}`);
+}
+
+function ean13Bits(code) {
+  assertEan13(code);
+  const leftOdd = {
+    0:'0001101',1:'0011001',2:'0010011',3:'0111101',4:'0100011',
+    5:'0110001',6:'0101111',7:'0111011',8:'0110111',9:'0001011'
+  };
+  const leftEven = {
+    0:'0100111',1:'0110011',2:'0011011',3:'0100001',4:'0011101',
+    5:'0111001',6:'0000101',7:'0010001',8:'0001001',9:'0010111'
+  };
+  const right = {
+    0:'1110010',1:'1100110',2:'1101100',3:'1000010',4:'1011100',
+    5:'1001110',6:'1010000',7:'1000100',8:'1001000',9:'1110100'
+  };
+  const parity = {
+    0:'OOOOOO',1:'OOEOEE',2:'OOEEOE',3:'OOEEEO',4:'OEOOEE',
+    5:'OEEOOE',6:'OEEEOO',7:'OEOEOE',8:'OEOEEO',9:'OEEOEO'
+  };
+  let bits = '101';
+  const p = parity[Number(code[0])];
+  for (let i = 1; i <= 6; i++) {
+    const digit = Number(code[i]);
+    bits += p[i - 1] === 'O' ? leftOdd[digit] : leftEven[digit];
+  }
+  bits += '01010';
+  for (let i = 7; i <= 12; i++) bits += right[Number(code[i])];
+  bits += '101';
+  return bits;
+}
+
+function renderEan13Html(code) {
+  const bits = ean13Bits(code);
+  const bars = Array.from(bits, bit => `<span class="${bit === '1' ? 'on' : ''}"></span>`).join('');
+  return `<div class="barcode-html" role="img" aria-label="EAN-13 ${code}">${bars}</div>`;
+}
+
+function renderList(filter = '') {
+  const q = filter.trim().toLowerCase();
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  products
+    .filter(p => !q || p.name.toLowerCase().includes(q) || p.ean13.includes(q))
+    .forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'item';
+      btn.dataset.ean = p.ean13;
+      btn.innerHTML = `<div class="name">${p.name}</div><div class="code">${p.ean13}</div>`;
+      btn.addEventListener('click', () => renderBarcode(p));
+      list.appendChild(btn);
     });
+  if (selected) {
+    document.querySelectorAll('.item').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.ean === selected.ean13);
+    });
+  }
+}
+
+function setSize(size, button) {
+  document.body.className = 'size-' + size;
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === button));
+}
+
+(async () => {
+  const res = await fetch('./catalog.json', { cache: 'no-store' });
+  const data = await res.json();
+  products = data.products || [];
+  renderList();
+  if (products[0]) renderBarcode(products[0]);
+
+  document.getElementById('search').addEventListener('input', e => renderList(e.target.value));
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => setSize(btn.dataset.size, btn));
   });
 })();
 </script>
