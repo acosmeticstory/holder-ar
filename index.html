@@ -443,7 +443,7 @@ function applyStaticI18n() {
 }
 function updateReticleHint() {
   const hint = document.querySelector('.reticle-hint');
-  if (hint) hint.textContent = t('scanPrompt');
+  if (hint) hint.textContent = t(manualSelectHintActive ? 'manualSelectHint' : 'scanPrompt');
   const browseBtn = $('browseBtn');
   if (browseBtn) browseBtn.classList.toggle('manual-pulse', manualSelectHintActive);
 }
@@ -488,7 +488,7 @@ function setMini(kind, text) {
   const el = $('miniStatus');
   if (!el) return;
   el.classList.remove('ok','err');
-  el.classList.toggle('show', Boolean(text) || kind === 'err');
+  el.classList.toggle('show', kind === 'err');
   if (kind === 'scan') el.classList.add('ok');
   else if (kind === 'err') el.classList.add('err');
   $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
@@ -630,16 +630,15 @@ async function refocusCameraAt(x, y) {
   if (focusRetryCount >= 3) {
     manualSelectHintActive = true;
     updateReticleHint();
-    setMini('scan', t('manualSelectHint'));
   } else {
-    setMini('scan', t('refocusing'));
+    updateReticleHint();
   }
 
   const track = cameraTrack;
   if (!track || typeof track.applyConstraints !== 'function') {
     showFocusRing(x, y, 'err');
     setText('focusStatus','초점 제어 미지원','wait');
-    setTimeout(() => setMini('scan', focusRetryCount >= 3 ? t('manualSelectHint') : undefined), 900);
+    setTimeout(() => updateReticleHint(), 900);
     return;
   }
 
@@ -673,7 +672,7 @@ async function refocusCameraAt(x, y) {
     showFocusRing(x, y, 'err');
     setText('focusStatus', `초점 제어 미지원 · ${e.name || 'Error'}`, 'wait');
   } finally {
-    setTimeout(() => setMini('scan', focusRetryCount >= 3 ? t('manualSelectHint') : undefined), 900);
+    setTimeout(() => updateReticleHint(), 900);
   }
 }
 
