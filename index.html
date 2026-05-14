@@ -30,7 +30,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .reticle::after{top:-2px;right:-2px;border-left:none;border-bottom:none;border-radius:0 10px 0 0}
 .reticle i{bottom:-2px;left:-2px;border-right:none;border-top:none;border-radius:0 0 0 10px;display:block}
 .reticle em{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 10px 0;display:block;font-style:normal}
-.reticle-hint{position:fixed;top:calc(50% + min(28vw,135px) + 16px);left:50%;transform:translateX(-50%);z-index:10;width:calc(100vw - 32px);max-width:360px;font-size:12.5px;line-height:1.45;color:#dff5e4;letter-spacing:.45px;text-align:center;white-space:normal;text-shadow:0 0 10px rgba(158,201,169,.72),0 1px 4px rgba(0,0,0,.7)}
+.reticle-hint{position:fixed;top:calc(50% + min(28vw,135px) + 16px);left:50%;transform:translateX(-50%);z-index:10;width:calc(100vw - 32px);max-width:380px;font-size:12.5px;line-height:1.5;color:#dff5e4;letter-spacing:.2px;text-align:center;white-space:normal;word-break:keep-all;overflow-wrap:normal;text-shadow:0 0 10px rgba(158,201,169,.72),0 1px 4px rgba(0,0,0,.7)}
 .reticle-hint::before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#9ec9a9;box-shadow:0 0 12px rgba(158,201,169,.95);animation:guideGlow 1.35s ease-in-out infinite;vertical-align:1px}
 .focus-ring{position:fixed;z-index:15;width:64px;height:64px;margin:-32px 0 0 -32px;border:2px solid #c8b89a;border-radius:50%;pointer-events:none;opacity:0;transform:scale(1.25);transition:opacity .18s ease,transform .18s ease,box-shadow .18s ease}
 .focus-ring.show{opacity:1;transform:scale(1);box-shadow:0 0 0 9999px rgba(0,0,0,.04),0 0 16px rgba(200,184,154,.42)}
@@ -286,7 +286,7 @@ body.debug .mini-status{display:none}
 // ===== Localization =====
 const I18N = {
   ko: {
-    title:'Holder AR 스캐너 · EAN-13', scanPrompt:'제품의 바코드를 박스 안에 비춰주세요', manualSelectHint:'초점을 맞췄는데도 안 된다면 제품을 직접 선택하는 방법이 있어요.', browseProducts:'제품 보기', pageLoading:'페이지 로드 중…',
+    title:'Holder AR 스캐너 · EAN-13', scanPrompt:'제품의 바코드를 박스 안에 비춰주세요', manualSelectHint:'초점을 맞췄는데도 인식이 안된다면?<br>제품을 직접 선택하는 방법이 있어요 · 우측 상단을 보세요 ↗️', browseProducts:'제품 보기', pageLoading:'페이지 로드 중…',
     scriptStart:'스크립트 시작…', cameraPreparing:'카메라 준비 중…', connectionError:'연결 오류', loadingCatalog:'카탈로그 로드 중…',
     requestingCamera:'카메라 준비 중…', startingDecoder:'바코드 디코더 시작…', scanning:'스캔 중…', viewingProduct:'제품 정보 확인 중 · "다시 스캔"으로 재개',
     scanAgain:'다시 스캔', productPage:'제품 페이지 →', errorTitle:'오류', httpsNote:'HTTPS 필수. 같은 WiFi에서 접근하면서 자체 서명 인증서 경고는 "고급 → 이동"으로 수락하세요.',
@@ -298,7 +298,7 @@ const I18N = {
     tapRequired:'탭하여 시작 필요', refocusing:'초점 다시 맞추는 중…'
   },
   en: {
-    title:'Holder AR Scanner · EAN-13', scanPrompt:'Place the product barcode inside the box', manualSelectHint:'If focusing still does not work, you can select the product manually.', browseProducts:'Products', pageLoading:'Loading page…',
+    title:'Holder AR Scanner · EAN-13', scanPrompt:'Place the product barcode inside the box', manualSelectHint:'If focusing still does not work,<br>select the product manually · look top right ↗️', browseProducts:'Products', pageLoading:'Loading page…',
     scriptStart:'Starting script…', cameraPreparing:'Preparing camera…', connectionError:'Connection error', loadingCatalog:'Loading catalog…',
     requestingCamera:'Preparing camera…', startingDecoder:'Starting barcode decoder…', scanning:'Scanning…', viewingProduct:'Checking product · use "Scan again" to resume',
     scanAgain:'Scan again', productPage:'Product page →', errorTitle:'Error', httpsNote:'HTTPS is required. On the same Wi-Fi, accept the self-signed certificate warning from Advanced → Proceed.',
@@ -310,7 +310,7 @@ const I18N = {
     tapRequired:'Tap required to start', refocusing:'Refocusing…'
   },
   ja: {
-    title:'Holder ARスキャナー · EAN-13', scanPrompt:'商品のバーコードを枠内に合わせてください', manualSelectHint:'ピントを合わせても読み取れない場合は、商品を直接選択できます。', browseProducts:'商品を見る', pageLoading:'ページを読み込み中…',
+    title:'Holder ARスキャナー · EAN-13', scanPrompt:'商品のバーコードを枠内に合わせてください', manualSelectHint:'ピントを合わせても読み取れない場合は、<br>商品を直接選択できます · 右上をご覧ください ↗️', browseProducts:'商品を見る', pageLoading:'ページを読み込み中…',
     scriptStart:'スクリプト開始…', cameraPreparing:'カメラを準備中…', connectionError:'接続エラー', loadingCatalog:'カタログを読み込み中…',
     requestingCamera:'カメラを準備中…', startingDecoder:'バーコードデコーダーを開始中…', scanning:'スキャン中…', viewingProduct:'商品情報を確認中 · 「再スキャン」で再開',
     scanAgain:'再スキャン', productPage:'商品ページ →', errorTitle:'エラー', httpsNote:'HTTPSが必要です。同じWi-Fiでアクセスし、自己署名証明書の警告は「詳細 → 続行」で許可してください。',
@@ -322,7 +322,7 @@ const I18N = {
     tapRequired:'開始にはタップが必要です', refocusing:'再フォーカス中…'
   },
   'zh-CN': {
-    title:'Holder AR 扫描器 · EAN-13', scanPrompt:'请将产品条形码对准框内', manualSelectHint:'如果对焦后仍无法识别，也可以直接选择产品。', browseProducts:'查看产品', pageLoading:'页面加载中…',
+    title:'Holder AR 扫描器 · EAN-13', scanPrompt:'请将产品条形码对准框内', manualSelectHint:'如果对焦后仍无法识别，<br>也可以直接选择产品 · 请看右上角 ↗️', browseProducts:'查看产品', pageLoading:'页面加载中…',
     scriptStart:'脚本启动中…', cameraPreparing:'正在准备相机…', connectionError:'连接错误', loadingCatalog:'目录加载中…',
     requestingCamera:'正在准备相机…', startingDecoder:'正在启动条码解码器…', scanning:'扫描中…', viewingProduct:'正在确认产品 · 点击“重新扫描”继续',
     scanAgain:'重新扫描', productPage:'产品页面 →', errorTitle:'错误', httpsNote:'需要 HTTPS。同一 Wi-Fi 下访问时，请在自签名证书警告中选择“高级 → 继续”。',
@@ -334,7 +334,7 @@ const I18N = {
     tapRequired:'需要点击才能启动', refocusing:'正在重新对焦…'
   },
   'zh-TW': {
-    title:'Holder AR 掃描器 · EAN-13', scanPrompt:'請將產品條碼對準框內', manualSelectHint:'如果對焦後仍無法辨識，也可以直接選擇產品。', browseProducts:'查看產品', pageLoading:'頁面載入中…',
+    title:'Holder AR 掃描器 · EAN-13', scanPrompt:'請將產品條碼對準框內', manualSelectHint:'如果對焦後仍無法辨識，<br>也可以直接選擇產品 · 請看右上角 ↗️', browseProducts:'查看產品', pageLoading:'頁面載入中…',
     scriptStart:'腳本啟動中…', cameraPreparing:'正在準備相機…', connectionError:'連線錯誤', loadingCatalog:'目錄載入中…',
     requestingCamera:'正在準備相機…', startingDecoder:'正在啟動條碼解碼器…', scanning:'掃描中…', viewingProduct:'正在確認產品 · 點選「重新掃描」繼續',
     scanAgain:'重新掃描', productPage:'產品頁面 →', errorTitle:'錯誤', httpsNote:'需要 HTTPS。同一 Wi-Fi 下存取時，請在自簽憑證警告中選擇「進階 → 繼續」。',
@@ -346,7 +346,7 @@ const I18N = {
     tapRequired:'需要點一下才能啟動', refocusing:'正在重新對焦…'
   },
   id: {
-    title:'Pemindai Holder AR · EAN-13', scanPrompt:'Arahkan barcode produk ke dalam kotak', manualSelectHint:'Jika tetap tidak terbaca setelah fokus, produk bisa dipilih langsung.', browseProducts:'Produk', pageLoading:'Memuat halaman…',
+    title:'Pemindai Holder AR · EAN-13', scanPrompt:'Arahkan barcode produk ke dalam kotak', manualSelectHint:'Jika tetap tidak terbaca setelah fokus,<br>pilih produk langsung · lihat kanan atas ↗️', browseProducts:'Produk', pageLoading:'Memuat halaman…',
     scriptStart:'Memulai skrip…', cameraPreparing:'Menyiapkan kamera…', connectionError:'Kesalahan koneksi', loadingCatalog:'Memuat katalog…',
     requestingCamera:'Menyiapkan kamera…', startingDecoder:'Memulai pembaca barcode…', scanning:'Memindai…', viewingProduct:'Memeriksa produk · gunakan "Pindai lagi" untuk lanjut',
     scanAgain:'Pindai lagi', productPage:'Halaman produk →', errorTitle:'Kesalahan', httpsNote:'HTTPS wajib. Saat memakai Wi-Fi yang sama, terima peringatan sertifikat melalui Advanced → Proceed.',
@@ -358,7 +358,7 @@ const I18N = {
     tapRequired:'Ketuk untuk memulai', refocusing:'Memfokus ulang…'
   },
   bn: {
-    title:'Holder AR স্ক্যানার · EAN-13', scanPrompt:'পণ্যের বারকোডটি বক্সের ভিতরে ধরুন', manualSelectHint:'ফোকাস করার পরও না হলে পণ্যটি সরাসরি নির্বাচন করা যায়।', browseProducts:'পণ্য দেখুন', pageLoading:'পৃষ্ঠা লোড হচ্ছে…',
+    title:'Holder AR স্ক্যানার · EAN-13', scanPrompt:'পণ্যের বারকোডটি বক্সের ভিতরে ধরুন', manualSelectHint:'ফোকাস করার পরও না হলে,<br>পণ্যটি সরাসরি নির্বাচন করুন · উপরের ডানদিকে দেখুন ↗️', browseProducts:'পণ্য দেখুন', pageLoading:'পৃষ্ঠা লোড হচ্ছে…',
     scriptStart:'স্ক্রিপ্ট শুরু হচ্ছে…', cameraPreparing:'ক্যামেরা প্রস্তুত হচ্ছে…', connectionError:'সংযোগ ত্রুটি', loadingCatalog:'ক্যাটালগ লোড হচ্ছে…',
     requestingCamera:'ক্যামেরা প্রস্তুত হচ্ছে…', startingDecoder:'বারকোড ডিকোডার শুরু হচ্ছে…', scanning:'স্ক্যান হচ্ছে…', viewingProduct:'পণ্য যাচাই হচ্ছে · আবার স্ক্যান করতে "Scan again"',
     scanAgain:'আবার স্ক্যান', productPage:'পণ্য পৃষ্ঠা →', errorTitle:'ত্রুটি', httpsNote:'HTTPS প্রয়োজন। একই Wi-Fi ব্যবহার করলে self-signed certificate সতর্কতায় Advanced → Proceed নির্বাচন করুন।',
@@ -370,7 +370,7 @@ const I18N = {
     tapRequired:'শুরু করতে ট্যাপ প্রয়োজন', refocusing:'ফোকাস আবার করা হচ্ছে…'
   },
   ar: {
-    title:'ماسح Holder AR · EAN-13', scanPrompt:'ضع باركود المنتج داخل الإطار', manualSelectHint:'إذا لم يعمل التركيز، يمكنك اختيار المنتج يدويًا.', browseProducts:'المنتجات', pageLoading:'جاري تحميل الصفحة…',
+    title:'ماسح Holder AR · EAN-13', scanPrompt:'ضع باركود المنتج داخل الإطار', manualSelectHint:'إذا لم يعمل التركيز،<br>اختر المنتج يدويًا · انظر إلى أعلى اليمين ↗️', browseProducts:'المنتجات', pageLoading:'جاري تحميل الصفحة…',
     scriptStart:'جاري بدء السكربت…', cameraPreparing:'جاري تجهيز الكاميرا…', connectionError:'خطأ في الاتصال', loadingCatalog:'جاري تحميل الكتالوج…',
     requestingCamera:'جاري تجهيز الكاميرا…', startingDecoder:'جاري بدء قارئ الباركود…', scanning:'جاري المسح…', viewingProduct:'جاري التحقق من المنتج · استخدم "المسح مرة أخرى" للمتابعة',
     scanAgain:'المسح مرة أخرى', productPage:'صفحة المنتج →', errorTitle:'خطأ', httpsNote:'يتطلب HTTPS. عند الاتصال بنفس شبكة Wi‑Fi، اقبل تحذير الشهادة من Advanced → Proceed.',
@@ -382,7 +382,7 @@ const I18N = {
     tapRequired:'يلزم النقر للبدء', refocusing:'جاري إعادة التركيز…'
   },
   fr: {
-    title:'Scanner Holder AR · EAN-13', scanPrompt:'Placez le code-barres du produit dans le cadre', manualSelectHint:'Si la mise au point ne suffit pas, vous pouvez sélectionner le produit directement.', browseProducts:'Produits', pageLoading:'Chargement de la page…',
+    title:'Scanner Holder AR · EAN-13', scanPrompt:'Placez le code-barres du produit dans le cadre', manualSelectHint:'Si la mise au point ne suffit pas,<br>sélectionnez le produit · regardez en haut à droite ↗️', browseProducts:'Produits', pageLoading:'Chargement de la page…',
     scriptStart:'Démarrage du script…', cameraPreparing:'Préparation de la caméra…', connectionError:'Erreur de connexion', loadingCatalog:'Chargement du catalogue…',
     requestingCamera:'Préparation de la caméra…', startingDecoder:'Démarrage du lecteur de code-barres…', scanning:'Scan en cours…', viewingProduct:'Vérification du produit · utilisez « Scanner à nouveau » pour reprendre',
     scanAgain:'Scanner à nouveau', productPage:'Page produit →', errorTitle:'Erreur', httpsNote:'HTTPS est requis. Sur le même Wi-Fi, acceptez l’avertissement de certificat via Avancé → Continuer.',
@@ -394,7 +394,7 @@ const I18N = {
     tapRequired:'Appui requis pour démarrer', refocusing:'Mise au point…'
   },
   de: {
-    title:'Holder AR Scanner · EAN-13', scanPrompt:'Produkt-Barcode in den Rahmen halten', manualSelectHint:'Wenn es trotz Fokussieren nicht klappt, können Sie das Produkt direkt auswählen.', browseProducts:'Produkte', pageLoading:'Seite wird geladen…',
+    title:'Holder AR Scanner · EAN-13', scanPrompt:'Produkt-Barcode in den Rahmen halten', manualSelectHint:'Wenn es trotz Fokussieren nicht klappt,<br>Produkt direkt auswählen · oben rechts schauen ↗️', browseProducts:'Produkte', pageLoading:'Seite wird geladen…',
     scriptStart:'Skript wird gestartet…', cameraPreparing:'Kamera wird vorbereitet…', connectionError:'Verbindungsfehler', loadingCatalog:'Katalog wird geladen…',
     requestingCamera:'Kamera wird vorbereitet…', startingDecoder:'Barcode-Decoder wird gestartet…', scanning:'Scannen…', viewingProduct:'Produkt wird geprüft · mit „Erneut scannen“ fortfahren',
     scanAgain:'Erneut scannen', productPage:'Produktseite →', errorTitle:'Fehler', httpsNote:'HTTPS ist erforderlich. Im selben WLAN die Zertifikatswarnung über Erweitert → Fortfahren akzeptieren.',
@@ -443,7 +443,7 @@ function applyStaticI18n() {
 }
 function updateReticleHint() {
   const hint = document.querySelector('.reticle-hint');
-  if (hint) hint.textContent = t(manualSelectHintActive ? 'manualSelectHint' : 'scanPrompt');
+  if (hint) hint.innerHTML = t(manualSelectHintActive ? 'manualSelectHint' : 'scanPrompt');
   const browseBtn = $('browseBtn');
   if (browseBtn) browseBtn.classList.toggle('manual-pulse', manualSelectHintActive);
 }
