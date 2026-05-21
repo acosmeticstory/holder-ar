@@ -733,7 +733,14 @@ async function showResult(product, via, rawValue) {
   $('rValue').textContent = '';
   $('rName').innerHTML = product.name.replace(/(\w+)\s+(\S+)/, '$1 <b>$2</b>');
   $('rSub').textContent = [product.color, product.structure].filter(Boolean).join(' · ');
-  $('rShopLink').href = product.shopifyUrl;
+  const shopLink = $('rShopLink');
+  if (product.shopifyUrl) {
+    shopLink.href = product.shopifyUrl;
+    shopLink.style.display = '';
+  } else {
+    shopLink.removeAttribute('href');
+    shopLink.style.display = 'none';
+  }
   $('rImg').innerHTML = `<span id="rImgFallback">${t('loadingImage')}</span>`;
   $('rShopTitle').textContent = '';
   $('rShopPrice').textContent = '';
@@ -1027,7 +1034,7 @@ async function fetchCollection(handle) {
     if (!catalog.length) await loadCatalog();
     const items = catalog
       .filter(p => /^Sai-s\b/i.test(p.name))
-      .slice(0, 10);
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
     const saiProducts = await fetchShopifyCollection('sai').catch(() => []);
     const byHandle = new Map(saiProducts.map(p => [p.handle, p]));
     const products = items.map(p => {
@@ -1046,13 +1053,17 @@ async function fetchCollection(handle) {
     return products;
   }
   if (handle === 'sai-m') {
-    const products = Array.from({length: 10}, (_, i) => ({
-      handle: '',
-      title: `Sai-m ${String(i + 1).padStart(2, '0')}`,
-      image: '',
-      price: '',
-      url: ''
-    }));
+    if (!catalog.length) await loadCatalog();
+    const products = catalog
+      .filter(p => /^Sai-m\b/i.test(p.name))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}))
+      .map(p => ({
+        handle: p.shopifyHandle || '',
+        title: p.name,
+        image: '',
+        price: '',
+        url: ''
+      }));
     collectionCache[handle] = products;
     return products;
   }

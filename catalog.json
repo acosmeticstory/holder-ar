@@ -1,65 +1,905 @@
 {
-  "_comment": "Holder AR catalog · 2026-05-11 Ju 50종 정식 EAN-13 (GS1 Korea prefix 8800353) → Shopify handle 매핑. 2026-05-14 Sai-s 01~10 임시 매칭 추가.",
+  "_comment": "Holder AR catalog: Ju 50, Sai-s 50, Sai-m 50. Updated 2026-05-21. Sai-m image/url intentionally blank for Coming soon.",
   "products": [
-    { "ean13": "8800353210956", "name": "Ju 01", "shopifyHandle": "ju-1",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-1" },
-    { "ean13": "8800353210963", "name": "Ju 02", "shopifyHandle": "ju-double-clear-white-inner-사본-1",                                  "shopifyUrl": "https://www.acosmeticstory.com/products/ju-double-clear-white-inner-사본-1" },
-    { "ean13": "8800353210970", "name": "Ju 03", "shopifyHandle": "ju-double-matte-clear-cap-white-inner-clear-body-holder-사본",        "shopifyUrl": "https://www.acosmeticstory.com/products/ju-double-matte-clear-cap-white-inner-clear-body-holder-사본" },
-    { "ean13": "8800353210987", "name": "Ju 04", "shopifyHandle": "ju-05-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-05-holder" },
-    { "ean13": "8800353210994", "name": "Ju 05", "shopifyHandle": "ju-09-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-09-holder" },
-    { "ean13": "8800353211007", "name": "Ju 06", "shopifyHandle": "ju-11-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-11-holder" },
-    { "ean13": "8800353211014", "name": "Ju 07", "shopifyHandle": "ju-13-holder-1",                                                     "shopifyUrl": "https://www.acosmeticstory.com/products/ju-13-holder-1" },
-    { "ean13": "8800353211021", "name": "Ju 08", "shopifyHandle": "ju-15-holder-사본",                                                    "shopifyUrl": "https://www.acosmeticstory.com/products/ju-15-holder-사본" },
-    { "ean13": "8800353211038", "name": "Ju 09", "shopifyHandle": "ju-16-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-16-holder" },
-    { "ean13": "8800353211045", "name": "Ju 10", "shopifyHandle": "ju-17-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-17-holder" },
-    { "ean13": "8800353211052", "name": "Ju 11", "shopifyHandle": "ju-23-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-23-holder" },
-    { "ean13": "8800353211069", "name": "Ju 12", "shopifyHandle": "ju-24-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-24-holder" },
-    { "ean13": "8800353211076", "name": "Ju 13", "shopifyHandle": "jud-02-holder",                                                      "shopifyUrl": "https://www.acosmeticstory.com/products/jud-02-holder" },
-    { "ean13": "8800353211083", "name": "Ju 14", "shopifyHandle": "jud-02-holder-사본",                                                   "shopifyUrl": "https://www.acosmeticstory.com/products/jud-02-holder-사본" },
-    { "ean13": "8800353211090", "name": "Ju 15", "shopifyHandle": "jud-29-holder",                                                      "shopifyUrl": "https://www.acosmeticstory.com/products/jud-29-holder" },
-    { "ean13": "8800353211106", "name": "Ju 16", "shopifyHandle": "jud-29-holder-사본",                                                   "shopifyUrl": "https://www.acosmeticstory.com/products/jud-29-holder-사본" },
-    { "ean13": "8800353211113", "name": "Ju 17", "shopifyHandle": "ju-30-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-30-holder" },
-    { "ean13": "8800353211120", "name": "Ju 18", "shopifyHandle": "ju-31-holder-사본",                                                    "shopifyUrl": "https://www.acosmeticstory.com/products/ju-31-holder-사본" },
-    { "ean13": "8800353211137", "name": "Ju 19", "shopifyHandle": "ju-32-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-32-holder" },
-    { "ean13": "8800353211144", "name": "Ju 20", "shopifyHandle": "ju-33-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-33-holder" },
-    { "ean13": "8800353211151", "name": "Ju 21", "shopifyHandle": "ju-21-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-21-holder" },
-    { "ean13": "8800353211168", "name": "Ju 22", "shopifyHandle": "ju-212holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-212holder" },
-    { "ean13": "8800353211175", "name": "Ju 23", "shopifyHandle": "ju-23holder",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/ju-23holder" },
-    { "ean13": "8800353211182", "name": "Ju 24", "shopifyHandle": "ju-24-holder-1",                                                     "shopifyUrl": "https://www.acosmeticstory.com/products/ju-24-holder-1" },
-    { "ean13": "8800353211199", "name": "Ju 25", "shopifyHandle": "ju-25-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-25-holder" },
-    { "ean13": "8800353211205", "name": "Ju 26", "shopifyHandle": "ju-26-holder",                                                       "shopifyUrl": "https://www.acosmeticstory.com/products/ju-26-holder" },
-    { "ean13": "8800353211212", "name": "Ju 27", "shopifyHandle": "ju-27",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-27" },
-    { "ean13": "8800353211229", "name": "Ju 28", "shopifyHandle": "ju-28",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-28" },
-    { "ean13": "8800353211236", "name": "Ju 29", "shopifyHandle": "ju-29",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-29" },
-    { "ean13": "8800353211243", "name": "Ju 30", "shopifyHandle": "ju-30",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-30" },
-    { "ean13": "8800353211250", "name": "Ju 31", "shopifyHandle": "ju-31",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-31" },
-    { "ean13": "8800353211267", "name": "Ju 32", "shopifyHandle": "ju-32",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-32" },
-    { "ean13": "8800353211274", "name": "Ju 33", "shopifyHandle": "ju-33",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-33" },
-    { "ean13": "8800353211281", "name": "Ju 34", "shopifyHandle": "ju-34",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-34" },
-    { "ean13": "8800353211298", "name": "Ju 35", "shopifyHandle": "ju-35",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-35" },
-    { "ean13": "8800353211304", "name": "Ju 36", "shopifyHandle": "ju-36",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-36" },
-    { "ean13": "8800353211311", "name": "Ju 37", "shopifyHandle": "ju-37",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-37" },
-    { "ean13": "8800353211328", "name": "Ju 38", "shopifyHandle": "ju-38",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-38" },
-    { "ean13": "8800353211335", "name": "Ju 39", "shopifyHandle": "ju-39",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-39" },
-    { "ean13": "8800353211342", "name": "Ju 40", "shopifyHandle": "ju-40",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-40" },
-    { "ean13": "8800353211359", "name": "Ju 41", "shopifyHandle": "ju-41",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-41" },
-    { "ean13": "8800353211366", "name": "Ju 42", "shopifyHandle": "ju-42",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-42" },
-    { "ean13": "8800353211373", "name": "Ju 43", "shopifyHandle": "ju-43",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-43" },
-    { "ean13": "8800353211380", "name": "Ju 44", "shopifyHandle": "ju-44",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-44" },
-    { "ean13": "8800353211397", "name": "Ju 45", "shopifyHandle": "ju-45",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-45" },
-    { "ean13": "8800353211403", "name": "Ju 46", "shopifyHandle": "ju-46",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-46" },
-    { "ean13": "8800353211410", "name": "Ju 47", "shopifyHandle": "ju-47",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-47" },
-    { "ean13": "8800353211427", "name": "Ju 48", "shopifyHandle": "ju-48",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-48" },
-    { "ean13": "8800353211434", "name": "Ju 49", "shopifyHandle": "ju-49",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-49" },
-    { "ean13": "8800353211441", "name": "Ju 50", "shopifyHandle": "ju-51",                                                              "shopifyUrl": "https://www.acosmeticstory.com/products/ju-51" },
-    { "ean13": "8800353211458", "name": "Sai-s 01", "shopifyHandle": "sai15-m36",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36" },
-    { "ean13": "8800353211465", "name": "Sai-s 02", "shopifyHandle": "sai15-m35",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35" },
-    { "ean13": "8800353211472", "name": "Sai-s 03", "shopifyHandle": "sai15-m34",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34" },
-    { "ean13": "8800353211489", "name": "Sai-s 04", "shopifyHandle": "sai15-m33",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33" },
-    { "ean13": "8800353211496", "name": "Sai-s 05", "shopifyHandle": "sai15-m32",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32" },
-    { "ean13": "8800353211502", "name": "Sai-s 06", "shopifyHandle": "sai15-m31",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31" },
-    { "ean13": "8800353211519", "name": "Sai-s 07", "shopifyHandle": "sai15-m30",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30" },
-    { "ean13": "8800353211526", "name": "Sai-s 08", "shopifyHandle": "sai15-m29",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29" },
-    { "ean13": "8800353211533", "name": "Sai-s 09", "shopifyHandle": "sai15-m28",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m28" },
-    { "ean13": "8800353211540", "name": "Sai-s 10", "shopifyHandle": "sai15-m27",                                                        "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m27" }
+    {
+      "ean13": "8800353210956",
+      "name": "Ju 01",
+      "shopifyHandle": "ju-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-1"
+    },
+    {
+      "ean13": "8800353210963",
+      "name": "Ju 02",
+      "shopifyHandle": "ju-double-clear-white-inner-사본-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-double-clear-white-inner-사본-1"
+    },
+    {
+      "ean13": "8800353210970",
+      "name": "Ju 03",
+      "shopifyHandle": "ju-double-matte-clear-cap-white-inner-clear-body-holder-사본",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-double-matte-clear-cap-white-inner-clear-body-holder-사본"
+    },
+    {
+      "ean13": "8800353210987",
+      "name": "Ju 04",
+      "shopifyHandle": "ju-05-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-05-holder"
+    },
+    {
+      "ean13": "8800353210994",
+      "name": "Ju 05",
+      "shopifyHandle": "ju-09-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-09-holder"
+    },
+    {
+      "ean13": "8800353211007",
+      "name": "Ju 06",
+      "shopifyHandle": "ju-11-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-11-holder"
+    },
+    {
+      "ean13": "8800353211014",
+      "name": "Ju 07",
+      "shopifyHandle": "ju-13-holder-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-13-holder-1"
+    },
+    {
+      "ean13": "8800353211021",
+      "name": "Ju 08",
+      "shopifyHandle": "ju-15-holder-사본",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-15-holder-사본"
+    },
+    {
+      "ean13": "8800353211038",
+      "name": "Ju 09",
+      "shopifyHandle": "ju-16-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-16-holder"
+    },
+    {
+      "ean13": "8800353211045",
+      "name": "Ju 10",
+      "shopifyHandle": "ju-17-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-17-holder"
+    },
+    {
+      "ean13": "8800353211052",
+      "name": "Ju 11",
+      "shopifyHandle": "ju-23-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-23-holder"
+    },
+    {
+      "ean13": "8800353211069",
+      "name": "Ju 12",
+      "shopifyHandle": "ju-24-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-24-holder"
+    },
+    {
+      "ean13": "8800353211076",
+      "name": "Ju 13",
+      "shopifyHandle": "jud-02-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/jud-02-holder"
+    },
+    {
+      "ean13": "8800353211083",
+      "name": "Ju 14",
+      "shopifyHandle": "jud-02-holder-사본",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/jud-02-holder-사본"
+    },
+    {
+      "ean13": "8800353211090",
+      "name": "Ju 15",
+      "shopifyHandle": "jud-29-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/jud-29-holder"
+    },
+    {
+      "ean13": "8800353211106",
+      "name": "Ju 16",
+      "shopifyHandle": "jud-29-holder-사본",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/jud-29-holder-사본"
+    },
+    {
+      "ean13": "8800353211113",
+      "name": "Ju 17",
+      "shopifyHandle": "ju-30-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-30-holder"
+    },
+    {
+      "ean13": "8800353211120",
+      "name": "Ju 18",
+      "shopifyHandle": "ju-31-holder-사본",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-31-holder-사본"
+    },
+    {
+      "ean13": "8800353211137",
+      "name": "Ju 19",
+      "shopifyHandle": "ju-32-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-32-holder"
+    },
+    {
+      "ean13": "8800353211144",
+      "name": "Ju 20",
+      "shopifyHandle": "ju-33-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-33-holder"
+    },
+    {
+      "ean13": "8800353211151",
+      "name": "Ju 21",
+      "shopifyHandle": "ju-21-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-21-holder"
+    },
+    {
+      "ean13": "8800353211168",
+      "name": "Ju 22",
+      "shopifyHandle": "ju-212holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-212holder"
+    },
+    {
+      "ean13": "8800353211175",
+      "name": "Ju 23",
+      "shopifyHandle": "ju-23holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-23holder"
+    },
+    {
+      "ean13": "8800353211182",
+      "name": "Ju 24",
+      "shopifyHandle": "ju-24-holder-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-24-holder-1"
+    },
+    {
+      "ean13": "8800353211199",
+      "name": "Ju 25",
+      "shopifyHandle": "ju-25-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-25-holder"
+    },
+    {
+      "ean13": "8800353211205",
+      "name": "Ju 26",
+      "shopifyHandle": "ju-26-holder",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-26-holder"
+    },
+    {
+      "ean13": "8800353211212",
+      "name": "Ju 27",
+      "shopifyHandle": "ju-27",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-27"
+    },
+    {
+      "ean13": "8800353211229",
+      "name": "Ju 28",
+      "shopifyHandle": "ju-28",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-28"
+    },
+    {
+      "ean13": "8800353211236",
+      "name": "Ju 29",
+      "shopifyHandle": "ju-29",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-29"
+    },
+    {
+      "ean13": "8800353211243",
+      "name": "Ju 30",
+      "shopifyHandle": "ju-30",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-30"
+    },
+    {
+      "ean13": "8800353211250",
+      "name": "Ju 31",
+      "shopifyHandle": "ju-31",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-31"
+    },
+    {
+      "ean13": "8800353211267",
+      "name": "Ju 32",
+      "shopifyHandle": "ju-32",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-32"
+    },
+    {
+      "ean13": "8800353211274",
+      "name": "Ju 33",
+      "shopifyHandle": "ju-33",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-33"
+    },
+    {
+      "ean13": "8800353211281",
+      "name": "Ju 34",
+      "shopifyHandle": "ju-34",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-34"
+    },
+    {
+      "ean13": "8800353211298",
+      "name": "Ju 35",
+      "shopifyHandle": "ju-35",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-35"
+    },
+    {
+      "ean13": "8800353211304",
+      "name": "Ju 36",
+      "shopifyHandle": "ju-36",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-36"
+    },
+    {
+      "ean13": "8800353211311",
+      "name": "Ju 37",
+      "shopifyHandle": "ju-37",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-37"
+    },
+    {
+      "ean13": "8800353211328",
+      "name": "Ju 38",
+      "shopifyHandle": "ju-38",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-38"
+    },
+    {
+      "ean13": "8800353211335",
+      "name": "Ju 39",
+      "shopifyHandle": "ju-39",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-39"
+    },
+    {
+      "ean13": "8800353211342",
+      "name": "Ju 40",
+      "shopifyHandle": "ju-40",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-40"
+    },
+    {
+      "ean13": "8800353211359",
+      "name": "Ju 41",
+      "shopifyHandle": "ju-41",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-41"
+    },
+    {
+      "ean13": "8800353211366",
+      "name": "Ju 42",
+      "shopifyHandle": "ju-42",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-42"
+    },
+    {
+      "ean13": "8800353211373",
+      "name": "Ju 43",
+      "shopifyHandle": "ju-43",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-43"
+    },
+    {
+      "ean13": "8800353211380",
+      "name": "Ju 44",
+      "shopifyHandle": "ju-44",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-44"
+    },
+    {
+      "ean13": "8800353211397",
+      "name": "Ju 45",
+      "shopifyHandle": "ju-45",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-45"
+    },
+    {
+      "ean13": "8800353211403",
+      "name": "Ju 46",
+      "shopifyHandle": "ju-46",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-46"
+    },
+    {
+      "ean13": "8800353211410",
+      "name": "Ju 47",
+      "shopifyHandle": "ju-47",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-47"
+    },
+    {
+      "ean13": "8800353211427",
+      "name": "Ju 48",
+      "shopifyHandle": "ju-48",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-48"
+    },
+    {
+      "ean13": "8800353211434",
+      "name": "Ju 49",
+      "shopifyHandle": "ju-49",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-49"
+    },
+    {
+      "ean13": "8800353211441",
+      "name": "Ju 50",
+      "shopifyHandle": "ju-51",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/ju-51"
+    },
+    {
+      "ean13": "8800353211458",
+      "name": "Sai-s 01",
+      "shopifyHandle": "sai15-m36",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36"
+    },
+    {
+      "ean13": "8800353211465",
+      "name": "Sai-s 02",
+      "shopifyHandle": "sai15-m35",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35"
+    },
+    {
+      "ean13": "8800353211472",
+      "name": "Sai-s 03",
+      "shopifyHandle": "sai15-m34",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34"
+    },
+    {
+      "ean13": "8800353211489",
+      "name": "Sai-s 04",
+      "shopifyHandle": "sai15-m33",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33"
+    },
+    {
+      "ean13": "8800353211496",
+      "name": "Sai-s 05",
+      "shopifyHandle": "sai15-m32",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32"
+    },
+    {
+      "ean13": "8800353211502",
+      "name": "Sai-s 06",
+      "shopifyHandle": "sai15-m31",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31"
+    },
+    {
+      "ean13": "8800353211519",
+      "name": "Sai-s 07",
+      "shopifyHandle": "sai15-m30",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30"
+    },
+    {
+      "ean13": "8800353211526",
+      "name": "Sai-s 08",
+      "shopifyHandle": "sai15-m29",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29"
+    },
+    {
+      "ean13": "8800353211533",
+      "name": "Sai-s 09",
+      "shopifyHandle": "sai15-m28",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m28"
+    },
+    {
+      "ean13": "8800353211540",
+      "name": "Sai-s 10",
+      "shopifyHandle": "sai15-m27",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m27"
+    },
+    {
+      "ean13": "8800353211557",
+      "name": "Sai-s 11",
+      "shopifyHandle": "sai15-m26",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m26"
+    },
+    {
+      "ean13": "8800353211564",
+      "name": "Sai-s 12",
+      "shopifyHandle": "sai15-m25",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m25"
+    },
+    {
+      "ean13": "8800353211571",
+      "name": "Sai-s 13",
+      "shopifyHandle": "sai15-m24",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m24"
+    },
+    {
+      "ean13": "8800353211588",
+      "name": "Sai-s 14",
+      "shopifyHandle": "sai15-m23",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m23"
+    },
+    {
+      "ean13": "8800353211595",
+      "name": "Sai-s 15",
+      "shopifyHandle": "sai15-m22",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m22"
+    },
+    {
+      "ean13": "8800353211601",
+      "name": "Sai-s 16",
+      "shopifyHandle": "sai15-m21",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m21"
+    },
+    {
+      "ean13": "8800353211618",
+      "name": "Sai-s 17",
+      "shopifyHandle": "sai15-m20",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m20"
+    },
+    {
+      "ean13": "8800353211625",
+      "name": "Sai-s 18",
+      "shopifyHandle": "sai15-m19",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m19"
+    },
+    {
+      "ean13": "8800353211632",
+      "name": "Sai-s 19",
+      "shopifyHandle": "sai15-m18",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m18"
+    },
+    {
+      "ean13": "8800353211649",
+      "name": "Sai-s 20",
+      "shopifyHandle": "sai15-m17",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m17"
+    },
+    {
+      "ean13": "8800353211656",
+      "name": "Sai-s 21",
+      "shopifyHandle": "sai15-m16",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m16"
+    },
+    {
+      "ean13": "8800353211663",
+      "name": "Sai-s 22",
+      "shopifyHandle": "sai15-m15",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m15"
+    },
+    {
+      "ean13": "8800353211670",
+      "name": "Sai-s 23",
+      "shopifyHandle": "sai15-m14",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m14"
+    },
+    {
+      "ean13": "8800353211687",
+      "name": "Sai-s 24",
+      "shopifyHandle": "sai15-m13",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m13"
+    },
+    {
+      "ean13": "8800353211694",
+      "name": "Sai-s 25",
+      "shopifyHandle": "sai15-m12",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m12"
+    },
+    {
+      "ean13": "8800353211700",
+      "name": "Sai-s 26",
+      "shopifyHandle": "sai15-m11",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m11"
+    },
+    {
+      "ean13": "8800353211717",
+      "name": "Sai-s 27",
+      "shopifyHandle": "sai15-m10",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m10"
+    },
+    {
+      "ean13": "8800353211724",
+      "name": "Sai-s 28",
+      "shopifyHandle": "sai15-m09",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m09"
+    },
+    {
+      "ean13": "8800353211731",
+      "name": "Sai-s 29",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211748",
+      "name": "Sai-s 30",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211755",
+      "name": "Sai-s 31",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211762",
+      "name": "Sai-s 32",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211779",
+      "name": "Sai-s 33",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211786",
+      "name": "Sai-s 34",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211793",
+      "name": "Sai-s 35",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211809",
+      "name": "Sai-s 36",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211816",
+      "name": "Sai-s 37",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211823",
+      "name": "Sai-s 38",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211830",
+      "name": "Sai-s 39",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211847",
+      "name": "Sai-s 40",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211854",
+      "name": "Sai-s 41",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211861",
+      "name": "Sai-s 42",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211878",
+      "name": "Sai-s 43",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211885",
+      "name": "Sai-s 44",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211892",
+      "name": "Sai-s 45",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211908",
+      "name": "Sai-s 46",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211915",
+      "name": "Sai-s 47",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211922",
+      "name": "Sai-s 48",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211939",
+      "name": "Sai-s 49",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211946",
+      "name": "Sai-s 50",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211953",
+      "name": "Sai-m 01",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211960",
+      "name": "Sai-m 02",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211977",
+      "name": "Sai-m 03",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211984",
+      "name": "Sai-m 04",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353211991",
+      "name": "Sai-m 05",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212004",
+      "name": "Sai-m 06",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212011",
+      "name": "Sai-m 07",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212028",
+      "name": "Sai-m 08",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212035",
+      "name": "Sai-m 09",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212042",
+      "name": "Sai-m 10",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212059",
+      "name": "Sai-m 11",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212066",
+      "name": "Sai-m 12",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212073",
+      "name": "Sai-m 13",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212080",
+      "name": "Sai-m 14",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212097",
+      "name": "Sai-m 15",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212103",
+      "name": "Sai-m 16",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212110",
+      "name": "Sai-m 17",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212127",
+      "name": "Sai-m 18",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212134",
+      "name": "Sai-m 19",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212141",
+      "name": "Sai-m 20",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212158",
+      "name": "Sai-m 21",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212165",
+      "name": "Sai-m 22",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212172",
+      "name": "Sai-m 23",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212189",
+      "name": "Sai-m 24",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212196",
+      "name": "Sai-m 25",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212202",
+      "name": "Sai-m 26",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212219",
+      "name": "Sai-m 27",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212226",
+      "name": "Sai-m 28",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212233",
+      "name": "Sai-m 29",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212240",
+      "name": "Sai-m 30",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212257",
+      "name": "Sai-m 31",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212264",
+      "name": "Sai-m 32",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212271",
+      "name": "Sai-m 33",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212288",
+      "name": "Sai-m 34",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212295",
+      "name": "Sai-m 35",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212301",
+      "name": "Sai-m 36",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212318",
+      "name": "Sai-m 37",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212325",
+      "name": "Sai-m 38",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212332",
+      "name": "Sai-m 39",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212349",
+      "name": "Sai-m 40",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212356",
+      "name": "Sai-m 41",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212363",
+      "name": "Sai-m 42",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212370",
+      "name": "Sai-m 43",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212387",
+      "name": "Sai-m 44",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212394",
+      "name": "Sai-m 45",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212400",
+      "name": "Sai-m 46",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212417",
+      "name": "Sai-m 47",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212424",
+      "name": "Sai-m 48",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212431",
+      "name": "Sai-m 49",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    },
+    {
+      "ean13": "8800353212448",
+      "name": "Sai-m 50",
+      "shopifyHandle": "",
+      "shopifyUrl": ""
+    }
   ]
 }
