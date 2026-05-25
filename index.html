@@ -103,7 +103,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .lang-select option{background:#1a1a1a;color:#fff}
 .browse-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;border-radius:20px;cursor:pointer;font-family:'Noto Sans KR','DM Sans',sans-serif;font-size:12.5px;font-weight:500;letter-spacing:.3px;white-space:nowrap;flex:0 0 auto;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .browse-btn:active{background:rgba(255,255,255,.22)}
-.browse-btn.on{background:#3d5a4c;border-color:#9ec9a9;color:#dff5e4}
 .browse-btn svg{width:14px;height:14px;opacity:.9}
 .browse-btn span{white-space:nowrap}
 
@@ -186,14 +185,6 @@ body.debug .mini-status{display:none}
 <span class="tag">Holder</span>
 </div>
 <div class="top-actions">
-<button class="browse-btn" id="focusLockBtn" aria-label="초점 잠금" style="display:none">
-<svg viewBox="0 0 16 16" fill="none"><path d="M4 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
-<span id="focusLockLabel">잠금</span>
-</button>
-<button class="browse-btn" id="lensBtn" aria-label="렌즈 전환" style="display:none">
-<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
-<span id="lensBtnLabel">렌즈</span>
-</button>
 <select class="lang-select" id="langSelect" aria-label="Language">
 <option value="ko">KO</option>
 <option value="en">EN</option>
@@ -509,12 +500,8 @@ let stopped = false;
 let zxingReader = null;
 let scanTest = null;
 let cameraTrack = null;
-let cameraStream = null;
-let backCameras = []; // [{id, label, hint:'ultra'|'macro'|'main'|'unknown'}]
-let currentCameraIdx = -1;
 let lastFocusTapAt = 0;
 let focusRetryCount = 0;
-let focusLocked = false;
 
 // ===== 타이밍 계측 =====
 const timing = {
@@ -840,152 +827,15 @@ function dismissResult(){
 }
 
 // ===== 5. Layer 1 · zxing-js EAN-13 연속 스캔 =====
-// 후면 카메라가 여러 개인 폰(예: Galaxy Z Flip의 wide+ultrawide)에서 Chrome은 보통
-// 메인 wide만 골라준다. 메인 wide의 최소 초점 거리(~10~15cm)가 EAN-13 거리(5cm 안팎)
-// 보다 길어서 절대 초점이 안 잡히는 케이스가 발생한다. 라벨 휴리스틱으로 ultra-wide /
-// macro 렌즈를 우선 선택한다.
-function classifyLensLabel(label) {
-  if (/macro/i.test(label)) return 'macro';
-  if (/ultra[\s-]?wide|0\.?5\s*x|wide.*0\.?5/i.test(label)) return 'ultra';
-  if (/tele/i.test(label)) return 'tele';
-  if (/\bwide\b/i.test(label)) return 'main';
-  return 'unknown';
-}
-
-async function findPreferredBackCameraId() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return null;
-  // 권한이 없으면 label이 빈 문자열이라 매칭 불가 → 임시 스트림으로 권한 prime
-  let primer = null;
-  try {
-    primer = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
-  } catch(e) {
-    console.warn('[camera] enumerate primer failed:', e.name, e.message);
-    return null;
-  }
-  let preferredId = null;
-  let allBack = [];
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const cams = devices.filter(d => d.kind === 'videoinput');
-    // facing back인 것 우선 (label이 항상 'back'을 포함하진 않지만, 'front'/'user'는 제외)
-    allBack = cams.filter(d => !/front|user/i.test(d.label));
-    if (!allBack.length) allBack = cams;
-    backCameras = allBack.map(d => ({ id: d.deviceId, label: d.label, hint: classifyLensLabel(d.label) }));
-    window.__allCameras = backCameras;
-    console.log('[camera] back cams:', backCameras);
-    // 우선순위: macro > ultra-wide/0.5x. main/tele는 회피.
-    const macro = backCameras.find(d => d.hint === 'macro');
-    const ultra = backCameras.find(d => d.hint === 'ultra');
-    const pick = macro || ultra || null;
-    preferredId = pick ? pick.id : null;
-    if (preferredId) console.log('[camera] preferred ultrawide/macro:', pick.label);
-  } catch(e) {
-    console.warn('[camera] enumerateDevices failed:', e.message);
-  } finally {
-    if (primer) primer.getTracks().forEach(t => t.stop());
-  }
-  return preferredId;
-}
-
-// 사용자 토글로 다음 후면 렌즈로 stream 교체
-async function cycleCameraLens() {
-  if (!backCameras.length) return;
-  // 다음 인덱스로 진행 (현재 사용 중인 deviceId를 기준)
-  const curId = cameraTrack && cameraTrack.getSettings ? cameraTrack.getSettings().deviceId : null;
-  const curIdx = backCameras.findIndex(c => c.id === curId);
-  currentCameraIdx = (curIdx >= 0 ? curIdx + 1 : currentCameraIdx + 1) % backCameras.length;
-  const next = backCameras[currentCameraIdx];
-  console.log('[camera] switching to:', next.label || next.id);
-  try {
-    const newStream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: { exact: next.id }, width:{ideal:1920}, height:{ideal:1080} }
-    });
-    // 기존 stream 정리
-    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = newStream;
-    const video = $('video');
-    video.srcObject = newStream;
-    await video.play().catch(()=>{});
-    cameraTrack = newStream.getVideoTracks()[0];
-    await applyBootFocusConstraints(cameraTrack);
-    updateLensBtnLabel();
-    updateFocusLockBtn(cameraTrack);
-    setMini('scan');
-  } catch(e) {
-    console.warn('[camera] cycle failed:', e.name, e.message);
-    setMini('err', '렌즈 전환 실패 · ' + (e.name || 'Error'));
-  }
-}
-
-async function toggleFocusLock() {
-  focusLocked = !focusLocked;
-  const btn = $('focusLockBtn');
-  if (btn) btn.classList.toggle('on', focusLocked);
-  const label = $('focusLockLabel');
-  if (label) label.textContent = focusLocked ? '잠금 ✓' : '잠금';
-  if (cameraTrack) await applyBootFocusConstraints(cameraTrack);
-  setMini('scan', focusLocked ? '매크로 잠금 — 10cm 거리 유지' : '');
-}
-
-function updateFocusLockBtn(track) {
-  const btn = $('focusLockBtn');
-  if (!btn || !track) return;
-  // focusDistance 미지원 폰에서는 잠금 의미 없으니 숨김
-  const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
-  const supported = (caps.focusDistance && typeof caps.focusDistance.min === 'number') ||
-                    (Array.isArray(caps.focusMode) && (caps.focusMode.includes('manual') || caps.focusMode.includes('single-shot')));
-  btn.style.display = supported ? 'flex' : 'none';
-}
-
-function updateLensBtnLabel() {
-  const btn = $('lensBtn');
-  if (!btn) return;
-  if (backCameras.length < 2) { btn.style.display = 'none'; return; }
-  btn.style.display = 'flex';
-  const curId = cameraTrack && cameraTrack.getSettings ? cameraTrack.getSettings().deviceId : null;
-  const cur = backCameras.find(c => c.id === curId);
-  const hint = cur && cur.hint;
-  const txt = hint === 'ultra' ? '0.5x' : hint === 'macro' ? 'Macro' : hint === 'tele' ? 'Tele' : hint === 'main' ? '1x' : '렌즈';
-  const idx = cur ? (backCameras.indexOf(cur) + 1) : 0;
-  $('lensBtnLabel').textContent = `${txt} ${idx}/${backCameras.length}`;
-}
-
+// continuous AF/AE/AWB만 요청. 디지털 줌이나 ultra-wide 강제는 안 함 (보간 손실 + 화각 왜곡 부작용).
 async function applyBootFocusConstraints(track) {
   if (!track || typeof track.applyConstraints !== 'function') return;
   const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
-  // 매크로 잠금 상태면 manual + 최소 focusDistance로 락. continuous AF 자체를 건너뜀.
-  if (focusLocked) {
-    const lockAdv = [];
-    if (Array.isArray(caps.focusMode) && caps.focusMode.includes('manual')) {
-      lockAdv.push({ focusMode: 'manual' });
-    } else if (Array.isArray(caps.focusMode) && caps.focusMode.includes('single-shot')) {
-      lockAdv.push({ focusMode: 'single-shot' });
-    }
-    if (caps.focusDistance && typeof caps.focusDistance.min === 'number') {
-      lockAdv.push({ focusDistance: caps.focusDistance.min });
-    }
-    if (caps.zoom && typeof caps.zoom.max === 'number') {
-      const t = Math.min(caps.zoom.max, 2.5);
-      if (t > 1) lockAdv.push({ zoom: t });
-    }
-    try { await track.applyConstraints({ advanced: lockAdv }); }
-    catch(e) { console.warn('[camera] focus lock constraints rejected:', e.name, e.message); }
-    return;
-  }
   const adv = [];
   if (Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) adv.push({ focusMode: 'continuous' });
   if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes('continuous')) adv.push({ exposureMode: 'continuous' });
   if (Array.isArray(caps.whiteBalanceMode) && caps.whiteBalanceMode.includes('continuous')) adv.push({ whiteBalanceMode: 'continuous' });
   if (caps.focusDistance && typeof caps.focusDistance.min === 'number') adv.push({ focusDistance: caps.focusDistance.min });
-  // 디지털 줌으로 작은 바코드(가로 20mm급) 인식률을 보강한다. 1x 화각에선 20mm
-  // 바코드가 reticle 안에 들어와도 모듈당 픽셀 수가 부족해 ZXing이 디코드 못 한다.
-  // 2~3x로 키우면 같은 10cm 거리에서 바코드가 더 크게 잡혀 디코드 가능.
-  // ultra-wide(0.5x) 강제는 오히려 화각이 넓어져 바코드가 더 작아지므로 제거 — 필요하면
-  // lens 토글 버튼으로 사용자가 직접 ultra-wide 선택.
-  if (caps.zoom && typeof caps.zoom.max === 'number') {
-    const target = Math.min(caps.zoom.max, 2.5);
-    if (target > 1) adv.push({ zoom: target });
-  }
   if (adv.length) {
     try { await track.applyConstraints({ advanced: adv }); }
     catch(e) { console.warn('[camera] boot focus constraints rejected:', e.name, e.message); }
@@ -993,21 +843,10 @@ async function applyBootFocusConstraints(track) {
 }
 
 async function startCamera(videoEl) {
-  // 0. ultra-wide / macro 후면 렌즈 우선 탐색 (Z Flip 등 다중 카메라 폰 대응)
-  const preferredId = await findPreferredBackCameraId();
-
-  // 1. getUserMedia로 먼저 스트림을 얻는다 (환경 카메라 우선, 고해상도부터 fallback)
+  // 1. getUserMedia로 스트림을 얻는다 (환경 카메라 우선, 고해상도부터 fallback)
   let stream = null;
   let selectedTry = null;
   const tries = [];
-  if (preferredId) {
-    // ultra-wide는 보통 4K 미지원이라 1080p / 720p만 시도
-    tries.push(
-      { label: 'preferred ultrawide 1080p', video: { deviceId: { exact: preferredId }, width:{ideal:1920}, height:{ideal:1080}, frameRate:{ideal:30,max:30} } },
-      { label: 'preferred ultrawide 720p', video: { deviceId: { exact: preferredId }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30,max:30} } },
-      { label: 'preferred ultrawide any', video: { deviceId: { exact: preferredId } } }
-    );
-  }
   tries.push(
     { label: '4K exact rear', video: { facingMode: { exact: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
     { label: '4K rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
@@ -1035,7 +874,6 @@ async function startCamera(videoEl) {
   if (!stream) {
     throw lastErr || new Error('getUserMedia all attempts failed');
   }
-  cameraStream = stream;
   videoEl.srcObject = stream;
   await videoEl.play().catch(e => console.warn('[camera] play err:', e));
   // wait until video has dimensions
@@ -1049,11 +887,8 @@ async function startCamera(videoEl) {
   const caps = track && track.getCapabilities ? track.getCapabilities() : {};
   const focusModes = Array.isArray(caps.focusMode) ? caps.focusMode.join('/') : 'auto';
 
-  // 카메라 시작 직후 continuous AF/AE/AWB + 근접 초점(macro) + 디지털 줌 강제.
-  // 자세한 의도는 applyBootFocusConstraints 정의 참고.
+  // 카메라 시작 직후 continuous AF/AE/AWB + 근접 초점.
   await applyBootFocusConstraints(track);
-  updateLensBtnLabel();
-  updateFocusLockBtn(track);
   const actualW = settings.width || videoEl.videoWidth;
   const actualH = settings.height || videoEl.videoHeight;
   const actualFps = settings.frameRate ? ` @${Math.round(settings.frameRate)}fps` : '';
@@ -1417,8 +1252,6 @@ function hideCollection() {
 // 바인딩 (요소 존재 확인 후)
 try {
   const b = $('browseBtn'); if (b) b.addEventListener('click', showCollection);
-  const lb = $('lensBtn'); if (lb) lb.addEventListener('click', cycleCameraLens);
-  const fl = $('focusLockBtn'); if (fl) fl.addEventListener('click', toggleFocusLock);
   const c = $('closeCollection'); if (c) c.addEventListener('click', hideCollection);
   const bd = $('collectionBackdrop'); if (bd) bd.addEventListener('click', hideCollection);
   document.querySelectorAll('.tab').forEach(tab => {
