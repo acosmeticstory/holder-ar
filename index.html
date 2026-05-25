@@ -931,7 +931,15 @@ async function applyBootFocusConstraints(track) {
   if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes('continuous')) adv.push({ exposureMode: 'continuous' });
   if (Array.isArray(caps.whiteBalanceMode) && caps.whiteBalanceMode.includes('continuous')) adv.push({ whiteBalanceMode: 'continuous' });
   if (caps.focusDistance && typeof caps.focusDistance.min === 'number') adv.push({ focusDistance: caps.focusDistance.min });
-  if (caps.zoom && typeof caps.zoom.min === 'number' && caps.zoom.min < 1) adv.push({ zoom: caps.zoom.min });
+  // 디지털 줌으로 작은 바코드(가로 20mm급) 인식률을 보강한다. 1x 화각에선 20mm
+  // 바코드가 reticle 안에 들어와도 모듈당 픽셀 수가 부족해 ZXing이 디코드 못 한다.
+  // 2~3x로 키우면 같은 10cm 거리에서 바코드가 더 크게 잡혀 디코드 가능.
+  // ultra-wide(0.5x) 강제는 오히려 화각이 넓어져 바코드가 더 작아지므로 제거 — 필요하면
+  // lens 토글 버튼으로 사용자가 직접 ultra-wide 선택.
+  if (caps.zoom && typeof caps.zoom.max === 'number') {
+    const target = Math.min(caps.zoom.max, 2.5);
+    if (target > 1) adv.push({ zoom: target });
+  }
   if (adv.length) {
     try { await track.applyConstraints({ advanced: adv }); }
     catch(e) { console.warn('[camera] boot focus constraints rejected:', e.name, e.message); }
@@ -1062,9 +1070,10 @@ async function startBarcode(videoEl) {
       const paused = $('result').classList.contains('show');
       if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
         const rect = getReticleVideoRect();
-        // 20~30mm급 소형 EAN-13 테스트를 위해 ROI 다운스케일을 최소화한다.
-        // 1080p 목표 스트림 기준 reticle crop은 보통 1920px 이내라 원본 픽셀을 유지한다.
-        const maxDim = 1920;
+        // 20mm급 소형 EAN-13 인식을 위해 ROI 다운스케일 한계를 4K로 키운다.
+        // 4K 스트림이 잡혔다면 reticle ROI가 ~2000~3000px이 되는데, 1920으로
+        // 축소하면 모듈당 픽셀이 부족해 디코드가 깨진다. 4K 그대로 ZXing에 전달.
+        const maxDim = 3840;
         const scale = Math.min(1, maxDim / Math.max(rect.w, rect.h));
         canvas.width = Math.round(rect.w * scale);
         canvas.height = Math.round(rect.h * scale);
