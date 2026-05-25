@@ -620,6 +620,22 @@ function showFocusRing(x, y, state) {
   showFocusRing.timer = setTimeout(() => ring.classList.remove('show'), 650);
 }
 
+// 화면 좌표 → 비디오 정규화 좌표(0~1). video는 object-fit:cover 이므로 cover 매핑을 역연산한다.
+function clientPointToNormalizedVideo(clientX, clientY, videoEl) {
+  const vw = videoEl && videoEl.videoWidth;
+  const vh = videoEl && videoEl.videoHeight;
+  if (!vw || !vh) return null;
+  const cw = window.innerWidth, ch = window.innerHeight;
+  const scale = Math.max(cw / vw, ch / vh);
+  const dispW = vw * scale, dispH = vh * scale;
+  const offX = (cw - dispW) / 2, offY = (ch - dispH) / 2;
+  const xv = (clientX - offX) / scale;
+  const yv = (clientY - offY) / scale;
+  const nx = Math.min(1, Math.max(0, xv / vw));
+  const ny = Math.min(1, Math.max(0, yv / vh));
+  return { x: nx, y: ny };
+}
+
 async function refocusCameraAt(x, y) {
   const now = performance.now();
   if (now - lastFocusTapAt < 450) return;
@@ -645,17 +661,35 @@ async function refocusCameraAt(x, y) {
   const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
   const advanced = [];
   let mode = '';
+  // 탭 위치를 카메라에 정확히 알려준다. pointsOfInterest 없이 focusMode만 바꾸면
+  // 카메라가 화면 중앙 또는 직전 초점 지점을 재계산할 뿐이라 거의 효과가 없다.
+  const norm = clientPointToNormalizedVideo(x, y, $('video'));
+  if (norm) {
+    // pointsOfInterest는 capability 객체에 보고되지 않는 브라우저에서도 동작하는 경우가 있어
+    // 일단 시도하고, OverconstrainedError가 나면 catch에서 한 번 더 fallback 한다.
+    advanced.push({ pointsOfInterest: [{ x: norm.x, y: norm.y }] });
+  }
   if (Array.isArray(caps.focusMode)) {
     if (caps.focusMode.includes('single-shot')) {
       advanced.push({ focusMode: 'single-shot' });
       mode = 'single-shot';
+    } else if (caps.focusMode.includes('manual')) {
+      advanced.push({ focusMode: 'manual' });
+      mode = 'manual';
     } else if (caps.focusMode.includes('continuous')) {
       advanced.push({ focusMode: 'continuous' });
       mode = 'continuous';
     }
   }
+  // 가까운 거리(바코드 macro) 강제. 일부 폰에서만 지원.
+  if (caps.focusDistance && typeof caps.focusDistance.min === 'number') {
+    advanced.push({ focusDistance: caps.focusDistance.min });
+  }
   if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes('continuous')) {
     advanced.push({ exposureMode: 'continuous' });
+  }
+  if (Array.isArray(caps.whiteBalanceMode) && caps.whiteBalanceMode.includes('continuous')) {
+    advanced.push({ whiteBalanceMode: 'continuous' });
   }
 
   try {
@@ -663,14 +697,33 @@ async function refocusCameraAt(x, y) {
       await track.applyConstraints({ advanced });
       showFocusRing(x, y, 'ok');
       setText('focusStatus', `초점 재시도 · ${mode || 'auto'}`, 'ok');
+      // single-shot은 1회성이라 잠시 후 continuous로 복귀시켜야 다음 프레임에서 자동 추적이 살아난다.
+      if (mode === 'single-shot' && Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
+        setTimeout(() => {
+          track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+        }, 1100);
+      }
     } else {
       showFocusRing(x, y, 'ok');
       setText('focusStatus','자동 초점 모드','wait');
     }
     navigator.vibrate && navigator.vibrate(20);
   } catch(e) {
-    showFocusRing(x, y, 'err');
-    setText('focusStatus', `초점 제어 미지원 · ${e.name || 'Error'}`, 'wait');
+    // pointsOfInterest 자체를 OverconstrainedError로 거부하는 폰이 있으니 한 번 더 시도.
+    if (e && e.name === 'OverconstrainedError' && advanced.some(c => 'pointsOfInterest' in c)) {
+      const fallback = advanced.filter(c => !('pointsOfInterest' in c));
+      try {
+        await track.applyConstraints({ advanced: fallback });
+        showFocusRing(x, y, 'ok');
+        setText('focusStatus', `초점 재시도 · ${mode || 'auto'} (POI 미지원)`, 'ok');
+      } catch(e2) {
+        showFocusRing(x, y, 'err');
+        setText('focusStatus', `초점 제어 미지원 · ${e2.name || 'Error'}`, 'wait');
+      }
+    } else {
+      showFocusRing(x, y, 'err');
+      setText('focusStatus', `초점 제어 미지원 · ${e.name || 'Error'}`, 'wait');
+    }
   } finally {
     setTimeout(() => updateReticleHint(), 900);
   }
@@ -817,6 +870,35 @@ async function startCamera(videoEl) {
   const settings = track && track.getSettings ? track.getSettings() : {};
   const caps = track && track.getCapabilities ? track.getCapabilities() : {};
   const focusModes = Array.isArray(caps.focusMode) ? caps.focusMode.join('/') : 'auto';
+
+  // 카메라 시작 직후 continuous AF/AE/AWB + 근접 초점(macro) 강제.
+  // 이게 없으면 폰 기본값이 무한대~중거리 초점에 머물러서 바코드가 뿌옇게 보이는 현상이 발생한다.
+  if (typeof track.applyConstraints === 'function') {
+    const bootAdvanced = [];
+    if (Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
+      bootAdvanced.push({ focusMode: 'continuous' });
+    }
+    if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes('continuous')) {
+      bootAdvanced.push({ exposureMode: 'continuous' });
+    }
+    if (Array.isArray(caps.whiteBalanceMode) && caps.whiteBalanceMode.includes('continuous')) {
+      bootAdvanced.push({ whiteBalanceMode: 'continuous' });
+    }
+    // focusDistance: 일부 안드로이드 크롬에서 지원. min~max(미터 단위) 중 min 쪽이 macro.
+    // continuous focus가 이미 잡히면 무시되지만, fixed 모드인 폰에서는 결정적인 역할을 한다.
+    if (caps.focusDistance && typeof caps.focusDistance.min === 'number') {
+      const near = caps.focusDistance.min;
+      bootAdvanced.push({ focusDistance: near });
+    }
+    if (bootAdvanced.length) {
+      try {
+        await track.applyConstraints({ advanced: bootAdvanced });
+        console.log('[camera] applied boot focus constraints:', bootAdvanced);
+      } catch(e) {
+        console.warn('[camera] boot focus constraints rejected:', e.name, e.message);
+      }
+    }
+  }
   const actualW = settings.width || videoEl.videoWidth;
   const actualH = settings.height || videoEl.videoHeight;
   const actualFps = settings.frameRate ? ` @${Math.round(settings.frameRate)}fps` : '';
@@ -1054,17 +1136,35 @@ async function fetchCollection(handle) {
   }
   if (handle === 'sai-m') {
     if (!catalog.length) await loadCatalog();
+    // Sai-m 제품 이미지는 아직 미확정 → 같은 번호의 Sai-s 이미지를 임시로 빌려서 표시.
+    // 단, Sai-m은 미출시이므로 url(클릭 이동)은 비워둔다.
+    const saiProducts = await fetchShopifyCollection('sai').catch(() => []);
+    const byHandle = new Map(saiProducts.map(p => [p.handle, p]));
+    const saiSImageByNum = new Map();
+    catalog
+      .filter(p => /^Sai-s\b/i.test(p.name))
+      .forEach(p => {
+        const num = (p.name.match(/Sai-s\s+(\d+)/i) || [])[1];
+        if (!num) return;
+        const shop = byHandle.get(p.shopifyHandle);
+        const img = shop && shop.images && shop.images[0];
+        if (img && img.src) saiSImageByNum.set(num, img.src);
+      });
     const products = catalog
       .filter(p => /^Sai-m\b/i.test(p.name))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}))
-      .map(p => ({
-        handle: p.shopifyHandle || '',
-        title: p.name,
-        image: '',
-        price: '',
-        url: ''
-      }));
+      .map(p => {
+        const num = (p.name.match(/Sai-m\s+(\d+)/i) || [])[1];
+        return {
+          handle: p.shopifyHandle || '',
+          title: p.name,
+          image: (num && saiSImageByNum.get(num)) || '',
+          price: '',
+          url: ''
+        };
+      });
     collectionCache[handle] = products;
+    warmImages(products);
     return products;
   }
   const rawProducts = await fetchShopifyCollection(handle);
