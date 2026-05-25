@@ -827,11 +827,62 @@ function dismissResult(){
 }
 
 // ===== 5. Layer 1 · zxing-js EAN-13 연속 스캔 =====
+// 후면 카메라가 여러 개인 폰(예: Galaxy Z Flip의 wide+ultrawide)에서 Chrome은 보통
+// 메인 wide만 골라준다. 메인 wide의 최소 초점 거리(~10~15cm)가 EAN-13 거리(5cm 안팎)
+// 보다 길어서 절대 초점이 안 잡히는 케이스가 발생한다. 라벨 휴리스틱으로 ultra-wide /
+// macro 렌즈를 우선 선택한다.
+async function findPreferredBackCameraId() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return null;
+  // 권한이 없으면 label이 빈 문자열이라 매칭 불가 → 임시 스트림으로 권한 prime
+  let primer = null;
+  try {
+    primer = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+  } catch(e) {
+    console.warn('[camera] enumerate primer failed:', e.name, e.message);
+    return null;
+  }
+  let preferredId = null;
+  let allBack = [];
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    // facing back인 것 우선 (label이 항상 'back'을 포함하진 않지만, 'front'/'user'는 제외)
+    allBack = cams.filter(d => !/front|user/i.test(d.label));
+    if (!allBack.length) allBack = cams;
+    window.__allCameras = allBack.map(d => ({ id: d.deviceId, label: d.label }));
+    console.log('[camera] back cams:', window.__allCameras);
+    // 우선순위: macro > ultra-wide/0.5x > telephoto는 회피
+    const macro = allBack.find(d => /macro/i.test(d.label));
+    const ultra = allBack.find(d => /ultra[\s-]?wide|0\.?5\s*x|wide.*0\.?5/i.test(d.label));
+    const wideAny = allBack.find(d => /\bwide\b/i.test(d.label) && !/tele/i.test(d.label));
+    const pick = macro || ultra || null; // wideAny는 메인 wide일 수 있어 안 씀
+    preferredId = pick ? pick.deviceId : null;
+    if (preferredId) console.log('[camera] preferred ultrawide/macro:', pick.label);
+  } catch(e) {
+    console.warn('[camera] enumerateDevices failed:', e.message);
+  } finally {
+    if (primer) primer.getTracks().forEach(t => t.stop());
+  }
+  return preferredId;
+}
+
 async function startCamera(videoEl) {
+  // 0. ultra-wide / macro 후면 렌즈 우선 탐색 (Z Flip 등 다중 카메라 폰 대응)
+  const preferredId = await findPreferredBackCameraId();
+
   // 1. getUserMedia로 먼저 스트림을 얻는다 (환경 카메라 우선, 고해상도부터 fallback)
   let stream = null;
   let selectedTry = null;
-  const tries = [
+  const tries = [];
+  if (preferredId) {
+    // ultra-wide는 보통 4K 미지원이라 1080p / 720p만 시도
+    tries.push(
+      { label: 'preferred ultrawide 1080p', video: { deviceId: { exact: preferredId }, width:{ideal:1920}, height:{ideal:1080}, frameRate:{ideal:30,max:30} } },
+      { label: 'preferred ultrawide 720p', video: { deviceId: { exact: preferredId }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30,max:30} } },
+      { label: 'preferred ultrawide any', video: { deviceId: { exact: preferredId } } }
+    );
+  }
+  tries.push(
     { label: '4K exact rear', video: { facingMode: { exact: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
     { label: '4K rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
     { label: '1440p rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:2560}, height:{ideal:1440}, frameRate:{ideal:30,max:30} } },
@@ -839,7 +890,7 @@ async function startCamera(videoEl) {
     { label: '720p fallback', video: { facingMode: { ideal: 'environment' }, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:30,max:30} } },
     { label: 'rear fallback', video: { facingMode: 'environment' } },
     { label: 'any camera fallback', video: true }
-  ];
+  );
   let lastErr = null;
   window.__cameraAttempts = [];
   for (const c of tries) {
