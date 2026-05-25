@@ -903,41 +903,45 @@ async function startCamera(videoEl) {
   return stream;
 }
 
-async function startBarcode(videoEl) {
-  if (typeof ZXing === 'undefined') {
-    setText('camera','zxing 로드 실패','err');
-    showError('zxing 라이브러리 로드 실패', 'CDN 접근 실패. WiFi 연결 확인 후 새로고침.');
-    return;
+// 1순위 native BarcodeDetector, 2순위 barcode-detector polyfill(zxing-cpp wasm),
+// 3순위 기존 ZXing-js. native는 Android Chrome에서 MLKit 기반으로 작은 EAN-13에 강함.
+async function loadDetector() {
+  const formats = ['ean_13', 'ean_8', 'code_128', 'upc_a'];
+  if ('BarcodeDetector' in window) {
+    try {
+      const supported = await window.BarcodeDetector.getSupportedFormats();
+      if (supported.includes('ean_13')) {
+        console.log('[detect] native BarcodeDetector');
+        return { kind: 'native', detector: new window.BarcodeDetector({ formats }) };
+      }
+    } catch(e) { console.warn('[detect] native unavailable:', e.message); }
   }
-  // 2026-04-22 목업에서 검증된 포맷 셋 그대로 복귀 (1종만 주면 어제보다 안 잡히는 현상 있음)
-  const hints = new Map();
-  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-    ZXing.BarcodeFormat.EAN_13,
-    ZXing.BarcodeFormat.EAN_8,
-    ZXing.BarcodeFormat.CODE_128,
-    ZXing.BarcodeFormat.UPC_A
-  ]);
-  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-  zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+  try {
+    const mod = await import('https://cdn.jsdelivr.net/npm/barcode-detector@2/+esm');
+    console.log('[detect] polyfill BarcodeDetector (zxing-cpp wasm)');
+    return { kind: 'polyfill', detector: new mod.BarcodeDetector({ formats }) };
+  } catch(e) {
+    console.warn('[detect] polyfill load failed:', e.message);
+    return null;
+  }
+}
+
+async function startBarcode(videoEl) {
   setLayer('layer1','active');
   window.__zxingStats = { calls: 0, results: 0, errs: 0, lastErr: '', lastResult: '' };
-  // 2026-04-23 저녁: v0.21.3 UMD 에는 `decodeFromCanvas` 없음(TypeError) →
-  // `decodeBitmap(BinaryBitmap)` 저수준 API 직접 사용. 필요 클래스:
-  // HTMLCanvasElementLuminanceSource → HybridBinarizer → BinaryBitmap
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  // reticle 영역만 video 좌표로 환산 → ZXing 에 그 영역만 전달
-  // video 는 object-fit:cover 로 화면을 덮으므로 vw/vh ↔ cssWidth/cssHeight 매핑 필요
+
+  // reticle 영역만 video 좌표로 환산 → 디코더에 그 영역만 전달
   function getReticleVideoRect() {
     const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
     const cw = window.innerWidth, ch = window.innerHeight;
     const reticleEl = document.querySelector('.reticle');
     if (!reticleEl) return { x:0, y:0, w:vw, h:vh };
     const r = reticleEl.getBoundingClientRect();
-    const scale = Math.max(cw / vw, ch / vh); // object-fit: cover
+    const scale = Math.max(cw / vw, ch / vh);
     const dispW = vw * scale, dispH = vh * scale;
     const offX = (cw - dispW) / 2, offY = (ch - dispH) / 2;
-    // 약간의 여유(8px) 두고 환산
     const pad = 8;
     const x = Math.max(0, Math.round((r.left - offX - pad) / scale));
     const y = Math.max(0, Math.round((r.top - offY - pad) / scale));
@@ -945,50 +949,94 @@ async function startBarcode(videoEl) {
     const h = Math.min(vh - y, Math.round((r.height + pad*2) / scale));
     return { x, y, w, h };
   }
-  async function scanLoop() {
-    while (!stopped) {
-      // 결과 카드가 떠 있는 동안은 디코딩 일시정지 (사용자가 제품 내용 볼 시간)
-      // "다시 스캔" 버튼 → dismissResult() → .show 제거되면 자동 재개
-      const paused = $('result').classList.contains('show');
-      if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
-        const rect = getReticleVideoRect();
-        // 20mm급 소형 EAN-13 인식을 위해 ROI 다운스케일 한계를 4K로 키운다.
-        // 4K 스트림이 잡혔다면 reticle ROI가 ~2000~3000px이 되는데, 1920으로
-        // 축소하면 모듈당 픽셀이 부족해 디코드가 깨진다. 4K 그대로 ZXing에 전달.
-        const maxDim = 3840;
-        const scale = Math.min(1, maxDim / Math.max(rect.w, rect.h));
-        canvas.width = Math.round(rect.w * scale);
-        canvas.height = Math.round(rect.h * scale);
-        ctx.drawImage(videoEl, rect.x, rect.y, rect.w, rect.h, 0, 0, canvas.width, canvas.height);
-        window.__zxingStats.calls++;
-        try {
-          const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
-          const binarizer = new ZXing.HybridBinarizer(luminance);
-          const bitmap = new ZXing.BinaryBitmap(binarizer);
-          const result = zxingReader.decodeBitmap(bitmap);
-          if (result) {
-            window.__zxingStats.results++;
-            const text = result.getText();
-            window.__zxingStats.lastResult = text;
-            console.log('[zxing] decoded:', text, 'format:', result.getBarcodeFormat());
-            const prod = matchByEan(text);
-            finishDecodeTest(true, text, prod);
-            if (prod) showResult(prod, 'ean', text);
-            else setText('lastHit', `EAN · ${text} (미등록)`, 'err');
-          }
-        } catch(e) {
-          window.__zxingStats.errs++;
-          const name = (e && e.name) || 'unknown';
-          window.__zxingStats.lastErr = `${name}:${(e && e.message || '').slice(0,30)}`;
-          if (name !== 'NotFoundException' && name !== 'NotFoundException2') {
-            console.warn('[zxing]', name, e && e.message, e);
+
+  function paintRoi(rect) {
+    const maxDim = 3840;
+    const scale = Math.min(1, maxDim / Math.max(rect.w, rect.h));
+    canvas.width = Math.round(rect.w * scale);
+    canvas.height = Math.round(rect.h * scale);
+    ctx.drawImage(videoEl, rect.x, rect.y, rect.w, rect.h, 0, 0, canvas.width, canvas.height);
+  }
+
+  function handleResult(text, format, via) {
+    window.__zxingStats.results++;
+    window.__zxingStats.lastResult = text;
+    console.log('[' + via + '] decoded:', text, 'format:', format);
+    const prod = matchByEan(text);
+    finishDecodeTest(true, text, prod);
+    if (prod) showResult(prod, 'ean', text);
+    else setText('lastHit', `EAN · ${text} (미등록)`, 'err');
+  }
+
+  // === 1·2순위: BarcodeDetector (native or polyfill) ===
+  const det = await loadDetector();
+  if (det) {
+    window.__detector = det.kind;
+    async function detectorLoop() {
+      while (!stopped) {
+        const paused = $('result').classList.contains('show');
+        if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
+          const rect = getReticleVideoRect();
+          paintRoi(rect);
+          window.__zxingStats.calls++;
+          try {
+            const codes = await det.detector.detect(canvas);
+            if (codes && codes.length) {
+              handleResult(codes[0].rawValue, codes[0].format, det.kind);
+            }
+          } catch(e) {
+            window.__zxingStats.errs++;
+            window.__zxingStats.lastErr = `${e.name || 'err'}:${(e.message||'').slice(0,30)}`;
+            console.warn('[' + det.kind + ']', e);
           }
         }
+        await new Promise(r => setTimeout(r, 120));
       }
-      await new Promise(r => setTimeout(r, 150));
     }
+    detectorLoop();
+    setText('status', `스캔 중… (${det.kind})`, 'ok');
+  } else {
+    // === 3순위 fallback: 기존 ZXing-js ===
+    if (typeof ZXing === 'undefined') {
+      setText('camera','디코더 로드 실패','err');
+      showError('디코더 로드 실패', 'BarcodeDetector polyfill과 ZXing 둘 다 사용 불가.');
+      return;
+    }
+    window.__detector = 'zxing-js';
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+      ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
+      ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.UPC_A
+    ]);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+    async function zxingLoop() {
+      while (!stopped) {
+        const paused = $('result').classList.contains('show');
+        if (!paused && videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
+          const rect = getReticleVideoRect();
+          paintRoi(rect);
+          window.__zxingStats.calls++;
+          try {
+            const luminance = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
+            const binarizer = new ZXing.HybridBinarizer(luminance);
+            const bitmap = new ZXing.BinaryBitmap(binarizer);
+            const result = zxingReader.decodeBitmap(bitmap);
+            if (result) handleResult(result.getText(), result.getBarcodeFormat(), 'zxing');
+          } catch(e) {
+            window.__zxingStats.errs++;
+            const name = (e && e.name) || 'unknown';
+            window.__zxingStats.lastErr = `${name}:${(e && e.message || '').slice(0,30)}`;
+            if (name !== 'NotFoundException' && name !== 'NotFoundException2') {
+              console.warn('[zxing]', name, e && e.message, e);
+            }
+          }
+        }
+        await new Promise(r => setTimeout(r, 150));
+      }
+    }
+    zxingLoop();
   }
-  scanLoop();
   // 1초마다 HUD 업데이트 (debug 모드에서만 표시)
   setInterval(() => {
     if (stopped) return;
@@ -998,8 +1046,9 @@ async function startBarcode(videoEl) {
       return;
     }
     const s = window.__zxingStats;
+    const dec = window.__detector || '?';
     setText('lastHit',
-      `calls:${s.calls} res:${s.results} err:${s.errs} last:${s.lastResult||s.lastErr||'―'}`,
+      `${dec} · calls:${s.calls} res:${s.results} err:${s.errs} last:${s.lastResult||s.lastErr||'―'}`,
       s.results ? 'ok' : 'wait');
   }, 1000);
   setText('status', '스캔 중…', 'ok');
