@@ -941,6 +941,13 @@ async function startCamera(videoEl) {
       const near = caps.focusDistance.min;
       bootAdvanced.push({ focusDistance: near });
     }
+    // zoom 최소값으로 강제 → Galaxy Note/Z Flip처럼 enumerateDevices가 ultra-wide를
+    // 별도 deviceId로 노출하지 않는 폰에서, zoom < 1 이면 OS가 ultra-wide 렌즈로
+    // 자동 스위칭한다 (Chrome on Samsung 카메라 HAL 동작). zoom.min이 1 이상이면
+    // 디지털 줌만 가능한 단일 렌즈 폰이라 시도해도 무해.
+    if (caps.zoom && typeof caps.zoom.min === 'number' && caps.zoom.min < 1) {
+      bootAdvanced.push({ zoom: caps.zoom.min });
+    }
     if (bootAdvanced.length) {
       try {
         await track.applyConstraints({ advanced: bootAdvanced });
