@@ -858,27 +858,77 @@ function dismissResult(){
 }
 
 // ===== 5. Layer 1 · zxing-js EAN-13 연속 스캔 =====
-// continuous AF/AE/AWB만 요청. 디지털 줌이나 ultra-wide 강제는 안 함 (보간 손실 + 화각 왜곡 부작용).
+// 부팅 시 manual + focusDistance.min 자동 lock. 사용자가 탭하지 않아도 매크로 모드 ON.
+// continuous는 일부러 안 씀 — continuous면 카메라가 가까이 댄 객체보다 멀리 있는 배경에
+// 초점을 옮길 수 있어서 macro 케이스에 부적합. 멀리 보려면 사용자가 탭(hardRefocus가
+// continuous로 풀어줌).
 async function applyBootFocusConstraints(track) {
   if (!track || typeof track.applyConstraints !== 'function') return;
   const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
   const adv = [];
-  if (Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) adv.push({ focusMode: 'continuous' });
+  // focus: manual + min 우선, 없으면 single-shot + min, 없으면 continuous + min
+  if (caps.focusDistance && typeof caps.focusDistance.min === 'number') {
+    if (Array.isArray(caps.focusMode) && caps.focusMode.includes('manual')) {
+      adv.push({ focusMode: 'manual', focusDistance: caps.focusDistance.min });
+    } else if (Array.isArray(caps.focusMode) && caps.focusMode.includes('single-shot')) {
+      adv.push({ focusMode: 'single-shot', focusDistance: caps.focusDistance.min });
+    } else {
+      adv.push({ focusDistance: caps.focusDistance.min });
+      if (Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
+        adv.push({ focusMode: 'continuous' });
+      }
+    }
+  } else if (Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
+    adv.push({ focusMode: 'continuous' });
+  }
   if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes('continuous')) adv.push({ exposureMode: 'continuous' });
   if (Array.isArray(caps.whiteBalanceMode) && caps.whiteBalanceMode.includes('continuous')) adv.push({ whiteBalanceMode: 'continuous' });
-  if (caps.focusDistance && typeof caps.focusDistance.min === 'number') adv.push({ focusDistance: caps.focusDistance.min });
   if (adv.length) {
-    try { await track.applyConstraints({ advanced: adv }); }
+    try { await track.applyConstraints({ advanced: adv }); console.log('[camera] macro lock applied:', adv); }
     catch(e) { console.warn('[camera] boot focus constraints rejected:', e.name, e.message); }
   }
 }
 
+// enumerateDevices로 ultra-wide / macro 렌즈 우선 deviceId 자동 선택.
+// Samsung Chrome처럼 후면 카메라를 단일 deviceId로 노출하는 폰에선 효과 없지만,
+// Pixel / OnePlus / Xiaomi 같은 폰에선 macro 렌즈가 별도 ID로 보임 → 5cm 잡힘.
+async function findPreferredBackCameraId() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return null;
+  let primer = null;
+  try { primer = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } }); }
+  catch(e) { return null; }
+  let preferredId = null;
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const back = devices.filter(d => d.kind === 'videoinput' && !/front|user/i.test(d.label));
+    window.__allCameras = back.map(d => ({ id: d.deviceId, label: d.label }));
+    console.log('[camera] back cams:', window.__allCameras);
+    const macro = back.find(d => /macro/i.test(d.label));
+    const ultra = back.find(d => /ultra[\s-]?wide|0\.?5\s*x/i.test(d.label));
+    const pick = macro || ultra;
+    if (pick) { preferredId = pick.deviceId; console.log('[camera] preferred macro/ultrawide:', pick.label); }
+  } catch(e) { console.warn('[camera] enumerate failed:', e.message); }
+  finally { if (primer) primer.getTracks().forEach(t => t.stop()); }
+  return preferredId;
+}
+
 async function startCamera(videoEl) {
-  // 1. getUserMedia로 스트림을 얻는다 (환경 카메라 우선, 고해상도부터 fallback)
+  // 0. macro/ultra-wide 렌즈 우선 탐색
+  const preferredId = await findPreferredBackCameraId();
+
+  // 1. getUserMedia tries. 첫 번째로 "5cm macro 요청" 추가 — 일부 폰은 이걸 보고
+  //    자동으로 macro/ultra-wide 렌즈를 골라준다.
   let stream = null;
   let selectedTry = null;
   const tries = [];
+  if (preferredId) {
+    tries.push(
+      { label: 'preferred macro 1080p', video: { deviceId: { exact: preferredId }, width:{ideal:1920}, height:{ideal:1080}, advanced: [{ focusDistance: 0.05 }] } },
+      { label: 'preferred macro any', video: { deviceId: { exact: preferredId } } }
+    );
+  }
   tries.push(
+    { label: '5cm macro hint 1080p', video: { facingMode: { ideal: 'environment' }, width:{ideal:1920}, height:{ideal:1080}, advanced: [{ focusMode: 'manual', focusDistance: 0.05 }] } },
     { label: '4K exact rear', video: { facingMode: { exact: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
     { label: '4K rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:3840}, height:{ideal:2160}, frameRate:{ideal:30,max:30} } },
     { label: '1440p rear', video: { facingMode: { ideal: 'environment' }, width:{ideal:2560}, height:{ideal:1440}, frameRate:{ideal:30,max:30} } },
