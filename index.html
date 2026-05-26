@@ -843,7 +843,8 @@ async function showResult(product, via, rawValue) {
 
   const shop = await fetchShopify(product.shopifyHandle);
   if (shop) {
-    const img = shop.images && shop.images[0];
+    // 두 번째 이미지(images[1])를 우선, 없으면 첫 번째 fallback — 통일된 컷
+    const img = (shop.images && (shop.images[1] || shop.images[0])) || null;
     if (img) $('rImg').innerHTML = `<img src="${img.src}" alt="">`;
     else $('rImg').innerHTML = comingSoonHtml();
     $('rShopTitle').textContent = '';
@@ -1238,7 +1239,7 @@ async function fetchCollection(handle) {
     const byHandle = new Map(saiProducts.map(p => [p.handle, p]));
     const products = items.map(p => {
       const shop = byHandle.get(p.shopifyHandle);
-      const img = shop && shop.images && shop.images[0];
+      const img = shop && shop.images && (shop.images[1] || shop.images[0]);
       return {
         ean13: p.ean13,
         handle: p.shopifyHandle,
@@ -1265,7 +1266,7 @@ async function fetchCollection(handle) {
         const num = (p.name.match(/Sai-s\s+(\d+)/i) || [])[1];
         if (!num) return;
         const shop = byHandle.get(p.shopifyHandle);
-        const img = shop && shop.images && shop.images[0];
+        const img = shop && shop.images && (shop.images[1] || shop.images[0]);
         if (img && img.src) saiSImageByNum.set(num, img.src);
       });
     const products = catalog
@@ -1294,7 +1295,7 @@ async function fetchCollection(handle) {
     ean13: handleToEan.get(p.handle) || '',
     handle: p.handle,
     title: p.title,
-    image: (p.images && p.images[0] && p.images[0].src) || '',
+    image: (p.images && ((p.images[1] && p.images[1].src) || (p.images[0] && p.images[0].src))) || '',
     price: '',
     url: `${SHOPIFY_BASE}/products/${p.handle}`
   }));
