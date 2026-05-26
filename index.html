@@ -1287,18 +1287,27 @@ async function fetchCollection(handle) {
     warmImages(products);
     return products;
   }
-  // ju 컬렉션: Shopify에서 직접 가져오되 catalog에서 shopifyHandle → ean13 매핑.
+  // ju 컬렉션: catalog 순서(Ju 01~50)를 기준으로 정렬하고, Shopify 데이터는
+  // shopifyHandle로 매핑해서 이미지/링크만 가져온다. Shopify products.json은
+  // created_at 기본 정렬이라 1~50 순서가 깨졌었음.
   if (!catalog.length) await loadCatalog();
-  const handleToEan = new Map(catalog.map(c => [c.shopifyHandle, c.ean13]));
   const rawProducts = await fetchShopifyCollection(handle);
-  const products = rawProducts.map(p => ({
-    ean13: handleToEan.get(p.handle) || '',
-    handle: p.handle,
-    title: p.title,
-    image: (p.images && ((p.images[1] && p.images[1].src) || (p.images[0] && p.images[0].src))) || '',
-    price: '',
-    url: `${SHOPIFY_BASE}/products/${p.handle}`
-  }));
+  const byHandle = new Map(rawProducts.map(p => [p.handle, p]));
+  const products = catalog
+    .filter(p => /^Ju\b/i.test(p.name))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}))
+    .map(p => {
+      const shop = byHandle.get(p.shopifyHandle);
+      const img = shop && shop.images && (shop.images[1] || shop.images[0]);
+      return {
+        ean13: p.ean13,
+        handle: p.shopifyHandle,
+        title: p.name, // catalog의 "Ju 01" 형식 유지
+        image: (img && img.src) || '',
+        price: '',
+        url: p.shopifyUrl || `${SHOPIFY_BASE}/products/${p.shopifyHandle}`
+      };
+    });
   collectionCache[handle] = products;
   warmImages(products);
   return products;
