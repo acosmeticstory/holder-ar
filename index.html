@@ -771,15 +771,22 @@ function bindTapToFocus() {
 }
 
 // ===== 1. 카탈로그 로드 =====
+let catalogPromise = null;
 async function loadCatalog() {
-  try {
-    const r = await fetch('./catalog.json', {cache:'no-store'});
-    const d = await r.json();
-    catalog = d.products;
-    console.log('[catalog]', catalog.length, '개 로드');
-  } catch(e) {
-    showError(t('catalogLoadFailed'), e.message);
-  }
+  // memoize — bootCore와 preloadCollections가 거의 동시에 호출해도 fetch는 한 번만.
+  if (catalog.length) return;
+  if (catalogPromise) return catalogPromise;
+  catalogPromise = (async () => {
+    try {
+      const r = await fetch('./catalog.json', {cache:'no-store'});
+      const d = await r.json();
+      catalog = d.products;
+      console.log('[catalog]', catalog.length, '개 로드');
+    } catch(e) {
+      showError(t('catalogLoadFailed'), e.message);
+    }
+  })();
+  return catalogPromise;
 }
 
 // ===== 2. 매칭 =====
@@ -1150,10 +1157,14 @@ async function bootCore() {
   $('testStart').onclick = () => startDecodeTest(10);
   $('statsReset').onclick = resetStats;
   $('statsExport').onclick = exportCsv;
-  preloadCollections();
 }
 
 async function boot() {
+  // 컬렉션 preload는 카메라 부팅과 병렬로 즉시 시작 — 카메라 부팅(1-2초) 동안
+  // shopify fetch가 끝나 있어야 사용자 첫 "제품 보기" 클릭에서 cache hit으로
+  // 곧바로 보임. 이전엔 bootCore 뒤에서 idle callback으로 호출돼서 사용자가
+  // 빨리 클릭하면 빈 skeleton만 보였다.
+  preloadCollections();
   try {
     await bootCore();
   } catch(e) {
@@ -1293,18 +1304,16 @@ async function fetchCollection(handle) {
 }
 
 function preloadCollections() {
-  const run = () => {
-    COLLECTIONS.forEach(h => {
-      fetchCollection(h)
-        .then(products => {
-          const c = $(`${h}Count`);
-          if (c) c.textContent = products.length ? ` (${products.length})` : '';
-        })
-        .catch(e => console.warn('[collection] preload failed:', h, e && e.message));
-    });
-  };
-  if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 2500 });
-  else setTimeout(run, 900);
+  // 즉시 시작 — idle callback / 900ms 지연은 사용자가 빨리 클릭하면 cache miss로
+  // skeleton만 보이는 결과를 낳았다. 페이지 로드 즉시 fetch 트리거.
+  COLLECTIONS.forEach(h => {
+    fetchCollection(h)
+      .then(products => {
+        const c = $(`${h}Count`);
+        if (c) c.textContent = products.length ? ` (${products.length})` : '';
+      })
+      .catch(e => console.warn('[collection] preload failed:', h, e && e.message));
+  });
 }
 
 function renderSlider(products) {
