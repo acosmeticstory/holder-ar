@@ -1372,22 +1372,9 @@ try {
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => openCollection(tab.dataset.handle));
   });
-  // 아래로 드래그하여 닫기
-  const sheet = $('collection');
-  if (sheet) {
-    let startY = null, delta = 0;
-    sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; delta = 0; }, {passive:true});
-    sheet.addEventListener('touchmove', e => {
-      if (startY == null) return;
-      delta = e.touches[0].clientY - startY;
-      if (delta > 0) sheet.style.transform = `translateY(${delta}px)`;
-    }, {passive:true});
-    sheet.addEventListener('touchend', () => {
-      if (delta > 120) hideCollection();
-      sheet.style.transform = '';
-      startY = null;
-    });
-  }
+  // 아래로 드래그하여 닫기 기능은 제거 — tab-content 스크롤이 위로 올라갈 때
+  // 시트 transform이 따라 움직여 본의 아니게 닫히는 현상이 있었음. 닫기는
+  // × 버튼 또는 backdrop 클릭으로만 수행.
 } catch(e) {
   console.error('[bindings]', e);
 }
