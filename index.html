@@ -1238,61 +1238,91 @@ function warmImages(products, limit = 16) {
   });
 }
 
+// Shopify 제품 title에서 "SAIs 01" / "SAIm 12" 패턴을 catalog 이름("Sai-s 01")으로 변환.
+// dash/underscore/공백 변형 + 1-3자리 번호 허용.
+function parseSaiTitle(title) {
+  const m = /SAI\s*[-_]?\s*([sm])\s*(\d+)/i.exec(title || '');
+  if (!m) return null;
+  return { variant: m[1].toLowerCase(), num: parseInt(m[2], 10) };
+}
+function saiCatalogKey(variant, num) {
+  return `Sai-${variant} ${String(num).padStart(2, '0')}`;
+}
+
+// catalog에 정의된 개수보다 Shopify에 더 많이 등록된 경우 알림 표시.
+// 사용자가 바코드(EAN-13)를 추가 발급해야 할 시점을 알 수 있도록.
+const overflowAlerts = {};
+
 async function fetchCollection(handle) {
   if (collectionCache[handle]) return collectionCache[handle];
-  if (handle === 'sai-s') {
+
+  // === sai-s / sai-m: title 기반 매칭 + catalog 초과분 카운트 ===
+  if (handle === 'sai-s' || handle === 'sai-m') {
     if (!catalog.length) await loadCatalog();
+    const variant = handle === 'sai-s' ? 's' : 'm';
+    const namePrefix = handle === 'sai-s' ? 'Sai-s' : 'Sai-m';
     const items = catalog
-      .filter(p => /^Sai-s\b/i.test(p.name))
+      .filter(p => p.name.startsWith(namePrefix + ' '))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
     const saiProducts = await fetchShopifyCollection('sai').catch(() => []);
-    const byHandle = new Map(saiProducts.map(p => [p.handle, p]));
+
+    // Shopify 제품을 catalog 이름 키로 인덱싱 + handle fallback
+    const shopByName = new Map();
+    const shopByHandle = new Map(saiProducts.map(p => [p.handle, p]));
+    saiProducts.forEach(p => {
+      const parsed = parseSaiTitle(p.title);
+      if (parsed) shopByName.set(saiCatalogKey(parsed.variant, parsed.num), p);
+    });
+
+    // sai-m이고 같은 번호의 Sai-s 이미지를 임시로 빌리는 fallback도 준비
+    const saiSImageByNum = new Map();
+    if (handle === 'sai-m') {
+      catalog
+        .filter(p => /^Sai-s\b/i.test(p.name))
+        .forEach(p => {
+          const num = (p.name.match(/Sai-s\s+(\d+)/i) || [])[1];
+          if (!num) return;
+          const shop = shopByName.get(saiCatalogKey('s', parseInt(num, 10))) || shopByHandle.get(p.shopifyHandle);
+          const img = shop && shop.images && (shop.images[1] || shop.images[0]);
+          if (img && img.src) saiSImageByNum.set(num, img.src);
+        });
+    }
+
     const products = items.map(p => {
-      const shop = byHandle.get(p.shopifyHandle);
+      const shop = shopByName.get(p.name) || shopByHandle.get(p.shopifyHandle);
       const img = shop && shop.images && (shop.images[1] || shop.images[0]);
+      const fallbackImg = handle === 'sai-m'
+        ? saiSImageByNum.get((p.name.match(/Sai-m\s+(\d+)/i) || [])[1])
+        : null;
       return {
         ean13: p.ean13,
-        handle: p.shopifyHandle,
+        handle: shop ? shop.handle : (p.shopifyHandle || ''),
         title: p.name,
-        image: (img && img.src) || '',
+        image: (img && img.src) || fallbackImg || '',
         price: '',
-        url: p.shopifyUrl
+        // Sai-m은 미출시 → url 비움. Sai-s는 shopify handle 기반 URL.
+        url: handle === 'sai-m' ? '' : (shop ? `${SHOPIFY_BASE}/products/${shop.handle}` : (p.shopifyUrl || ''))
       };
     });
-    collectionCache[handle] = products;
-    warmImages(products);
-    return products;
-  }
-  if (handle === 'sai-m') {
-    if (!catalog.length) await loadCatalog();
-    // Sai-m 제품 이미지는 아직 미확정 → 같은 번호의 Sai-s 이미지를 임시로 빌려서 표시.
-    // 단, Sai-m은 미출시이므로 url(클릭 이동)은 비워둔다.
-    const saiProducts = await fetchShopifyCollection('sai').catch(() => []);
-    const byHandle = new Map(saiProducts.map(p => [p.handle, p]));
-    const saiSImageByNum = new Map();
-    catalog
-      .filter(p => /^Sai-s\b/i.test(p.name))
-      .forEach(p => {
-        const num = (p.name.match(/Sai-s\s+(\d+)/i) || [])[1];
-        if (!num) return;
-        const shop = byHandle.get(p.shopifyHandle);
-        const img = shop && shop.images && (shop.images[1] || shop.images[0]);
-        if (img && img.src) saiSImageByNum.set(num, img.src);
-      });
-    const products = catalog
-      .filter(p => /^Sai-m\b/i.test(p.name))
-      .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}))
-      .map(p => {
-        const num = (p.name.match(/Sai-m\s+(\d+)/i) || [])[1];
-        return {
-          ean13: p.ean13,
-          handle: p.shopifyHandle || '',
-          title: p.name,
-          image: (num && saiSImageByNum.get(num)) || '',
-          price: '',
-          url: ''
-        };
-      });
+
+    // catalog 초과분: Shopify에 있는데 catalog에 없는 sai-s/sai-m 번호
+    const catalogNums = new Set(items.map(p => {
+      const n = (p.name.match(new RegExp(namePrefix + '\\s+(\\d+)', 'i')) || [])[1];
+      return n ? parseInt(n, 10) : null;
+    }).filter(Boolean));
+    const shopNumbers = new Set();
+    saiProducts.forEach(p => {
+      const parsed = parseSaiTitle(p.title);
+      if (parsed && parsed.variant === variant) shopNumbers.add(parsed.num);
+    });
+    const overflowNums = [...shopNumbers].filter(n => !catalogNums.has(n)).sort((a,b)=>a-b);
+    if (overflowNums.length) {
+      console.warn(`[${handle}] Shopify에 catalog 외 ${overflowNums.length}개 제품 발견 — 바코드 추가 발급 필요. 번호:`, overflowNums);
+      overflowAlerts[handle] = overflowNums.length;
+    } else {
+      delete overflowAlerts[handle];
+    }
+
     collectionCache[handle] = products;
     warmImages(products);
     return products;
@@ -1404,7 +1434,11 @@ async function openCollection(handle, forceReload) {
     const products = await fetchCollection(handle);
     renderSlider(products);
     const c = $(`${handle}Count`);
-    if (c) c.textContent = products.length ? ` (${products.length})` : '';
+    if (c) {
+      let txt = products.length ? ` (${products.length})` : '';
+      if (overflowAlerts[handle]) txt += ` ⚠+${overflowAlerts[handle]}`;
+      c.textContent = txt;
+    }
   } catch(e) {
     console.error('[collection] fetch err:', e);
     $('slider').innerHTML = `<div class="tab-empty" style="flex:1">${t('collectionLoadFailed')}<br><small style="opacity:.6">${escapeHtml(e.message)}</small><br><button class="retry" onclick="openCollection('${handle}', true)">${t('retry')}</button></div>`;
