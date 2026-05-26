@@ -833,7 +833,13 @@ async function showResult(product, via, rawValue) {
     shopLink.removeAttribute('href');
     shopLink.style.display = 'none';
   }
-  $('rImg').innerHTML = `<span id="rImgFallback">${t('loadingImage')}</span>`;
+  // 컬렉션에서 이미 이미지 URL을 알고 있으면 즉시 표시. 그렇지 않으면
+  // (바코드 스캔 케이스 등) fetchShopify로 가져온다.
+  if (product._preImg) {
+    $('rImg').innerHTML = `<img src="${product._preImg}" alt="">`;
+  } else {
+    $('rImg').innerHTML = `<span id="rImgFallback">${t('loadingImage')}</span>`;
+  }
   $('rShopTitle').textContent = '';
   $('rShopPrice').textContent = '';
   $('result').classList.add('show');
@@ -841,15 +847,15 @@ async function showResult(product, via, rawValue) {
   setMini('scan', t('viewingProduct'));
   navigator.vibrate && navigator.vibrate(80);
 
-  const shop = await fetchShopify(product.shopifyHandle);
-  if (shop) {
-    // 두 번째 이미지(images[1])를 우선, 없으면 첫 번째 fallback — 통일된 컷
-    const img = (shop.images && (shop.images[1] || shop.images[0])) || null;
-    if (img) $('rImg').innerHTML = `<img src="${img.src}" alt="">`;
-    else $('rImg').innerHTML = comingSoonHtml();
-    $('rShopTitle').textContent = '';
-  } else {
-    $('rImg').innerHTML = comingSoonHtml();
+  if (!product._preImg) {
+    const shop = await fetchShopify(product.shopifyHandle);
+    if (shop) {
+      const img = (shop.images && (shop.images[1] || shop.images[0])) || null;
+      if (img) $('rImg').innerHTML = `<img src="${img.src}" alt="">`;
+      else $('rImg').innerHTML = comingSoonHtml();
+    } else {
+      $('rImg').innerHTML = comingSoonHtml();
+    }
   }
 }
 function dismissResult(){
@@ -1353,7 +1359,16 @@ function showResultFromCollection(ean13) {
   if (!prod) return;
   // lastMatchId가 남아 있으면 같은 제품을 다시 못 띄우므로 초기화.
   lastMatchId = null;
-  showResult(prod, 'manual', ean13);
+  // 컬렉션 cache에 이미 이미지 URL이 있으면 그것을 즉시 사용 → fetchShopify
+  // 중복 호출 + 로딩 깜빡임 제거.
+  let preImg = '';
+  for (const h of COLLECTIONS) {
+    const cached = collectionCache[h];
+    if (!cached) continue;
+    const found = cached.find(p => p.ean13 === ean13);
+    if (found && found.image) { preImg = found.image; break; }
+  }
+  showResult({ ...prod, _preImg: preImg }, 'manual', ean13);
 }
 
 function renderSkeletons(n) {
