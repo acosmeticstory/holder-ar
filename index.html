@@ -489,7 +489,8 @@ function setMini(kind, text) {
   const el = $('miniStatus');
   if (!el) return;
   el.classList.remove('ok','err');
-  el.classList.toggle('show', kind === 'err');
+  // boot/err 단계도 사용자에게 보이게 — 검정 화면에서 어디 막혔는지 알 수 있도록.
+  el.classList.toggle('show', kind === 'err' || kind === 'boot');
   if (kind === 'scan') el.classList.add('ok');
   else if (kind === 'err') el.classList.add('err');
   $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
