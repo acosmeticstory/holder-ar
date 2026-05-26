@@ -697,7 +697,38 @@ async function refocusCameraAt(x, y) {
       await track.applyConstraints({ advanced });
       showFocusRing(x, y, 'ok');
       setText('focusStatus', `초점 재시도 · ${mode || 'auto'}`, 'ok');
-      // single-shot은 1회성이라 잠시 후 continuous로 복귀시켜야 다음 프레임에서 자동 추적이 살아난다.
+
+      // === 강력 트리거 1: focusDistance 흔들기 ===
+      // OEM HAL이 "이미 잡고 있다"고 무시하는 케이스 방지. 렌즈 모터를 실제로
+      // 움직이게 해서 AF 강제 재계산. max→min 시퀀스.
+      if (caps.focusDistance && typeof caps.focusDistance.min === 'number' &&
+          Array.isArray(caps.focusMode) && (caps.focusMode.includes('manual') || caps.focusMode.includes('single-shot'))) {
+        const fmManual = caps.focusMode.includes('manual') ? 'manual' : 'single-shot';
+        const fdMax = typeof caps.focusDistance.max === 'number' ? caps.focusDistance.max : caps.focusDistance.min * 10;
+        (async () => {
+          try {
+            await track.applyConstraints({ advanced: [{ focusMode: fmManual, focusDistance: fdMax }] });
+            await new Promise(r => setTimeout(r, 80));
+            await track.applyConstraints({ advanced: [{ focusMode: fmManual, focusDistance: caps.focusDistance.min }] });
+            await new Promise(r => setTimeout(r, 80));
+            if (caps.focusMode.includes('continuous')) {
+              await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+            }
+          } catch(e) { /* OEM이 거부해도 무시 */ }
+        })();
+      }
+
+      // === 강력 트리거 2: ImageCapture.takePhoto() ===
+      // 사진 촬영 API를 호출하는 순간 카메라가 internal AF 사이클을 강제로 돌린다.
+      // 결과 Blob은 버리고 AF 트리거 용도로만 사용. Android Chrome 강력 지원.
+      if (typeof ImageCapture !== 'undefined') {
+        try {
+          const ic = new ImageCapture(track);
+          ic.takePhoto().catch(() => {});
+        } catch(e) { /* iOS Safari 등 미지원 */ }
+      }
+
+      // single-shot은 1회성이라 잠시 후 continuous로 복귀.
       if (mode === 'single-shot' && Array.isArray(caps.focusMode) && caps.focusMode.includes('continuous')) {
         setTimeout(() => {
           track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
