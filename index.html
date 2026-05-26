@@ -119,7 +119,7 @@ body.debug .debug-only{display:block !important}
 body.debug .mini-status{display:none}
 
 /* ===== 컬렉션 패널 (바텀시트) — acosmeticstory 홈페이지 톤 (cream + deep green) ===== */
-.collection{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#ffffff;border-radius:20px 20px 0 0;max-height:86vh;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);display:none;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+.collection{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#ffffff;border-radius:20px 20px 0 0;height:86vh;max-height:86vh;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);display:none;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
 .collection.show{transform:translateY(0);display:flex}
 .collection-backdrop{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;display:none}
 .collection-backdrop.show{opacity:1;pointer-events:auto;display:block}
@@ -140,7 +140,7 @@ body.debug .mini-status{display:none}
 .slider-hint{font-size:11.5px;color:rgba(26,26,26,.5);padding:0 20px 10px;font-family:'DM Sans',sans-serif;letter-spacing:.3px}
 /* 3 columns 강제. 50개 데이터면 자연스럽게 ~17 rows로 스크롤. */
 .slider{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px 16px}
-.product{background:#faf9f6;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden;text-decoration:none;color:#1a1a1a;display:flex;flex-direction:column;transition:transform .2s;cursor:pointer}
+.product{background:#ffffff;border:1px solid rgba(0,0,0,.1);border-radius:12px;overflow:hidden;text-decoration:none;color:#1a1a1a;display:flex;flex-direction:column;transition:transform .2s;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .product:active{transform:scale(.96)}
 .product .p-img{width:100%;aspect-ratio:1;background:#eae6da;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888;overflow:hidden}
 .product .p-img img{width:100%;height:100%;object-fit:cover;display:block}
@@ -148,7 +148,7 @@ body.debug .mini-status{display:none}
 .coming-soon img{display:none}
 .coming-soon strong{font-family:'DM Sans',sans-serif;font-size:11.5px;letter-spacing:.5px;color:#3d5a4c;text-transform:uppercase}
 .product .p-body{padding:9px 10px 11px}
-.product .p-name{font-size:11.5px;font-weight:600;color:#1a1a1a;line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:30px}
+.product .p-name{font-size:11.5px;font-weight:600;color:#1a1a1a;line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:30px;text-align:center}
 .product .p-price{display:none}
 .product-skeleton{background:#eae6da;border-radius:12px;height:180px;animation:skeleton 1.3s ease-in-out infinite}
 @keyframes skeleton{0%,100%{opacity:1}50%{opacity:.5}}
@@ -1354,7 +1354,7 @@ async function openCollection(handle, forceReload) {
     t.classList.toggle('active', t.dataset.handle === handle);
   });
   if (forceReload) delete collectionCache[handle];
-  renderSkeletons(5);
+  renderSkeletons(15);
   try {
     const products = await fetchCollection(handle);
     renderSlider(products);
