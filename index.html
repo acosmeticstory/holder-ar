@@ -66,8 +66,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .stats-btn{flex:1;padding:5px 6px;font-size:10px;background:rgba(255,255,255,.06);color:rgba(200,184,154,.85);border:1px solid rgba(255,255,255,.1);border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px}
 .stats-btn:active{background:rgba(200,184,154,.2)}
 
-/* Result modal */
-.result{position:fixed;inset:0;z-index:50;background:rgba(12,14,12,.94);display:none;align-items:center;justify-content:center;padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0))}
+/* Result modal — z-index 80 so it can sit on top of the collection sheet (z-index 60) */
+.result{position:fixed;inset:0;z-index:80;background:rgba(12,14,12,.94);display:none;align-items:center;justify-content:center;padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0))}
 .result.show{display:flex}
 .result-card{background:#faf9f6;color:#1a1a1a;border-radius:16px;padding:24px 22px 20px;max-width:380px;width:100%;max-height:calc(100vh - 40px);overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .result-card .matched-via{display:none}
@@ -1229,6 +1229,7 @@ async function fetchCollection(handle) {
       const shop = byHandle.get(p.shopifyHandle);
       const img = shop && shop.images && shop.images[0];
       return {
+        ean13: p.ean13,
         handle: p.shopifyHandle,
         title: p.name,
         image: (img && img.src) || '',
@@ -1262,6 +1263,7 @@ async function fetchCollection(handle) {
       .map(p => {
         const num = (p.name.match(/Sai-m\s+(\d+)/i) || [])[1];
         return {
+          ean13: p.ean13,
           handle: p.shopifyHandle || '',
           title: p.name,
           image: (num && saiSImageByNum.get(num)) || '',
@@ -1273,8 +1275,12 @@ async function fetchCollection(handle) {
     warmImages(products);
     return products;
   }
+  // ju 컬렉션: Shopify에서 직접 가져오되 catalog에서 shopifyHandle → ean13 매핑.
+  if (!catalog.length) await loadCatalog();
+  const handleToEan = new Map(catalog.map(c => [c.shopifyHandle, c.ean13]));
   const rawProducts = await fetchShopifyCollection(handle);
   const products = rawProducts.map(p => ({
+    ean13: handleToEan.get(p.handle) || '',
     handle: p.handle,
     title: p.title,
     image: (p.images && p.images[0] && p.images[0].src) || '',
@@ -1307,19 +1313,28 @@ function renderSlider(products) {
     slider.innerHTML = `<div class="tab-empty" style="flex:1">${t('emptyCollection')}<br><button class="retry" onclick="openCollection(currentTab, true)">${t('retry')}</button></div>`;
     return;
   }
+  // 외부 링크가 아니라 같은 앱 안에서 결과 카드를 띄운다. 사용자가 "제품 페이지 →"
+  // 버튼을 명시적으로 눌러야 외부 Shopify 페이지로 이동.
   const html = products.map(p => {
     const media = p.image ? `<img src="${shopifyThumb(p.image,300)}" alt="" loading="lazy" decoding="async">` : comingSoonHtml();
-    const tag = p.url ? 'a' : 'div';
-    const attrs = p.url ? `href="${p.url}" target="_blank" rel="noopener"` : 'aria-disabled="true"';
     return `
-    <${tag} class="product" ${attrs}>
+    <div class="product" data-ean="${escapeHtml(p.ean13 || '')}" role="button" tabindex="0">
       <div class="p-img">${media}</div>
       <div class="p-body">
         <div class="p-name">${escapeHtml(p.title)}</div>
       </div>
-    </${tag}>`;
+    </div>`;
   }).join('');
   slider.innerHTML = html;
+}
+
+function showResultFromCollection(ean13) {
+  if (!ean13) return;
+  const prod = catalog.find(c => c.ean13 === ean13);
+  if (!prod) return;
+  // lastMatchId가 남아 있으면 같은 제품을 다시 못 띄우므로 초기화.
+  lastMatchId = null;
+  showResult(prod, 'manual', ean13);
 }
 
 function renderSkeletons(n) {
@@ -1372,6 +1387,15 @@ try {
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => openCollection(tab.dataset.handle));
   });
+  // 컬렉션에서 제품 카드 클릭 → 결과 카드 (외부 링크 즉시 이동 대신 한 단계 미리보기)
+  const sliderEl = $('slider');
+  if (sliderEl) {
+    sliderEl.addEventListener('click', e => {
+      const card = e.target.closest('.product');
+      if (!card) return;
+      showResultFromCollection(card.dataset.ean);
+    });
+  }
   // 아래로 드래그하여 닫기 기능은 제거 — tab-content 스크롤이 위로 올라갈 때
   // 시트 transform이 따라 움직여 본의 아니게 닫히는 현상이 있었음. 닫기는
   // × 버튼 또는 backdrop 클릭으로만 수행.
