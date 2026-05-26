@@ -119,7 +119,7 @@ body.debug .debug-only{display:block !important}
 body.debug .mini-status{display:none}
 
 /* ===== 컬렉션 패널 (바텀시트) — acosmeticstory 홈페이지 톤 (cream + deep green) ===== */
-.collection{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#faf9f6;border-radius:20px 20px 0 0;max-height:86vh;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);display:none;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+.collection{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#ffffff;border-radius:20px 20px 0 0;max-height:86vh;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);display:none;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
 .collection.show{transform:translateY(0);display:flex}
 .collection-backdrop{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;display:none}
 .collection-backdrop.show{opacity:1;pointer-events:auto;display:block}
@@ -140,7 +140,7 @@ body.debug .mini-status{display:none}
 .slider-hint{font-size:11.5px;color:rgba(26,26,26,.5);padding:0 20px 10px;font-family:'DM Sans',sans-serif;letter-spacing:.3px}
 /* 3 columns 강제. 50개 데이터면 자연스럽게 ~17 rows로 스크롤. */
 .slider{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px 16px}
-.product{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:12px;overflow:hidden;text-decoration:none;color:#1a1a1a;display:flex;flex-direction:column;transition:transform .2s}
+.product{background:#faf9f6;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden;text-decoration:none;color:#1a1a1a;display:flex;flex-direction:column;transition:transform .2s;cursor:pointer}
 .product:active{transform:scale(.96)}
 .product .p-img{width:100%;aspect-ratio:1;background:#eae6da;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888;overflow:hidden}
 .product .p-img img{width:100%;height:100%;object-fit:cover;display:block}
