@@ -493,9 +493,10 @@ function setMini(kind, text) {
   const el = $('miniStatus');
   if (!el) return;
   el.classList.remove('ok','err');
-  // 진단을 위해 항상 보이도록. 검정 화면에서 어디서 막혔는지 사용자가 확인 가능.
-  // 스캔 정상 진입 시엔 자동으로 사라지도록 별도 처리 가능하지만 지금은 진단 우선.
-  el.classList.add('show');
+  // err-overlay가 떠 있으면 중복 표시 방지 — 그쪽이 더 자세한 진단 메시지를 보여줌.
+  const errOverlayShown = document.getElementById('errOverlay').classList.contains('show');
+  if (errOverlayShown) { el.classList.remove('show'); return; }
+  el.classList.toggle('show', kind === 'err');
   if (kind === 'scan') el.classList.add('ok');
   else if (kind === 'err') el.classList.add('err');
   $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
