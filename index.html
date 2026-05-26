@@ -1363,6 +1363,13 @@ async function openCollection(handle, forceReload) {
     t.classList.toggle('active', t.dataset.handle === handle);
   });
   if (forceReload) delete collectionCache[handle];
+  // cache hit이면 skeleton 깜빡임 없이 즉시 렌더.
+  if (collectionCache[handle]) {
+    renderSlider(collectionCache[handle]);
+    const c = $(`${handle}Count`);
+    if (c) c.textContent = collectionCache[handle].length ? ` (${collectionCache[handle].length})` : '';
+    return;
+  }
   renderSkeletons(15);
   try {
     const products = await fetchCollection(handle);
@@ -1378,7 +1385,10 @@ async function openCollection(handle, forceReload) {
 function showCollection() {
   $('collection').classList.add('show');
   $('collectionBackdrop').classList.add('show');
-  if (!collectionCache[currentTab]) openCollection(currentTab);
+  // cache 여부와 무관하게 항상 render. cache miss면 skeleton + fetch,
+  // cache hit이면 즉시 표시. 이전엔 cache hit일 때 openCollection이 skip되어
+  // slider DOM이 비어 있는 채로 시트만 열리는 버그가 있었다.
+  openCollection(currentTab);
   // 둘 다 선제 로드
   COLLECTIONS.forEach(h => { if (!collectionCache[h]) fetchCollection(h).catch(()=>{}); });
 }
