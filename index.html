@@ -9,6 +9,7 @@
 <title>Holder AR 스캐너 · EAN-13 (GTIN-13) barcode-only MVP</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script src="./scroll-sequence.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:'Noto Sans KR','DM Sans',-apple-system,sans-serif}
@@ -75,7 +76,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 .result-card h2{font-family:'DM Sans',sans-serif;font-size:26px;font-weight:300;letter-spacing:.5px;line-height:1.2;margin-bottom:4px}
 .result-card h2 b{font-weight:700}
 .result-card .sub{font-size:13px;color:#555;margin-bottom:16px;line-height:1.5}
-.result-card .shopify-img{width:100%;aspect-ratio:1;background:#eee;border-radius:8px;overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999}
+.result-card .shopify-img{width:100%;aspect-ratio:1;background:#eee;border-radius:8px;overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;position:relative}
+.result-card .shopify-img .scroll-seq-canvas{display:block;width:100%;height:100%}
+.result-card .shopify-img::after{content:"← 좌우로 끌어 보세요 →";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10.5px;color:rgba(0,0,0,.45);background:rgba(255,255,255,.7);padding:3px 8px;border-radius:10px;letter-spacing:.3px;pointer-events:none;opacity:0;transition:opacity .3s;font-family:'Noto Sans KR','DM Sans',sans-serif}
+.result-card .shopify-img.has-sequence::after{opacity:1;animation:hintFade 4s ease-in-out forwards}
+@keyframes hintFade{0%,55%{opacity:1}100%{opacity:0}}
 .result-card .shopify-img img{width:100%;height:100%;object-fit:cover;display:block}
 .result-card .shopify-title{font-size:15px;font-weight:700;margin-bottom:4px}
 .result-card .shopify-price{display:none}
@@ -502,6 +507,15 @@ function setMini(kind, text) {
   $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
 }
 
+// EAN-13 → 스크롤 시퀀스 폴더 매핑. 매핑된 제품은 결과 카드 이미지 자리에
+// ScrollSequence 컴포넌트를 띄움. 매핑 없는 제품은 기존 단일 이미지.
+// 우선 Ju 01과 Sai-s 01에 test 시퀀스 적용. 제품별 진짜 시퀀스 만들어지면 path만 교체.
+const PRODUCT_SEQUENCES = {
+  '8800353210956': { basePath: './frames/test' }, // Ju 01
+  '8800353211458': { basePath: './frames/test' }  // Sai-s 01
+};
+let currentSequence = null;  // 떠 있는 ScrollSequence 인스턴스 (한 번에 하나)
+
 let catalog = [];
 let lastMatchId = null;
 let stopped = false;
@@ -840,6 +854,32 @@ async function showResult(product, via, rawValue) {
     shopLink.removeAttribute('href');
     shopLink.style.display = 'none';
   }
+  // 시퀀스 매핑된 제품이면 ScrollSequence 컴포넌트 띄움. 아니면 기존 이미지 흐름.
+  const seqConfig = PRODUCT_SEQUENCES[product.ean13];
+  if (seqConfig && window.ScrollSequence) {
+    $('rImg').innerHTML = '';
+    $('rImg').classList.add('has-sequence');
+    $('result').classList.add('show');
+    setText('status','일시정지 — 결과 보는 중','wait');
+    setMini('scan', t('viewingProduct'));
+    navigator.vibrate && navigator.vibrate(80);
+    try {
+      // 기존 sequence 있으면 먼저 정리
+      if (currentSequence) { currentSequence.destroy(); currentSequence = null; }
+      currentSequence = new ScrollSequence($('rImg'), seqConfig);
+      await currentSequence.init();
+    } catch(e) {
+      console.warn('[scroll-sequence] init failed, falling back to image:', e.message);
+      currentSequence = null;
+      $('rImg').classList.remove('has-sequence');
+      // 시퀀스 로드 실패 → 그냥 단일 이미지로 fallback
+      if (product._preImg) $('rImg').innerHTML = `<img src="${product._preImg}" alt="">`;
+      else $('rImg').innerHTML = comingSoonHtml();
+    }
+    return;
+  }
+  $('rImg').classList.remove('has-sequence');
+
   // 컬렉션에서 이미 이미지 URL을 알고 있으면 즉시 표시. 그렇지 않으면
   // (바코드 스캔 케이스 등) fetchShopify로 가져온다.
   if (product._preImg) {
@@ -867,6 +907,10 @@ async function showResult(product, via, rawValue) {
 }
 function dismissResult(){
   $('result').classList.remove('show');
+  if (currentSequence) {
+    currentSequence.destroy();
+    currentSequence = null;
+  }
   lastMatchId = null;
   focusRetryCount = 0;
   manualSelectHintActive = false;
