@@ -113,6 +113,9 @@ class ScrollSequence {
       this.dragStartIdx = this.currentIdx;
       this.canvas.style.cursor = 'grabbing';
       try { this.canvas.setPointerCapture(e.pointerId); } catch(_) {}
+      // 사용자가 잡았으니 깜빡임 힌트 즉시 끔
+      this._clearIdleHint();
+      this.container.classList.remove('hint-blink');
     };
     const onMove = (e) => {
       if (this.dragStartX == null) return;
@@ -130,12 +133,27 @@ class ScrollSequence {
       this.dragStartX = null;
       this.canvas.style.cursor = 'grab';
       try { this.canvas.releasePointerCapture(e.pointerId); } catch(_) {}
+      // 손 떼면 3초 idle 후 깜빡임 hint 다시 표시 → 사용자가 더 끌 수 있다는 안내
+      this._scheduleIdleHint();
     };
     this.canvas.addEventListener('pointerdown', onDown);
     this.canvas.addEventListener('pointermove', onMove);
     this.canvas.addEventListener('pointerup', onUp);
     this.canvas.addEventListener('pointercancel', onUp);
     this._handlers = { onDown, onMove, onUp };
+  }
+
+  _scheduleIdleHint() {
+    this._clearIdleHint();
+    this._idleTimer = setTimeout(() => {
+      if (this._destroyed) return;
+      // 첫 4초 intro fade가 끝났을 시점이라 hint-intro도 같이 제거. blink만 남김.
+      this.container.classList.remove('hint-intro');
+      this.container.classList.add('hint-blink');
+    }, 3000);
+  }
+  _clearIdleHint() {
+    if (this._idleTimer) { clearTimeout(this._idleTimer); this._idleTimer = null; }
   }
 
   _scheduleRender(idx) {
@@ -164,6 +182,7 @@ class ScrollSequence {
   destroy() {
     this._destroyed = true;
     if (this.rafId) cancelAnimationFrame(this.rafId);
+    this._clearIdleHint();
     if (this._onResize) window.removeEventListener('resize', this._onResize);
     if (this.canvas && this._handlers) {
       this.canvas.removeEventListener('pointerdown', this._handlers.onDown);
@@ -171,6 +190,7 @@ class ScrollSequence {
       this.canvas.removeEventListener('pointerup', this._handlers.onUp);
       this.canvas.removeEventListener('pointercancel', this._handlers.onUp);
     }
+    if (this.container) this.container.classList.remove('hint-intro', 'hint-blink');
     // 이미지 참조 끊어서 GC가 가져가도록
     this.frames = [];
     if (this.container) this.container.innerHTML = '';
