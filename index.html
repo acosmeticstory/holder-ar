@@ -511,27 +511,23 @@ function setMini(kind, text) {
   $('miniStatusText').textContent = text || t(USER_MSGS[kind] || kind) || '';
 }
 
-// EAN-13 → 스크롤 시퀀스 폴더 매핑. 매핑된 제품은 결과 카드 이미지 자리에
-// ScrollSequence 컴포넌트를 띄움. 매핑 없는 제품은 기존 단일 이미지.
-// Shopify 상품 상세와 동일한 CDN frame 시퀀스를 바코드별로 연결.
-const PRODUCT_SEQUENCES = {
-  '8800353211205': {
-    frameBase: 'https://cdn.shopify.com/s/files/1/0944/0398/5780/files/spin-frame-ju26-v001-',
+const PRODUCT_SEQUENCE_ROOT = 'https://cdn.shopify.com/s/files/1/0944/0398/5780/files/spin-frame-';
+function productSequenceConfig(product) {
+  const name = product && product.name ? String(product.name) : '';
+  const match = /^(Ju|Sai-[sm])\s+(\d+)$/i.exec(name);
+  if (!match) return null;
+  const number = Number(match[2]);
+  if (!Number.isInteger(number) || number < 1 || number > 50) return null;
+  const family = match[1].toLowerCase() === 'ju' ? 'ju' : 'sais';
+  return {
+    frameBase: `${PRODUCT_SEQUENCE_ROOT}${family}${String(number).padStart(2, '0')}-v001-`,
     frameCount: 121,
     framePad: 3,
     frameExt: 'webp',
     preloadAll: false,
     preloadRadius: 3
-  }, // Ju 26
-  '8800353211458': {
-    frameBase: 'https://cdn.shopify.com/s/files/1/0944/0398/5780/files/spin-frame-sais01-v001-',
-    frameCount: 121,
-    framePad: 3,
-    frameExt: 'webp',
-    preloadAll: false,
-    preloadRadius: 3
-  } // Sai-s 01
-};
+  };
+}
 let currentSequence = null;  // 떠 있는 ScrollSequence 인스턴스 (한 번에 하나)
 
 let catalog = [];
@@ -872,8 +868,7 @@ async function showResult(product, via, rawValue) {
     shopLink.removeAttribute('href');
     shopLink.style.display = 'none';
   }
-  // 시퀀스 매핑된 제품이면 ScrollSequence 컴포넌트 띄움. 아니면 기존 이미지 흐름.
-  const seqConfig = PRODUCT_SEQUENCES[product.ean13];
+  const seqConfig = productSequenceConfig(product);
   if (seqConfig && window.ScrollSequence) {
     $('rImg').innerHTML = '';
     $('rImg').classList.add('is-sequence');
