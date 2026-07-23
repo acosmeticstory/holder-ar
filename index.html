@@ -1315,15 +1315,22 @@ function warmImages(products, limit = 16) {
   });
 }
 
-// Shopify 제품 title에서 "SAIs 01" / "SAIm 12" 패턴을 catalog 이름("Sai-s 01")으로 변환.
-// dash/underscore/공백 변형 + 1-3자리 번호 허용.
+// 현재 Shopify의 Sai 상품은 "Sai 01" 한 상품 안에 S/M variant가 함께 있다.
+// AR catalog의 "Sai-s 01" / "Sai-m 01"은 같은 상품의 각 variant로 연결한다.
 function parseSaiTitle(title) {
-  const m = /SAI\s*[-_]?\s*([sm])\s*(\d+)/i.exec(title || '');
+  const m = /^SAI\s*[-_]?\s*(\d+)\b/i.exec(title || '');
   if (!m) return null;
-  return { variant: m[1].toLowerCase(), num: parseInt(m[2], 10) };
+  return { num: parseInt(m[1], 10) };
 }
-function saiCatalogKey(variant, num) {
-  return `Sai-${variant} ${String(num).padStart(2, '0')}`;
+function findShopifyVariant(product, size) {
+  return product && Array.isArray(product.variants)
+    ? product.variants.find(variant => String(variant.title).toUpperCase() === size)
+    : null;
+}
+function shopifyProductImage(product, variant) {
+  const featured = variant && variant.featured_image && variant.featured_image.src;
+  const fallback = product && product.images && (product.images[1] || product.images[0]);
+  return featured || (fallback && fallback.src) || '';
 }
 
 // catalog에 정의된 개수보다 Shopify에 더 많이 등록된 경우 알림 표시.
@@ -1333,52 +1340,37 @@ const overflowAlerts = {};
 async function fetchCollection(handle) {
   if (collectionCache[handle]) return collectionCache[handle];
 
-  // === sai-s / sai-m: title 기반 매칭 + catalog 초과분 카운트 ===
+  // === sai-s / sai-m: "Sai NN" 상품 + S/M variant 기반 매칭 ===
   if (handle === 'sai-s' || handle === 'sai-m') {
     if (!catalog.length) await loadCatalog();
-    const variant = handle === 'sai-s' ? 's' : 'm';
+    const size = handle === 'sai-s' ? 'S' : 'M';
     const namePrefix = handle === 'sai-s' ? 'Sai-s' : 'Sai-m';
     const items = catalog
       .filter(p => p.name.startsWith(namePrefix + ' '))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
     const saiProducts = await fetchShopifyCollection('sai').catch(() => []);
 
-    // Shopify 제품을 catalog 이름 키로 인덱싱 + handle fallback
-    const shopByName = new Map();
+    // Shopify 제품을 번호로 인덱싱하고, 과거 데이터에는 handle fallback도 허용.
+    const shopByNumber = new Map();
     const shopByHandle = new Map(saiProducts.map(p => [p.handle, p]));
     saiProducts.forEach(p => {
       const parsed = parseSaiTitle(p.title);
-      if (parsed) shopByName.set(saiCatalogKey(parsed.variant, parsed.num), p);
+      if (parsed) shopByNumber.set(parsed.num, p);
     });
 
-    // sai-m이고 같은 번호의 Sai-s 이미지를 임시로 빌리는 fallback도 준비
-    const saiSImageByNum = new Map();
-    if (handle === 'sai-m') {
-      catalog
-        .filter(p => /^Sai-s\b/i.test(p.name))
-        .forEach(p => {
-          const num = (p.name.match(/Sai-s\s+(\d+)/i) || [])[1];
-          if (!num) return;
-          const shop = shopByName.get(saiCatalogKey('s', parseInt(num, 10))) || shopByHandle.get(p.shopifyHandle);
-          const img = shop && shop.images && (shop.images[1] || shop.images[0]);
-          if (img && img.src) saiSImageByNum.set(num, img.src);
-        });
-    }
-
     const products = items.map(p => {
-      const shop = shopByName.get(p.name) || shopByHandle.get(p.shopifyHandle);
-      const img = shop && shop.images && (shop.images[1] || shop.images[0]);
-      const fallbackImg = handle === 'sai-m'
-        ? saiSImageByNum.get((p.name.match(/Sai-m\s+(\d+)/i) || [])[1])
-        : null;
+      const num = parseInt((p.name.match(/Sai-[sm]\s+(\d+)/i) || [])[1], 10);
+      const shop = shopByNumber.get(num) || shopByHandle.get(p.shopifyHandle);
+      const variant = findShopifyVariant(shop, size);
       return {
         ean13: p.ean13,
         handle: shop ? shop.handle : (p.shopifyHandle || ''),
         title: p.name,
-        image: (img && img.src) || fallbackImg || '',
+        image: shopifyProductImage(shop, variant),
         price: '',
-        // Sai-m은 미출시 → url 비움. Sai-s는 shopify handle 기반 URL.
-        url: handle === 'sai-m' ? '' : (shop ? `${SHOPIFY_BASE}/products/${shop.handle}` : (p.shopifyUrl || ''))
+        url: shop && variant
+          ? `${SHOPIFY_BASE}/products/${shop.handle}?variant=${variant.id}`
+          : (p.shopifyUrl || '')
       };
     });
 
@@ -1390,7 +1382,7 @@ async function fetchCollection(handle) {
     const shopNumbers = new Set();
     saiProducts.forEach(p => {
       const parsed = parseSaiTitle(p.title);
-      if (parsed && parsed.variant === variant) shopNumbers.add(parsed.num);
+      if (parsed && findShopifyVariant(p, size)) shopNumbers.add(parsed.num);
     });
     const overflowNums = [...shopNumbers].filter(n => !catalogNums.has(n)).sort((a,b)=>a-b);
     if (overflowNums.length) {
@@ -1404,25 +1396,24 @@ async function fetchCollection(handle) {
     warmImages(products);
     return products;
   }
-  // ju 컬렉션: catalog 순서(Ju 01~50)를 기준으로 정렬하고, Shopify 데이터는
-  // shopifyHandle로 매핑해서 이미지/링크만 가져온다. Shopify products.json은
-  // created_at 기본 정렬이라 1~50 순서가 깨졌었음.
+  // Ju 컬렉션은 catalog 순서(Ju 01~50)를 유지하되, Shopify title을 우선 매칭한다.
+  // handle이 나중에 변경돼도 목록 이미지와 링크는 현재 상품을 따라간다.
   if (!catalog.length) await loadCatalog();
   const rawProducts = await fetchShopifyCollection(handle);
+  const byTitle = new Map(rawProducts.map(p => [p.title, p]));
   const byHandle = new Map(rawProducts.map(p => [p.handle, p]));
   const products = catalog
     .filter(p => /^Ju\b/i.test(p.name))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}))
     .map(p => {
-      const shop = byHandle.get(p.shopifyHandle);
-      const img = shop && shop.images && (shop.images[1] || shop.images[0]);
+      const shop = byTitle.get(p.name) || byHandle.get(p.shopifyHandle);
       return {
         ean13: p.ean13,
-        handle: p.shopifyHandle,
+        handle: shop ? shop.handle : p.shopifyHandle,
         title: p.name, // catalog의 "Ju 01" 형식 유지
-        image: (img && img.src) || '',
+        image: shopifyProductImage(shop, null),
         price: '',
-        url: p.shopifyUrl || `${SHOPIFY_BASE}/products/${p.shopifyHandle}`
+        url: shop ? `${SHOPIFY_BASE}/products/${shop.handle}` : (p.shopifyUrl || '')
       };
     });
   collectionCache[handle] = products;

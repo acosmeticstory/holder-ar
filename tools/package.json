@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "description": "Build-time tools for holder-ar webapp (frame compression etc.)",
   "scripts": {
-    "build:frames": "node build-frames.cjs"
+    "build:frames": "node build-frames.cjs",
+    "catalog:check": "node sync-shopify-catalog.cjs",
+    "catalog:sync": "node sync-shopify-catalog.cjs --write"
   },
   "dependencies": {
     "sharp": "^0.33.0"

@@ -23,6 +23,7 @@
 |---|---|
 | `index.html` | AR 스캐너 본체. zxing 기반 EAN-13 디코더 + Shopify 제품 정보 fetch |
 | `catalog.json` | EAN-13 ↔ Shopify 제품 핸들 매핑 테이블 |
+| `tools/sync-shopify-catalog.cjs` | 현재 Shopify Ju·Sai 상품/variant와 바코드 카탈로그 대조·동기화 |
 | `labels.html` | 디자이너·QA 용 테스트 라벨(4종) · 인쇄 시 자동으로 실측 20mm |
 | `logo.png` | 브랜드 로고 (스캐너 상단 표시) |
 
@@ -55,6 +56,21 @@ npx local-web-server --https --port 8443
 브라우저에서 `https://localhost:8443/` 접속.
 
 `?debug=1` 파라미터를 붙이면 HUD에 실시간 디코더 카운터 표시.
+
+### Shopify 상품 매칭 확인
+
+`catalog.json`의 EAN은 유지하고, 현재 Shopify의 Ju 상품 및 Sai S/M variant
+핸들·링크와 일치하는지 다음 명령으로 확인합니다.
+
+```bash
+node tools/sync-shopify-catalog.cjs
+```
+
+불일치를 검토한 뒤 카탈로그에 반영할 때만 `--write`를 사용합니다.
+
+```bash
+node tools/sync-shopify-catalog.cjs --write
+```
 
 ---
 

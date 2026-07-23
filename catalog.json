@@ -1,5 +1,5 @@
 {
-  "_comment": "Holder AR catalog: Ju 50, Sai-s 50, Sai-m 50. Updated 2026-05-21. Sai-m image/url intentionally blank for Coming soon.",
+  "_comment": "Holder AR barcode catalog: Ju 50, Sai-s 50, Sai-m 50. Shopify handles and S/M variant URLs synchronized on 2026-07-23.",
   "products": [
     {
       "ean13": "8800353210956",
@@ -310,596 +310,596 @@
     {
       "ean13": "8800353211465",
       "name": "Sai-s 02",
-      "shopifyHandle": "sai15-m35",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35"
+      "shopifyHandle": "sai15-m54",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m54?variant=54686713282932"
     },
     {
       "ean13": "8800353211472",
       "name": "Sai-s 03",
-      "shopifyHandle": "sai15-m34",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34"
+      "shopifyHandle": "sai15-m53",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m53?variant=54686714495348"
     },
     {
       "ean13": "8800353211489",
       "name": "Sai-s 04",
-      "shopifyHandle": "sai15-m33",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33"
+      "shopifyHandle": "sai15-m52-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m52-1?variant=54686714659188"
     },
     {
       "ean13": "8800353211496",
       "name": "Sai-s 05",
-      "shopifyHandle": "sai15-m32",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32"
+      "shopifyHandle": "sai15-m52",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m52?variant=54686714724724"
     },
     {
       "ean13": "8800353211502",
       "name": "Sai-s 06",
-      "shopifyHandle": "sai15-m31",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31"
+      "shopifyHandle": "sai15-m51",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m51?variant=54686714888564"
     },
     {
       "ean13": "8800353211519",
       "name": "Sai-s 07",
-      "shopifyHandle": "sai15-m30",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30"
+      "shopifyHandle": "sai15-m50",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m50?variant=54686715576692"
     },
     {
       "ean13": "8800353211526",
       "name": "Sai-s 08",
-      "shopifyHandle": "sai15-m29",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29"
+      "shopifyHandle": "sai15-m49",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m49?variant=54686715642228"
     },
     {
       "ean13": "8800353211533",
       "name": "Sai-s 09",
-      "shopifyHandle": "sai15-m28",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m28"
+      "shopifyHandle": "sai15-m48",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m48?variant=54686715740532"
     },
     {
       "ean13": "8800353211540",
       "name": "Sai-s 10",
-      "shopifyHandle": "sai15-m27",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m27"
+      "shopifyHandle": "sai15-m47",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m47?variant=54686715904372"
     },
     {
       "ean13": "8800353211557",
       "name": "Sai-s 11",
-      "shopifyHandle": "sai15-m26",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m26"
+      "shopifyHandle": "sai15-m46",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m46?variant=54686716068212"
     },
     {
       "ean13": "8800353211564",
       "name": "Sai-s 12",
-      "shopifyHandle": "sai15-m25",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m25"
+      "shopifyHandle": "sai15-m45",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m45?variant=54686718329204"
     },
     {
       "ean13": "8800353211571",
       "name": "Sai-s 13",
-      "shopifyHandle": "sai15-m24",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m24"
+      "shopifyHandle": "sai15-m44",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m44?variant=54686718394740"
     },
     {
       "ean13": "8800353211588",
       "name": "Sai-s 14",
-      "shopifyHandle": "sai15-m23",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m23"
+      "shopifyHandle": "sai15-m43",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m43?variant=54686718493044"
     },
     {
       "ean13": "8800353211595",
       "name": "Sai-s 15",
-      "shopifyHandle": "sai15-m22",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m22"
+      "shopifyHandle": "sai15-m42",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m42?variant=54686718591348"
     },
     {
       "ean13": "8800353211601",
       "name": "Sai-s 16",
-      "shopifyHandle": "sai15-m21",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m21"
+      "shopifyHandle": "sai15-m41",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m41?variant=54686718951796"
     },
     {
       "ean13": "8800353211618",
       "name": "Sai-s 17",
-      "shopifyHandle": "sai15-m20",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m20"
+      "shopifyHandle": "sai15-m40",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m40?variant=54686719082868"
     },
     {
       "ean13": "8800353211625",
       "name": "Sai-s 18",
-      "shopifyHandle": "sai15-m19",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m19"
+      "shopifyHandle": "sai15-m39",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m39?variant=54686719148404"
     },
     {
       "ean13": "8800353211632",
       "name": "Sai-s 19",
-      "shopifyHandle": "sai15-m18",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m18"
+      "shopifyHandle": "sai15-m38",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m38?variant=54686720164212"
     },
     {
       "ean13": "8800353211649",
       "name": "Sai-s 20",
-      "shopifyHandle": "sai15-m17",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m17"
+      "shopifyHandle": "sai15-m37",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m37?variant=54686720262516"
     },
     {
       "ean13": "8800353211656",
       "name": "Sai-s 21",
-      "shopifyHandle": "sai15-m16",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m16"
+      "shopifyHandle": "sai15-m36-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36-1?variant=54686720524660"
     },
     {
       "ean13": "8800353211663",
       "name": "Sai-s 22",
-      "shopifyHandle": "sai15-m15",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m15"
+      "shopifyHandle": "sai15-m35-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35-1?variant=54686720655732"
     },
     {
       "ean13": "8800353211670",
       "name": "Sai-s 23",
-      "shopifyHandle": "sai15-m14",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m14"
+      "shopifyHandle": "sai15-m34-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34-1?variant=54686720786804"
     },
     {
       "ean13": "8800353211687",
       "name": "Sai-s 24",
-      "shopifyHandle": "sai15-m13",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m13"
+      "shopifyHandle": "sai15-m33-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33-1?variant=54686721376628"
     },
     {
       "ean13": "8800353211694",
       "name": "Sai-s 25",
-      "shopifyHandle": "sai15-m12",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m12"
+      "shopifyHandle": "sai15-m32-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32-1?variant=54686721802612"
     },
     {
       "ean13": "8800353211700",
       "name": "Sai-s 26",
-      "shopifyHandle": "sai15-m11",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m11"
+      "shopifyHandle": "sai15-m31-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31-1?variant=54686721868148"
     },
     {
       "ean13": "8800353211717",
       "name": "Sai-s 27",
-      "shopifyHandle": "sai15-m10",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m10"
+      "shopifyHandle": "sai15-m30-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30-1?variant=54686722163060"
     },
     {
       "ean13": "8800353211724",
       "name": "Sai-s 28",
-      "shopifyHandle": "sai15-m09",
-      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m09"
+      "shopifyHandle": "sai15-m29-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29-1?variant=54686723211636"
     },
     {
       "ean13": "8800353211731",
       "name": "Sai-s 29",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m36",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36?variant=54686723572084"
     },
     {
       "ean13": "8800353211748",
       "name": "Sai-s 30",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m35",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35?variant=54686723998068"
     },
     {
       "ean13": "8800353211755",
       "name": "Sai-s 31",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m34",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34?variant=54686724063604"
     },
     {
       "ean13": "8800353211762",
       "name": "Sai-s 32",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m33",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33?variant=54686724129140"
     },
     {
       "ean13": "8800353211779",
       "name": "Sai-s 33",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m32",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32?variant=54686724194676"
     },
     {
       "ean13": "8800353211786",
       "name": "Sai-s 34",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m31",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31?variant=54686724292980"
     },
     {
       "ean13": "8800353211793",
       "name": "Sai-s 35",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m30",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30?variant=54686724424052"
     },
     {
       "ean13": "8800353211809",
       "name": "Sai-s 36",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m29",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29?variant=54686724686196"
     },
     {
       "ean13": "8800353211816",
       "name": "Sai-s 37",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m28",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m28?variant=54686725177716"
     },
     {
       "ean13": "8800353211823",
       "name": "Sai-s 38",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m27",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m27?variant=54686725341556"
     },
     {
       "ean13": "8800353211830",
       "name": "Sai-s 39",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m26",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m26?variant=54686725407092"
     },
     {
       "ean13": "8800353211847",
       "name": "Sai-s 40",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m25",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m25?variant=54686762762612"
     },
     {
       "ean13": "8800353211854",
       "name": "Sai-s 41",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m24",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m24?variant=54686771708276"
     },
     {
       "ean13": "8800353211861",
       "name": "Sai-s 42",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m23",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m23?variant=54686771806580"
     },
     {
       "ean13": "8800353211878",
       "name": "Sai-s 43",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m22",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m22?variant=54686771904884"
     },
     {
       "ean13": "8800353211885",
       "name": "Sai-s 44",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m21",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m21?variant=54686771970420"
     },
     {
       "ean13": "8800353211892",
       "name": "Sai-s 45",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m20",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m20?variant=54686772724084"
     },
     {
       "ean13": "8800353211908",
       "name": "Sai-s 46",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m19",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m19?variant=54686772986228"
     },
     {
       "ean13": "8800353211915",
       "name": "Sai-s 47",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m18",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m18?variant=54686773084532"
     },
     {
       "ean13": "8800353211922",
       "name": "Sai-s 48",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m17",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m17?variant=54686773248372"
     },
     {
       "ean13": "8800353211939",
       "name": "Sai-s 49",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m16",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m16?variant=54686773346676"
     },
     {
       "ean13": "8800353211946",
       "name": "Sai-s 50",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m15",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m15?variant=54686773412212"
     },
     {
       "ean13": "8800353211953",
       "name": "Sai-m 01",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m55",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m55?variant=54686706303348"
     },
     {
       "ean13": "8800353211960",
       "name": "Sai-m 02",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m54",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m54?variant=54686713315700"
     },
     {
       "ean13": "8800353211977",
       "name": "Sai-m 03",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m53",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m53?variant=54686714528116"
     },
     {
       "ean13": "8800353211984",
       "name": "Sai-m 04",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m52-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m52-1?variant=54686714691956"
     },
     {
       "ean13": "8800353211991",
       "name": "Sai-m 05",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m52",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m52?variant=54686714757492"
     },
     {
       "ean13": "8800353212004",
       "name": "Sai-m 06",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m51",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m51?variant=54686714921332"
     },
     {
       "ean13": "8800353212011",
       "name": "Sai-m 07",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m50",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m50?variant=54686715609460"
     },
     {
       "ean13": "8800353212028",
       "name": "Sai-m 08",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m49",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m49?variant=54686715674996"
     },
     {
       "ean13": "8800353212035",
       "name": "Sai-m 09",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m48",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m48?variant=54686715773300"
     },
     {
       "ean13": "8800353212042",
       "name": "Sai-m 10",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m47",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m47?variant=54686715937140"
     },
     {
       "ean13": "8800353212059",
       "name": "Sai-m 11",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m46",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m46?variant=54686716100980"
     },
     {
       "ean13": "8800353212066",
       "name": "Sai-m 12",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m45",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m45?variant=54686718361972"
     },
     {
       "ean13": "8800353212073",
       "name": "Sai-m 13",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m44",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m44?variant=54686718427508"
     },
     {
       "ean13": "8800353212080",
       "name": "Sai-m 14",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m43",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m43?variant=54686718525812"
     },
     {
       "ean13": "8800353212097",
       "name": "Sai-m 15",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m42",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m42?variant=54686718624116"
     },
     {
       "ean13": "8800353212103",
       "name": "Sai-m 16",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m41",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m41?variant=54686718984564"
     },
     {
       "ean13": "8800353212110",
       "name": "Sai-m 17",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m40",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m40?variant=54686719115636"
     },
     {
       "ean13": "8800353212127",
       "name": "Sai-m 18",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m39",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m39?variant=54686719181172"
     },
     {
       "ean13": "8800353212134",
       "name": "Sai-m 19",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m38",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m38?variant=54686720196980"
     },
     {
       "ean13": "8800353212141",
       "name": "Sai-m 20",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m37",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m37?variant=54686720295284"
     },
     {
       "ean13": "8800353212158",
       "name": "Sai-m 21",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m36-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36-1?variant=54686720557428"
     },
     {
       "ean13": "8800353212165",
       "name": "Sai-m 22",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m35-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35-1?variant=54686720688500"
     },
     {
       "ean13": "8800353212172",
       "name": "Sai-m 23",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m34-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34-1?variant=54686720819572"
     },
     {
       "ean13": "8800353212189",
       "name": "Sai-m 24",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m33-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33-1?variant=54686721409396"
     },
     {
       "ean13": "8800353212196",
       "name": "Sai-m 25",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m32-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32-1?variant=54686721835380"
     },
     {
       "ean13": "8800353212202",
       "name": "Sai-m 26",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m31-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31-1?variant=54686721900916"
     },
     {
       "ean13": "8800353212219",
       "name": "Sai-m 27",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m30-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30-1?variant=54686722195828"
     },
     {
       "ean13": "8800353212226",
       "name": "Sai-m 28",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m29-1",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29-1?variant=54686723244404"
     },
     {
       "ean13": "8800353212233",
       "name": "Sai-m 29",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m36",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m36?variant=54686723604852"
     },
     {
       "ean13": "8800353212240",
       "name": "Sai-m 30",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m35",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m35?variant=54686724030836"
     },
     {
       "ean13": "8800353212257",
       "name": "Sai-m 31",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m34",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m34?variant=54686724096372"
     },
     {
       "ean13": "8800353212264",
       "name": "Sai-m 32",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m33",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m33?variant=54686724161908"
     },
     {
       "ean13": "8800353212271",
       "name": "Sai-m 33",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m32",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m32?variant=54686724227444"
     },
     {
       "ean13": "8800353212288",
       "name": "Sai-m 34",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m31",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m31?variant=54686724325748"
     },
     {
       "ean13": "8800353212295",
       "name": "Sai-m 35",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m30",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m30?variant=54686724456820"
     },
     {
       "ean13": "8800353212301",
       "name": "Sai-m 36",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m29",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m29?variant=54686724718964"
     },
     {
       "ean13": "8800353212318",
       "name": "Sai-m 37",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m28",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m28?variant=54686725210484"
     },
     {
       "ean13": "8800353212325",
       "name": "Sai-m 38",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m27",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m27?variant=54686725374324"
     },
     {
       "ean13": "8800353212332",
       "name": "Sai-m 39",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m26",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m26?variant=54686725439860"
     },
     {
       "ean13": "8800353212349",
       "name": "Sai-m 40",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m25",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m25?variant=54686762795380"
     },
     {
       "ean13": "8800353212356",
       "name": "Sai-m 41",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m24",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m24?variant=54686771741044"
     },
     {
       "ean13": "8800353212363",
       "name": "Sai-m 42",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m23",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m23?variant=54686771839348"
     },
     {
       "ean13": "8800353212370",
       "name": "Sai-m 43",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m22",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m22?variant=54686771937652"
     },
     {
       "ean13": "8800353212387",
       "name": "Sai-m 44",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m21",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m21?variant=54686772003188"
     },
     {
       "ean13": "8800353212394",
       "name": "Sai-m 45",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m20",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m20?variant=54686772756852"
     },
     {
       "ean13": "8800353212400",
       "name": "Sai-m 46",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m19",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m19?variant=54686773018996"
     },
     {
       "ean13": "8800353212417",
       "name": "Sai-m 47",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m18",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m18?variant=54686773117300"
     },
     {
       "ean13": "8800353212424",
       "name": "Sai-m 48",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m17",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m17?variant=54686773281140"
     },
     {
       "ean13": "8800353212431",
       "name": "Sai-m 49",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m16",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m16?variant=54686773379444"
     },
     {
       "ean13": "8800353212448",
       "name": "Sai-m 50",
-      "shopifyHandle": "",
-      "shopifyUrl": ""
+      "shopifyHandle": "sai15-m15",
+      "shopifyUrl": "https://www.acosmeticstory.com/products/sai15-m15?variant=54686773444980"
     }
   ]
 }
