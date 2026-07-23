@@ -7,7 +7,12 @@
  *
  * 사용법:
  *   const seq = new ScrollSequence(containerEl, { basePath: 'frames/test' });
- *   await seq.init();   // manifest 로드 + 모든 frame preload + canvas 그리기 시작
+ *   const remoteSeq = new ScrollSequence(containerEl, {
+ *     frameBase: 'https://cdn.example.com/frame-',
+ *     frameCount: 121,
+ *     preloadAll: false
+ *   });
+ *   await seq.init();
  *   ...
  *   seq.destroy();      // 모달 닫힐 때 메모리/이벤트 정리
  *
@@ -16,13 +21,28 @@
  */
 class ScrollSequence {
   constructor(container, options) {
+    const config = options || {};
     this.container = container;
-    this.basePath = (options && options.basePath) || '';
+    this.basePath = config.basePath || '';
+    this.frameBase = config.frameBase || '';
+    this.frameCount = Math.max(0, Number(config.frameCount) || 0);
+    this.framePad = Math.max(1, Number(config.framePad) || 3);
+    this.frameExt = config.frameExt || 'webp';
+    this.preloadRadius = Math.max(
+      0,
+      Object.prototype.hasOwnProperty.call(config, 'preloadRadius')
+        ? Number(config.preloadRadius) || 0
+        : 4
+    );
+    this.preloadAll = Object.prototype.hasOwnProperty.call(config, 'preloadAll')
+      ? Boolean(config.preloadAll)
+      : !this.frameBase;
     // 사용자가 화면 너비만큼 좌우로 끌면 처음 → 끝 (full sweep). 너비 절반 끌면 절반 진행.
-    this.fullSweepRatio = (options && options.fullSweepRatio) || 1.0;
+    this.fullSweepRatio = config.fullSweepRatio || 1.0;
     // 내부 상태
     this.manifest = null;
     this.frames = [];          // Image() 객체 배열
+    this.loadingFrames = new Map();
     this.loadedCount = 0;
     this.currentIdx = 0;
     this.canvas = null;
@@ -30,15 +50,26 @@ class ScrollSequence {
     this.dragStartX = null;
     this.dragStartIdx = 0;
     this.rafId = null;
+    this.pendingIdx = null;
     this._onResize = null;
     this._destroyed = false;
   }
 
   async init() {
-    // 1) manifest 로드 — 몇 장인지, 파일명 패턴 파악
-    const r = await fetch(`${this.basePath}/manifest.json`, { cache: 'no-store' });
-    if (!r.ok) throw new Error(`manifest fetch failed: HTTP ${r.status}`);
-    this.manifest = await r.json();
+    // 1) 원격 frame 규칙이 있으면 바로 구성하고, 아니면 기존 manifest를 로드.
+    if (this.frameBase && this.frameCount > 0) {
+      this.manifest = { count: this.frameCount, frames: new Array(this.frameCount).fill('') };
+    } else {
+      const r = await fetch(`${this.basePath}/manifest.json`, { cache: 'no-store' });
+      if (!r.ok) throw new Error(`manifest fetch failed: HTTP ${r.status}`);
+      this.manifest = await r.json();
+    }
+
+    if (!this.manifest || !Array.isArray(this.manifest.frames) || !this.manifest.frames.length) {
+      throw new Error('frame list is empty');
+    }
+
+    this.frames = new Array(this.manifest.frames.length);
 
     // 2) canvas 만들고 컨테이너에 붙임
     this._setupCanvas();
@@ -46,12 +77,13 @@ class ScrollSequence {
     // 3) 제스처 바인딩 (canvas에 손가락 drag)
     this._bindGestures();
 
-    // 4) frame preload — 모든 이미지를 메모리에 미리 로드 (~2MB)
-    //    첫 장은 await로 기다리고 즉시 그림. 나머지는 background.
-    await this._preloadAll();
+    // 4) 첫 장만 기다린 뒤 주변 frame을 백그라운드에서 준비.
+    await this._loadFrame(0);
 
     // 5) 첫 frame 표시
     this._render(0);
+    this._preloadAround(0);
+    if (this.preloadAll) this._preloadRemaining();
   }
 
   _setupCanvas() {
@@ -64,6 +96,8 @@ class ScrollSequence {
     this.canvas.style.display = 'block';
     this.canvas.style.touchAction = 'pan-y';  // 세로 스크롤 허용, 가로는 우리가 처리
     this.canvas.style.cursor = 'grab';
+    this.canvas.dataset.frameIndex = '0';
+    this.canvas.dataset.frameLoaded = 'false';
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
 
@@ -82,28 +116,65 @@ class ScrollSequence {
     if (this.frames[this.currentIdx]) this._render(this.currentIdx);
   }
 
-  async _preloadAll() {
-    const total = this.manifest.frames.length;
-    this.frames = new Array(total);
+  _frameUrl(index) {
+    if (this.frameBase) {
+      const frame = String(index + 1).padStart(this.framePad, '0');
+      return `${this.frameBase}${frame}.${this.frameExt}`;
+    }
+    return `${this.basePath}/${this.manifest.frames[index]}`;
+  }
 
-    // 첫 장만 await로 — 사용자에게 즉시 보여줘야 하니까
-    await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => { this.frames[0] = img; this.loadedCount = 1; resolve(); };
-      img.onerror = reject;
-      img.src = `${this.basePath}/${this.manifest.frames[0]}`;
-    });
+  _loadFrame(index) {
+    if (this._destroyed || index < 0 || index >= this.manifest.frames.length) {
+      return Promise.resolve(null);
+    }
 
-    // 나머지는 background에서 비동기 로드. 사용자가 swipe하면서 점차 채워짐.
-    for (let i = 1; i < total; i++) {
-      const img = new Image();
+    const existing = this.frames[index];
+    if (existing && existing.complete && existing.naturalWidth > 0) {
+      return Promise.resolve(existing);
+    }
+    if (this.loadingFrames.has(index)) return this.loadingFrames.get(index);
+
+    const promise = new Promise((resolve, reject) => {
+      const img = existing || new Image();
       img.decoding = 'async';
       img.onload = () => {
-        if (this._destroyed) return;
+        if (this._destroyed) {
+          resolve(null);
+          return;
+        }
         this.loadedCount++;
+        this.frames[index] = img;
+        resolve(img);
       };
-      img.src = `${this.basePath}/${this.manifest.frames[i]}`;
-      this.frames[i] = img;
+      img.onerror = () => {
+        if (this._destroyed) {
+          resolve(null);
+          return;
+        }
+        this.frames[index] = null;
+        reject(new Error(`frame load failed: ${index + 1}`));
+      };
+      this.frames[index] = img;
+      img.src = this._frameUrl(index);
+    }).finally(() => this.loadingFrames.delete(index));
+
+    this.loadingFrames.set(index, promise);
+    return promise;
+  }
+
+  _preloadAround(index) {
+    const start = Math.max(0, index - this.preloadRadius);
+    const end = Math.min(this.manifest.frames.length - 1, index + this.preloadRadius);
+    for (let i = start; i <= end; i++) {
+      if (i === index) continue;
+      this._loadFrame(i).catch(() => {});
+    }
+  }
+
+  _preloadRemaining() {
+    for (let i = 1; i < this.manifest.frames.length; i++) {
+      this._loadFrame(i).catch(() => {});
     }
   }
 
@@ -157,18 +228,37 @@ class ScrollSequence {
   }
 
   _scheduleRender(idx) {
+    this.pendingIdx = idx;
     if (this.rafId) return;
     this.rafId = requestAnimationFrame(() => {
       this.rafId = null;
-      this._render(idx);
+      const nextIdx = this.pendingIdx;
+      this.pendingIdx = null;
+      this._render(nextIdx);
     });
   }
 
   _render(idx) {
     if (this._destroyed) return;
     this.currentIdx = idx;
+    this.canvas.dataset.frameIndex = String(idx);
+    this.canvas.dataset.frameLoaded = 'false';
     const img = this.frames[idx];
-    if (!img || !img.complete) return;
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      this._loadFrame(idx)
+        .then(loaded => {
+          if (!loaded || this._destroyed || this.currentIdx !== idx) return;
+          this._drawFrame(loaded);
+          this._preloadAround(idx);
+        })
+        .catch(e => console.warn('[scroll-sequence]', e.message));
+      return;
+    }
+    this._drawFrame(img);
+    this._preloadAround(idx);
+  }
+
+  _drawFrame(img) {
     // canvas 비율 유지하면서 contain 방식으로 그림 (이미지 잘림 방지)
     const cw = this.canvas.width, ch = this.canvas.height;
     const iw = img.naturalWidth, ih = img.naturalHeight;
@@ -177,11 +267,13 @@ class ScrollSequence {
     const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
     this.ctx.clearRect(0, 0, cw, ch);
     this.ctx.drawImage(img, dx, dy, dw, dh);
+    this.canvas.dataset.frameLoaded = 'true';
   }
 
   destroy() {
     this._destroyed = true;
     if (this.rafId) cancelAnimationFrame(this.rafId);
+    this.pendingIdx = null;
     this._clearIdleHint();
     if (this._onResize) window.removeEventListener('resize', this._onResize);
     if (this.canvas && this._handlers) {
@@ -193,6 +285,7 @@ class ScrollSequence {
     if (this.container) this.container.classList.remove('hint-intro', 'hint-blink');
     // 이미지 참조 끊어서 GC가 가져가도록
     this.frames = [];
+    this.loadingFrames.clear();
     if (this.container) this.container.innerHTML = '';
   }
 }
